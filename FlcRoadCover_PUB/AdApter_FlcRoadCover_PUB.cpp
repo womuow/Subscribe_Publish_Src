@@ -1,0 +1,105 @@
+#include"AdApter_FlcRoadCover_PUB.h"
+
+void print_memory(const void* ptr, size_t size) {
+    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
+    for (size_t i = 0; i < size; ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(bytes[i]) << " ";
+    }
+    std::cout << std::dec << std::endl;
+}
+
+
+
+
+
+
+AdApter_FlcRoadCoverPUB::AdApter_FlcRoadCoverPUB()
+{
+}
+AdApter_FlcRoadCoverPUB::~AdApter_FlcRoadCoverPUB()
+{
+}
+auto AdApter_FlcRoadCoverPUB::maxeye_midware_init()
+{
+
+return proto_info;
+}
+
+
+void AdApter_FlcRoadCoverPUB::run()
+{
+    int i=0;
+    std::cout << "config file path: " << json_file.c_str() << std::endl;
+    data_in.resize(sizeof(FlcRoadCover));
+    MOS::communication::Init(json_file.c_str());
+    MOS::utils::Register::get().register_version("libFlcRoadCoverPUB", "1.1.0");
+    MOS::communication::ProtocolInfo proto_info;
+    proto_info.protocol_type = MOS::communication::kProtocolShm;//kProtocolHybrid
+    proto_info.shm_info.block_count = 10;
+    proto_info.shm_info.block_size = data_in.size();
+    proto_info.shm_info.fast_mode = false;
+    auto pub = MOS::communication::Publisher::New(domiain_id, topic, proto_info);
+    auto mos_msg = std::make_shared<MOS::message::Message>();
+    std::this_thread::sleep_for(std::chrono::milliseconds(cycle_ms*3));//40ms
+
+
+    FlcRoadCover FlcRoadCover_;
+    setIntialValue_FlcRoadCover(FlcRoadCover_);
+
+    while (true) {        
+        data_in.resize(sizeof(FlcRoadCover_));
+        std::memcpy(&data_in[0], &FlcRoadCover_, sizeof(FlcRoadCover_));
+        auto data_ref = std::make_shared<MOS::message::DataRef>(const_cast<char*>(data_in.data()), data_in.size());
+        mos_msg->SetDataRef(data_ref);
+        auto now_time = MOS::TimeUtils::NowNsec();
+        mos_msg->SetGenTimestamp(now_time);
+        pub->Pub(mos_msg);
+        std::this_thread::sleep_for(std::chrono::milliseconds(cycle_ms));//40ms
+    }
+}
+int main()
+{
+#ifdef _WIN32
+    char* path = nullptr;
+    _get_pgmptr(&path);
+    std::stringstream ss;
+    ss << path;
+    std::string fullPath(path);
+    std::cout << "Running on Windows" << std::endl;
+#endif
+#ifdef __linux__
+    std::string fullPath = std::filesystem::read_symlink("/proc/self/exe");
+    std::cout << "Running FlcRoadCover_PUB on Linux"<< fullPath << std::endl;
+#endif
+    size_t pos = fullPath.find_last_of("\\/");
+    std::string configPath = fullPath.substr(0, pos) + "/discovery_config.json";
+    AdApter_FlcRoadCoverPUB objtest;
+    objtest.json_file = configPath;
+    objtest.run();
+return 0;
+}
+
+
+/* Set and Print struct FlcRoadCover initial value */
+void setIntialValue_FlcRoadCover(FlcRoadCover& FlcRoadCover_){
+    std::cout << "Set struct FlcRoadCover variable and Publish:" << std::endl;
+    FlcRoadCover_.Snow.isDetected = 1;
+    std::cout << "FlcRoadCover_.Snow.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Snow.isDetected) << std::dec  << std::endl;
+    FlcRoadCover_.Snow.confidence = 1.10;
+    std::cout << "FlcRoadCover_.Snow.confidence(float32): " << FlcRoadCover_.Snow.confidence << std::endl;
+    FlcRoadCover_.Gravel.isDetected = 2;
+    std::cout << "FlcRoadCover_.Gravel.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Gravel.isDetected) << std::dec  << std::endl;
+    FlcRoadCover_.Gravel.confidence = 2.20;
+    std::cout << "FlcRoadCover_.Gravel.confidence(float32): " << FlcRoadCover_.Gravel.confidence << std::endl;
+    FlcRoadCover_.Wet.isDetected = 3;
+    std::cout << "FlcRoadCover_.Wet.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Wet.isDetected) << std::dec  << std::endl;
+    FlcRoadCover_.Wet.confidence = 3.30;
+    std::cout << "FlcRoadCover_.Wet.confidence(float32): " << FlcRoadCover_.Wet.confidence << std::endl;
+}
+
+
+
+
+
+
