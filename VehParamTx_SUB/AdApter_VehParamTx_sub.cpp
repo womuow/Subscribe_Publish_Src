@@ -1,13 +1,39 @@
 #include "AdApter_VehParamTx_sub.h"
-
+#include <fstream>
 
 using namespace std::chrono_literals;
 using VariableVariant = std::variant<uint8*, uint16* ,uint32*,float32*,sint8*,sint16*,sint32*>;
-enum VarType {UINT8=0,UINT16,UINT32,FLOAT32,SINT8,SINT16,SINT32};
-struct VarInfo{
-    VariableVariant  var;
-    VarType type;
-};
+
+
+
+uint32_t floatToBitsPointer(float f) {
+    // 注意：使用reinterpret_cast将float指针转换为uint32_t指针
+    return *reinterpret_cast<uint32_t*>(&f);
+}
+
+std::string getCurrentTime() {
+auto now = std::chrono::high_resolution_clock::now();
+    
+    // 转换为time_t用于日历时间
+    auto now_time_t = std::chrono::system_clock::to_time_t(
+        std::chrono::system_clock::now()
+    );
+    
+    // 获取本地时间
+    std::tm* local_time = std::localtime(&now_time_t);
+    
+    // 获取纳秒部分
+    auto duration = now.time_since_epoch();
+    auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        duration
+    ).count() % 1000000000;  // 取模1秒内的纳秒数
+    
+    std::ostringstream oss;
+    oss << "[" << std::put_time(local_time, "%Y-%m-%d %H:%M:%S")
+        << "." << std::setfill('0') << std::setw(9) << nanoseconds << "] ";
+    
+    return oss.str();
+}
 
 void print_memory(const void* ptr, size_t size) {
     const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
@@ -129,33 +155,33 @@ int config_async_sub(std::string json_file) {
     {"VehParam_Tx_.Weight(float32)" , &VehParam_Tx_.Weight},
     {"VehParam_Tx_.WhlBas(float32)" , &VehParam_Tx_.WhlBas},
     {"VehParam_Tx_.Width(float32)" , &VehParam_Tx_.Width},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._0_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._1_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._2_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._3_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._4_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._5_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._6_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd._7_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7]},
     {"VehParam_Tx_.SingleTrackCornrgStfnFrnt(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrnt},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._0_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._1_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._2_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._3_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._4_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._5_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._6_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd._7_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7]},
     {"VehParam_Tx_.SingleTrackCornrgStfnRe(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnRe},
     {"VehParam_Tx_.SteerWhlAgRat(float32)" , &VehParam_Tx_.SteerWhlAgRat},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6]},
-    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._0_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._1_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._2_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._3_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._4_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._5_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._6_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6]},
+    {"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd._7_(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7]},
     {"VehParam_Tx_.BltFrntExist(uint8)" , &VehParam_Tx_.BltFrntExist},
     {"VehParam_Tx_.OncomingBrk(uint8)" , &VehParam_Tx_.OncomingBrk},
     {"VehParam_Tx_.SelfStrGrdt(float32)" , &VehParam_Tx_.SelfStrGrdt},
@@ -168,10 +194,9 @@ int config_async_sub(std::string json_file) {
     {"VehParam_Tx_.VehTyp(uint8)" , &VehParam_Tx_.VehTyp},
     {"VehParam_Tx_.WhlRadius(float32)" , &VehParam_Tx_.WhlRadius},
 
-
-
     };
 
+    // std::thread inputThread(asyncInputThread);
     auto sub = MOS::communication::Subscriber::New(
         domain_id,
         topic, 
@@ -200,21 +225,42 @@ int config_async_sub(std::string json_file) {
         }
     }
 );
+
+    int i=0;
+    //std::string log;
+    char templog[100];
+    char log[1000000];
+    // log.clear();
+    snprintf(log,sizeof(log),"");
+
     while (true) {//while (!stop.load()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
         std::memcpy(&VehParam_Tx_, data_in.data(), sizeof(VehParam_Tx));
-
-        // std::cout<< "Print VehParam_Tx changed value"<< std::endl;
-        print_VehParam_Tx(VehParam_Tx_,VehParam_Tx_old);
-        // std::cout<< "----------------------------------End"<< std::endl;
-
-
-
-
-        // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // std::string temptime=getCurrentTime();
+        // snprintf(templog,sizeof(templog),"%s VehParam_Tx_.SteerWhlPosn(uint8)::: 0x%02X;\n",temptime.c_str(),VehParam_Tx_.SteerWhlPosn);
         
-        std::memcpy(&VehParam_Tx_old, data_in.data(), sizeof(VehParam_Tx));
+        // strncat(log,templog,sizeof(log)-strlen(log)-1);
+        // snprintf(templog,sizeof(templog),"");
+        // //std::this_thread::sleep_for(std::chrono::microseconds(20));
+        // i++;
+        // if(i==1000)
+        // {
+        //     std::cout <<"save log" << std::endl;
+        //     std::cout <<log << std::endl;
+        //     i=0;
+        //     snprintf(log,sizeof(log),"");
+        // }
+        print_VehParam_Tx(VehParam_Tx_,VehParam_Tx_old);
+
+        VehParam_Tx_old = VehParam_Tx_;
+
+
+        // if (!inputQueue.empty())
+        // {
+        //     getVariableValue(variableMap,inputQueue.front());
+        //     inputQueue.pop();
+        // }        
     }
     return 0;
 }
@@ -243,12 +289,27 @@ int main()
     std::string fullPath = std::filesystem::read_symlink("/proc/self/exe");
     std::cout << "Running on Linux(VehParamTx_Sub)"<< fullPath << std::endl;
 #endif
+	// std::ofstream logFile("./logfile.log");
+    // if (!logFile.is_open()) {
+    //     std::cerr << "could not create log" << std::endl;
+    //     return -1;
+    // }
+    //save count orign buffer to log
+    // std::streambuf* originalCoutBuffer = std::cout.rdbuf();
+    // std::cout.rdbuf(logFile.rdbuf()); //redirect to log file
+
+
     size_t pos = fullPath.find_last_of("\\/");
     std::string configPath = fullPath.substr(0, pos) + "/discovery_config.json";
     AdApter_VehParam_Tx objtest;
     objtest.json_file = configPath;
     objtest.run();
     // config_async_sub(configPath);
+    
+    // Restore cout to the console
+    // std::cout.rdbuf(originalCoutBuffer);
+    // logFile.close();
+
 return 0;
 }
 
@@ -256,8 +317,10 @@ return 0;
 /* Print struct VehParam_Tx changed value */
 void print_VehParam_Tx(VehParam_Tx& VehParam_Tx_,VehParam_Tx& VehParam_Tx_old){
 // std::cout << "VehParam_Tx all variable:" << std::endl;
+    uint32_t binary_representation;
     if(VehParam_Tx_.AxleDstReToVehFrnt != VehParam_Tx_old.AxleDstReToVehFrnt){
-        std::cout << "VehParam_Tx_.AxleDstReToVehFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.AxleDstReToVehFrnt << std::endl;
+        std::cout << "VehParam_Tx_.AxleDstReToVehFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.AxleDstReToVehFrnt <<";0x"<<std::hex << std::setw(8) << std::setfill('0') <<floatToBitsPointer(VehParam_Tx_.AxleDstReToVehFrnt)<< std::dec <<std::endl;
+
         }
     if(VehParam_Tx_.SingleTrackAxleDistFrnt != VehParam_Tx_old.SingleTrackAxleDistFrnt){
         std::cout << "VehParam_Tx_.SingleTrackAxleDistFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackAxleDistFrnt << std::endl;
@@ -277,15 +340,7 @@ void print_VehParam_Tx(VehParam_Tx& VehParam_Tx_,VehParam_Tx& VehParam_Tx_old){
     if(VehParam_Tx_.Width != VehParam_Tx_old.Width){
         std::cout << "VehParam_Tx_.Width(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.Width << std::endl;
         }
-    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[0]){
-        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] << std::endl;
-        }
-    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[1]){
-        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] << std::endl;
-        }
-    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[2]){
-        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] << std::endl;
-        }
+    
     if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[3]){
         std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] << std::endl;
         }

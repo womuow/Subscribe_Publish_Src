@@ -77,5 +77,6 @@ std::mutex inputMutex;
 std::queue<std::string> inputQueue;
 std::string currentInput;
 
+
 /* Print struct FuncTgtVisnID changed value */
 void print_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_,IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_old);
