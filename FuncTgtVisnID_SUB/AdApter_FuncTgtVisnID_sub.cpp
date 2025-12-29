@@ -106,7 +106,7 @@ void print_flags(struct termios *options) {
 void asyncInputThreadTTY() {
 
 
-    while (true) {
+    // while (true) {
 
     int serial_fd = open("/dev/ttyS1",  O_NOCTTY | O_RDWR );
     if (serial_fd == -1) {
@@ -119,7 +119,7 @@ void asyncInputThreadTTY() {
     struct termios options_old;
     tcgetattr(serial_fd, &options);
     options_old = options;
-    print_flags(&options_old);
+    //print_flags(&options_old);
     // 设置波特率
     cfsetispeed(&options, B921600);
     cfsetospeed(&options, B921600);
@@ -203,8 +203,9 @@ void asyncInputThreadTTY() {
                 
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                tcflush(serial_fd, TCIOFLUSH);
-            close(serial_fd);
-            break;
+            // close(serial_fd);
+            // break;
+            continue;
             
             }
         }
@@ -219,7 +220,7 @@ void asyncInputThreadTTY() {
         
         // 短暂休眠
         // usleep(500000);  // 500ms
-    }
+    // }
     
 }
 
@@ -362,7 +363,7 @@ int config_async_sub(std::string json_file) {
 );
 
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     std::memcpy(&IDT_FuncTgtVisnID_, data_in.data(), sizeof(IDT_FuncTgtVisnID));
     print_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID_,IDT_FuncTgtVisnID_old);
     IDT_FuncTgtVisnID_old = IDT_FuncTgtVisnID_;
