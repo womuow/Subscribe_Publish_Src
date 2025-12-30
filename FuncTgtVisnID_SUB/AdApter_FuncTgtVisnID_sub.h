@@ -51,12 +51,13 @@ class AdApter_FuncTgtVisnID
 {
 public:
 	AdApter_FuncTgtVisnID();
-	~AdApter_FuncTgtVisnID();	void run();
+	~AdApter_FuncTgtVisnID();	
+	void run();
 	std::string json_file = "";
 	// dds::sub::DataReader<FuncTgtVisnIDModule::FuncTgtVisnID> topic_read_init(std::string topicName);
 	// FuncTgtVisnIDModule::FuncTgtVisnID topic_out;
 	std::string topicName = "rte2dds/FuncTgtVisnID";
-	int domiain_id = 0;
+	int domain_id = 0;
 	bool type = false;
 	std::string topic = "IPCC/FuncTgtVisnID";
 	std::string data_in = "";

@@ -5,11 +5,8 @@
 
 using namespace std::chrono_literals;
 using VariableVariant = std::variant<uint8*, uint16* ,uint32*,float32*,sint8*,sint16*,sint32*>;
-enum VarType {UINT8=0,UINT16,UINT32,FLOAT32,SINT8,SINT16,SINT32};
-struct VarInfo{
-    VariableVariant  var;
-    VarType type;
-};
+
+
 
 void print_memory(const void* ptr, size_t size) {
     const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
@@ -307,8 +304,6 @@ int config_async_sub(std::string json_file) {
     AdApter_FuncTgtVisnID_.json_file = json_file;
     int flag=true;
 
-    int domain_id=0;
-    std::string topic ="IPCC/FuncTgtVisnID";
     
     std::cout << "config_async_sub start with "  <<json_file<<"!!!"<< std::endl;
 
@@ -334,8 +329,8 @@ int config_async_sub(std::string json_file) {
 
 
     auto sub = MOS::communication::Subscriber::New(
-        domain_id,
-        topic, 
+        AdApter_FuncTgtVisnID_.domain_id,
+        AdApter_FuncTgtVisnID_.topic, 
         proto_info, 
         [&data_in](MOS::message::spMsg tmp) {
 
