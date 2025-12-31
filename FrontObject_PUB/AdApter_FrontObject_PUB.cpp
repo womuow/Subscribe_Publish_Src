@@ -2261,7 +2261,7 @@ void setIntialValue_FusedFrontObject(FusedFrontObject& FusedFrontObject_){
     FusedFrontObject_.Properties[31].SensorUpdateStatus = 160;
     std::cout << "FusedFrontObject_.Properties[31].SensorUpdateStatus(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FusedFrontObject_.Properties[31].SensorUpdateStatus) << std::dec  << std::endl;
     FusedFrontObject_.SequenceID = 1;
-    std::cout << "FusedFrontObject_.SequenceID(uint32): " << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(FusedFrontObject_.SequenceID) << std::dec  << std::endl;
+    std::cout << "FusedFrontObject_.SequenceID(uint32): " << std::hex << std::setw(8) << std::setfill('0') << static_cast<int>(FusedFrontObject_.SequenceID) << std::dec  << std::endl;
     FusedFrontObject_.States[0].acceleration = 458.70;
     std::cout << "FusedFrontObject_.States[0].acceleration(float32): " << FusedFrontObject_.States[0].acceleration << std::endl;
     FusedFrontObject_.States[0].curvature = 459.80;
@@ -2902,6 +2902,8 @@ void setIntialValue_FusedFrontObject(FusedFrontObject& FusedFrontObject_){
     std::cout << "FusedFrontObject_.States[31].longVelocity(float32): " << FusedFrontObject_.States[31].longVelocity << std::endl;
     FusedFrontObject_.States[31].speed = 809.60;
     std::cout << "FusedFrontObject_.States[31].speed(float32): " << FusedFrontObject_.States[31].speed << std::endl;
+    FusedFrontObject_.Timestamp = 1;
+    std::cout << "FusedFrontObject_.Timestamp(uint64): " << std::hex << std::setw(8) << std::setfill('0') << static_cast<int>(FusedFrontObject_.Timestamp) << std::dec  << std::endl;
 }
 
 

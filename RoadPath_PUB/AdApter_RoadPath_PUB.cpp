@@ -77,6 +77,7 @@ return 0;
 }
 
 
+
 /* Set and Print struct RoadPath initial value */
 void setIntialValue_RoadPath(RoadPath& RoadPath_){
     std::cout << "Set struct RoadPath variable and Publish:" << std::endl;
@@ -392,5 +393,14 @@ void setIntialValue_RoadPath(RoadPath& RoadPath_){
     std::cout << "RoadPath_.LaneMarkerInfo.Right.Type(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(RoadPath_.LaneMarkerInfo.Right.Type) << std::dec  << std::endl;
     RoadPath_.LaneMarkerInfo.Right.IsUsedByRGF = 141;
     std::cout << "RoadPath_.LaneMarkerInfo.Right.IsUsedByRGF(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(RoadPath_.LaneMarkerInfo.Right.IsUsedByRGF) << std::dec  << std::endl;
+    RoadPath_.Timestamp = 1;
+    std::cout << "RoadPath_.Timestamp(uint64): " << std::hex << std::setw(8) << std::setfill('0') << static_cast<int>(RoadPath_.Timestamp) << std::dec  << std::endl;
 }
+
+
+
+
+
+
+
 

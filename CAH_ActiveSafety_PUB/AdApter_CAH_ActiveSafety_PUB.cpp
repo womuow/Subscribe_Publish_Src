@@ -84,7 +84,6 @@ return 0;
 
 
 
-
 /* Set and Print struct CAH_ActiveSafety initial value */
 void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
     std::cout << "Set struct CAH_ActiveSafety variable and Publish:" << std::endl;
@@ -96,21 +95,23 @@ void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
     std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_LatentWarning(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_LatentWarning) << std::dec  << std::endl;
     CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState = 4;
     std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState) << std::dec  << std::endl;
+    CAH_ActiveSafety_.fcw_flag.FCW_TargetId = 5;
+    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_TargetId(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_TargetId) << std::dec  << std::endl;
     CAH_ActiveSafety_.aeb_flag.AEB_FunConfig = 1;
     std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_FunConfig(uint32): " << std::hex << std::setw(8) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_FunConfig) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_State = 5;
+    CAH_ActiveSafety_.aeb_flag.AEB_State = 6;
     std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_State(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_State) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq = 6;
+    CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq = 7;
     std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_Level = 7;
+    CAH_ActiveSafety_.aeb_flag.AEB_Level = 8;
     std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_Level(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_Level) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_Type = 8;
+    CAH_ActiveSafety_.aeb_flag.AEB_Type = 9;
     std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_Type(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_Type) << std::dec  << std::endl;
     CAH_ActiveSafety_.drt.DRT_TTC = 1.10;
     std::cout << "CAH_ActiveSafety_.drt.DRT_TTC(float32): " << CAH_ActiveSafety_.drt.DRT_TTC << std::endl;
-    CAH_ActiveSafety_.drt.DRT_ID = 9;
+    CAH_ActiveSafety_.drt.DRT_ID = 10;
     std::cout << "CAH_ActiveSafety_.drt.DRT_ID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.drt.DRT_ID) << std::dec  << std::endl;
-    CAH_ActiveSafety_.drt.DRT_ObjectClass = 10;
+    CAH_ActiveSafety_.drt.DRT_ObjectClass = 11;
     std::cout << "CAH_ActiveSafety_.drt.DRT_ObjectClass(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.drt.DRT_ObjectClass) << std::dec  << std::endl;
     CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime = 2.20;
     std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime << std::endl;
@@ -119,6 +120,7 @@ void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
     CAH_ActiveSafety_.fcw_dev.FCW_TTC = 4.40;
     std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_TTC(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_TTC << std::endl;
 }
+
 
 
 
