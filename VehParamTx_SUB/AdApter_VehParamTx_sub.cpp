@@ -385,7 +385,7 @@ int config_async_sub(std::string json_file) {
     snprintf(log,sizeof(log),"");
 
     while (true) {//while (!stop.load()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         std::memcpy(&VehParam_Tx_, data_in.data(), sizeof(VehParam_Tx));
         // std::string temptime=getCurrentTime();
