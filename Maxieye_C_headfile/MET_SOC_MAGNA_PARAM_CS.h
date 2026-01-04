@@ -85,14 +85,14 @@ typedef struct MagnaCamIntParam{
 	float undistort_focalLength_Y;
 
     /* distort image info */
-    short distort_imgWidth;
-    short distort_imgHeight;
+    int16_t distort_imgWidth;
+    int16_t distort_imgHeight;
     float distort_principalPoint_X;
     float distort_principalPoint_Y;
 
     /* undistort image info */
-    short undistort_imgWidth;
-    short undistort_imgHeight;
+    int16_t undistort_imgWidth;
+    int16_t undistort_imgHeight;
     float undistort_principalPoint_X;
     float undistort_principalPoint_Y;
 

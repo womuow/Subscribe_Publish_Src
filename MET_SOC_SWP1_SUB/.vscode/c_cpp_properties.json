@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "/home/c/MAXEYE/ADCU/dds_mos/linux-ax750/include",
                 "/home/c/MAXEYE/ADCU/dds_mos/Src/Maxieye_C_headfile",
-                "/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_CS_Calib_SUB",
+                "/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_VEHINFO_SUB",
                 "/home/c/ExternalLib/json/include"
             ],
             "defines": [],

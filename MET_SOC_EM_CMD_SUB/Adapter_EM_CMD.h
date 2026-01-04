@@ -51,7 +51,7 @@
 #include "mos-com/interface/subscriber.hpp"
 #include "mos-com/message/message.h"
 #include "mos-com/utils/debug_log.h"
-#include"MET_SOC_MAGNA_PARAM_CS.h"
+#include"MET_SOC_EM_CMD.h"
 #include"mos-pack/met_pack.h"
 #include <termios.h>
 #include <unistd.h>
@@ -61,12 +61,12 @@
 #include <map>
 
 using namespace std::chrono_literals;
-
-class Adapter_VEHINFO
+using namespace mos::mgmt::infra ;
+class Adapter_EM_CMD
 {
 public:
-	Adapter_VEHINFO();
-	~Adapter_VEHINFO();
+	Adapter_EM_CMD();
+	~Adapter_EM_CMD();
 	void run();
 	std::string json_file = "";
 // private:
@@ -75,7 +75,7 @@ public:
 	
 	int domain_id = 0;
 	bool type = false;
-	std::string topic = "Veh/vehinfo";
+	std::string topic = "Veh/EM_CMD";
 	
 	std::string data_in = "";
 	uint32_t cycle_ms = 100;
@@ -94,5 +94,16 @@ std::queue<std::string> inputQueue;
 int flag=true;
 
 
-/* Print struct FuncTgtVisnID changed value */
-// void print_MET_SOC_VehInfo(MET_SOC_VehInfo& MET_SOC_VehInfo_,MET_SOC_VehInfo& MET_SOC_VehInfo_old);
+
+/* Print struct RecoveryCommand changed value */
+void print_RecoveryCommand(RecoveryCommand& RecoveryCommand_,RecoveryCommand& RecoveryCommand_old);
+
+
+
+
+/* Print struct RecoveryResponse changed value */
+void print_RecoveryResponse(RecoveryResponse& RecoveryResponse_,RecoveryResponse& RecoveryResponse_old);
+
+
+
+
