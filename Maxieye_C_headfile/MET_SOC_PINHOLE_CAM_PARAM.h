@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "met/MET_DataStructure.h"
+#include "MET_DataStructure.h"
 
 #define SOC_PINHOLE_CAM_PARAM_VERSION 3
 

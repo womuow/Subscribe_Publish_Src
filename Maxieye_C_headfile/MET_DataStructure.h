@@ -14,21 +14,21 @@ Function:		basic data structure define
 
 typedef struct METSize
 {
-	short	w;
-	short	h;
+	int16_t	w;
+	int16_t	h;
 }METSize;
 
 typedef struct METPoint		/*unit: pixel*/
 {
-	short	x;				/*horizontal coordinate*/
-	short	y;				/*vertical coordinate*/
+	int16_t	x;				/*horizontal coordinate*/
+	int16_t	y;				/*vertical coordinate*/
 }METPoint;
 
 typedef struct METPoint3D		/*unit: km,m,cm etc */
 {
-	short	x;
-	short	y;
-	short   z;
+	int16_t	x;
+	int16_t	y;
+	int16_t   z;
 }METPoint3D;
 
 typedef struct METPoint2D32f
@@ -46,10 +46,10 @@ typedef struct METPoint3D32f
 
 typedef struct METRect		/*unit: pixel*/
 {
-	short	x;				/*horizontal coordinate*/
-	short	y;				/*vertical coordinate*/
-	short	width;			/*width*/
-	short	height;			/*height*/
+	int16_t	x;				/*horizontal coordinate*/
+	int16_t	y;				/*vertical coordinate*/
+	int16_t	width;			/*width*/
+	int16_t	height;			/*height*/
 }METRect;
 
 typedef struct METRect32f		/*unit: pixel*/
@@ -63,10 +63,10 @@ typedef struct METRect32f		/*unit: pixel*/
 typedef struct METLowPassFilter //IIR
 {
 	char		initFlag;
-	int			dim;
+	int32_t			dim;
 	float		*NL;
 	float		*DL;
-	int			cnt;
+	int32_t			cnt;
 	float		*src;
 	float		*des;
 	float		inputData;
@@ -99,16 +99,16 @@ typedef struct {
 	float undistort_focalLength_Y;
 
     /* distort image info */
-    short distort_imgWidth;
-    short distort_imgHeight;
+    int16_t distort_imgWidth;
+    int16_t distort_imgHeight;
     float distort_principalPoint_X;
     float distort_principalPoint_Y;
     float distort_camFov_H;
     float distort_camFov_V;
 
     /* undistort image info */
-    short undistort_imgWidth;
-    short undistort_imgHeight;
+    int16_t undistort_imgWidth;
+    int16_t undistort_imgHeight;
     float undistort_principalPoint_X;
     float undistort_principalPoint_Y;
     float undistort_camFov_H;
@@ -130,8 +130,8 @@ typedef struct {
 
 typedef struct METCamConfig
 {
-	int			imgWidth;		//source image size: SD(1024, 512), HD(1280, 1080)
-	int			imgHeight;
+	int32_t			imgWidth;		//source image size: SD(1024, 512), HD(1280, 1080)
+	int32_t			imgHeight;
 	float		flength;
 	float		pixel_pitch_x;
 	float		pixel_pitch_y;
@@ -149,7 +149,7 @@ typedef struct METCamConfig
 	float		yaw;
 	float		pitch;
 
-	int			imgHD_offsetY;	/*unit: pixel*/
+	int32_t			imgHD_offsetY;	/*unit: pixel*/
 
 	float		hFov;	/*unit: degree*/
 	float		vFov;
