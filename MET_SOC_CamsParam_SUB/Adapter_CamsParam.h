@@ -75,9 +75,9 @@ public:
 	
 	int domain_id = 0;
 	bool type = false;
-	std::string topic = "Veh/CamsParam";
+	std::string topic = "ParamServer/cams_param";
 	
-	std::string data_in = "";
+
 	uint32_t cycle_ms = 100;
 	uint32_t port = 12352;
 	std::string ip = "127.0.0.1";
@@ -92,7 +92,7 @@ public:
 // 全局变量
 std::queue<std::string> inputQueue;
 int flag=true;
-
+std::string data_in;
 
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_CamsParam(MET_SOC_CamsParam& MET_SOC_CamsParam_,MET_SOC_CamsParam& MET_SOC_CamsParam_old);

@@ -3,7 +3,14 @@
 
 
 using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,CamParamUpdateType*,CameraDistortType*>;
-
+void print_memory(const void* ptr, size_t size) {
+    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
+    for (size_t i = 0; i < size; ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(bytes[i]) << " ";
+    }
+    std::cout << std::dec << std::endl;
+}
 
 void printVariableVariant(const std::string& name, VariableVariant var) {
     std::visit([&name](auto&& ptr) {
@@ -66,6 +73,19 @@ void asyncInputThreadTTY() {
         std::cerr << "can not open serial port /dev/ttyS1" << std::endl;
         return ;
     }
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    std::cout<<"data length: "<<data_in.length()<<std::endl<<"MET_SOC_CamsParam length: "<<sizeof(MET_SOC_CamsParam)<<std::endl;
+
+    // if (flag)
+    {
+        std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
+        print_memory(data_in.data(),data_in.size());  
+        // flag=false;
+    }
+
+    
     
     // 2. 配置串口参数
     struct termios options;
@@ -154,10 +174,10 @@ void asyncInputThreadTTY() {
             {
                 inputQueue.push(line);
                 
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                tcflush(serial_fd, TCIOFLUSH);
             // close(serial_fd);
             // break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
             continue;
             
             }
@@ -217,13 +237,14 @@ int config_async_sub(std::string json_file) {
     MOS::utils::Register::get().register_version("libCamsParam", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
-    std::string data_in ="";
+    // std::string data_in = Adapter_CamsParam_.data_in;
+    data_in = "";
     MET_SOC_CamsParam MET_SOC_CamsParam_;
     MET_SOC_CamsParam MET_SOC_CamsParam_old;
 
         std::map<std::string, VariableVariant > variableMap = {
             
-            // [MET_SOC_CamsParam]
+            
 {"MET_SOC_CamsParam_.update_count(uint32_t)" , &MET_SOC_CamsParam_.update_count},
 {"MET_SOC_CamsParam_.update_type(uint8_t)" , &MET_SOC_CamsParam_.update_type},
 {"MET_SOC_CamsParam_.cams_num(uint16_t)" , &MET_SOC_CamsParam_.cams_num},
@@ -458,7 +479,7 @@ int config_async_sub(std::string json_file) {
         Adapter_CamsParam_.domain_id,
         Adapter_CamsParam_.topic, 
         proto_info, 
-        [&data_in](MOS::message::spMsg tmp) {
+        [](MOS::message::spMsg tmp) {
 
         auto data_vec = tmp->GetDataRef()->GetDataVec();
         auto data_size_vec = tmp->GetDataRef()->GetDataSizeVec();
@@ -473,9 +494,11 @@ int config_async_sub(std::string json_file) {
     }
 );
 
+    
 
-    // std::thread inputThread(asyncInputThread);
+
     std::thread inputThread2(asyncInputThreadTTY);
+    
 
     while (true) {//while (!stop.load()) {
         //std::this_thread::sleep_for(std::chrono::milliseconds(5));

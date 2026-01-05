@@ -3,7 +3,14 @@
 
 
 using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*>;
-
+void print_memory(const void* ptr, size_t size) {
+    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
+    for (size_t i = 0; i < size; ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(bytes[i]) << " ";
+    }
+    std::cout << std::dec << std::endl;
+}
 
 void printVariableVariant(const std::string& name, VariableVariant var) {
     std::visit([&name](auto&& ptr) {
@@ -66,6 +73,17 @@ void asyncInputThreadTTY() {
         std::cerr << "can not open serial port /dev/ttyS1" << std::endl;
         return ;
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    std::cout<<"data length: "<<data_in.length()<<std::endl<<"MET_SOC_SWP1_Param length: "<<sizeof(MET_SOC_SWP1_Param)<<std::endl;
+
+    // if (flag)
+    {
+        std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
+        print_memory(data_in.data(),data_in.size());  
+        // flag=false;
+    }
+
     
     // 2. 配置串口参数
     struct termios options;
@@ -217,7 +235,7 @@ int config_async_sub(std::string json_file) {
     MOS::utils::Register::get().register_version("libSWP1", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
-    std::string data_in ="";
+    data_in ="";
     MET_SOC_SWP1_Param MET_SOC_SWP1_Param_;
     MET_SOC_SWP1_Param MET_SOC_SWP1_Param_old;
 
@@ -394,7 +412,7 @@ int config_async_sub(std::string json_file) {
         Adapter_SWP1_.domain_id,
         Adapter_SWP1_.topic, 
         proto_info, 
-        [&data_in](MOS::message::spMsg tmp) {
+        [](MOS::message::spMsg tmp) {
 
         auto data_vec = tmp->GetDataRef()->GetDataVec();
         auto data_size_vec = tmp->GetDataRef()->GetDataSizeVec();

@@ -92,7 +92,7 @@ public:
 // 全局变量
 std::queue<std::string> inputQueue;
 int flag=true;
-
+std::string data_in;
 
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_BEVAutofixResult(MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_,MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_old);
