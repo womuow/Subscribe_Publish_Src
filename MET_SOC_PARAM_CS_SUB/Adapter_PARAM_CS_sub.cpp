@@ -1,7 +1,6 @@
 ﻿#include"Adapter_PARAM_CS.h"
 
 
-
 using VariableVariant = std::variant<uint8_t*, uint16_t*, uint32_t*, uint64_t*, int8_t*, int16_t*, int32_t*, int64_t*, float*, bool*,MagnaParamReqType*,MagnaStatusCode*,MagnaClientStatusCode*,MagnaCalibResultCode*>;
 
 
@@ -66,6 +65,7 @@ void asyncInputThreadTTY() {
         std::cerr << "can not open serial port /dev/ttyS1" << std::endl;
         return ;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     
     // 2. 配置串口参数
     struct termios options;
@@ -204,7 +204,100 @@ void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string 
 
 
 
-int config_async_sub(std::string json_file) {
+
+
+
+void TestServiceCallback(MOS::message::spMsg request, MOS::message::spMsg & response) {
+    auto request_gen_ts = request->GetGenTimestamp();
+    auto request_first_data = static_cast<MagnaParamCSReq*>(request->GetDataRef()->GetDataVec()[0]);
+    MagnaParamCSReq_ = *request_first_data;
+
+    std::cout<<"receive client request, gen_ts = "<< request_gen_ts<<", req.meta_req_data[0] = "<< (int)(request_first_data->meta_req_data[0]) <<std::endl;
+  
+
+//   LOG_DEBUG("receive client request, gen_ts = %ld, event = %d", request_gen_ts, request_first_data->event);
+
+    //  TestResponse res;
+//   res.rev = request_first_data->event + 1;
+
+//   auto res_data_ref = std::make_shared<MOS::message::DataRef>(&res, sizeof(res));
+//   response->SetDataRef(res_data_ref);
+//   response->SetGenTimestamp(MOS::TimeUtils::NowNsec());
+
+//   LOG_DEBUG("send response, gen_ts = %ld, rev = %d", response->GetGenTimestamp(), res.rev);
+}
+
+void set_proto_info(MOS::communication::ProtocolInfo& proto_info, bool type, int port, const std::string& ip,
+                    int block_size, int block_count = 10) {
+//   if (type) {
+//     proto_info.protocol_type = MOS::communication::kProtocolNet;
+//     proto_info.net_info.local_addr.ip = ip.c_str();
+//     proto_info.net_info.local_addr.port = port;
+//   } else {
+    proto_info.protocol_type = MOS::communication::kProtocolShm;
+    proto_info.shm_info.block_count = block_count;
+    proto_info.shm_info.block_size = block_size;
+    proto_info.shm_info.fast_mode = false;
+//   }
+}
+
+
+
+int config_client(int domain_id, std::string service_name, bool type, std::string discovery_json_file, std::string ip,
+                  uint32_t port) {
+  // 初始化Communication中间件
+  MOS::communication::Init(discovery_json_file);
+
+  // 配置通信属性
+  MOS::communication::ProtocolInfo proto_info;
+  set_proto_info(proto_info, type, port, ip, sizeof(MagnaParamCSReq));
+
+  // 创建Client
+  auto client = MOS::communication::Client::New(domain_id, service_name, proto_info);
+  uint8_t count = 0;
+  int timeout_ms = 1000;
+  while (true) {
+    MagnaParamCSReq req;
+    count++;
+    req.meta_req_data[0] = count;
+    std::cout<<"output req.meta_req_data[0] = "<<req.meta_req_data[0]<<std::endl;
+    
+    auto request_msg = std::make_shared<MOS::message::Message>();
+    auto response_msg = std::make_shared<MOS::message::Message>();
+    auto data_ref = std::make_shared<MOS::message::DataRef>(&req, sizeof(MagnaParamCSReq));
+    request_msg->SetDataRef(data_ref);
+
+    // 发送 request
+    auto ret = client->SendRequest(request_msg, response_msg, timeout_ms);
+    if (ret == MOS::communication::COMM_CODE_OK) {
+      // 处理 response
+    //   auto response = static_cast<MagnaParamCSRes*>(response_msg->GetDataRef()->GetDataVec()[0]);
+    //   LOG_DEBUG("get response success, gen_ts = %ld, rev = %d", response_msg->GetGenTimestamp(), response->rev);
+
+    } else {
+    //   LOG_WARNING("get response failed, ret = %d", ret);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  return 0;
+}
+    
+
+
+
+
+
+void asyncClientThread() {
+
+    config_client(0, "CS/Calib", false, "discovery_config.json", "127.0.0.1",12352);
+
+
+}
+
+
+int config_async_service(std::string json_file) {
     
 
     Adapter_PARAM_CS Adapter_PARAM_CS_;
@@ -212,733 +305,37 @@ int config_async_sub(std::string json_file) {
 
     std::cout << "config_async_sub start with "  <<json_file<<"!!!"<< std::endl;
 
-
+    // 初始化Communication中间件
     MOS::communication::Init(json_file);
-    MOS::utils::Register::get().register_version("libPARAM_CS", "1.1.0");
+    // 配置通信属性
     MOS::communication::ProtocolInfo proto_info;
-    proto_info.protocol_type = MOS::communication::kProtocolShm;
-    std::string data_in ="";
+    set_proto_info(proto_info, Adapter_PARAM_CS_.type, Adapter_PARAM_CS_.port, Adapter_PARAM_CS_.ip, sizeof(MagnaParamCSRes));
+
+
+    
     MagnaParamCSReq MagnaParamCSReq_;
     MagnaParamCSReq MagnaParamCSReq_old;
 
     MagnaParamCSRes MagnaParamCSRes_;
     MagnaParamCSRes MagnaParamCSRes_old;
 
-    MagnaCamExtParam MagnaCamExtParam_;
-    MagnaCamExtParam MagnaCamExtParam_old;
-
-    MagnaCalibResult MagnaCalibResult_;
-    MagnaCalibResult MagnaCalibResult_old;
 
 
-    MagnaCamIntParam MagnaCamIntParam_;
-    MagnaCamIntParam MagnaCamIntParam_old;
+    std::map<std::string, VariableVariant > variableMap = {};
+    
 
 
-    MagnaTACCalibInput MagnaTACCalibInput_;
-    MagnaTACCalibInput MagnaTACCalibInput_old;
+    // 创建Service
+    auto service = MOS::communication::Service::New(Adapter_PARAM_CS_.domain_id, Adapter_PARAM_CS_.topic, proto_info, TestServiceCallback);
 
 
+    std::thread inputThread(asyncClientThread);
+    // std::thread inputThread2(asyncInputThreadTTY);
 
-    std::map<std::string, VariableVariant > variableMap = {
-        
-{"MagnaParamCSReq_.req_type(uint8_t)" , &MagnaParamCSReq_.req_type},
-{"MagnaParamCSReq_.meta_req_data[0](uint8_t)" , &MagnaParamCSReq_.meta_req_data[0]},
-{"MagnaParamCSReq_.meta_req_data[1](uint8_t)" , &MagnaParamCSReq_.meta_req_data[1]},
-{"MagnaParamCSReq_.meta_req_data[2](uint8_t)" , &MagnaParamCSReq_.meta_req_data[2]},
-{"MagnaParamCSReq_.meta_req_data[3](uint8_t)" , &MagnaParamCSReq_.meta_req_data[3]},
-{"MagnaParamCSReq_.meta_req_data[4](uint8_t)" , &MagnaParamCSReq_.meta_req_data[4]},
-{"MagnaParamCSReq_.meta_req_data[5](uint8_t)" , &MagnaParamCSReq_.meta_req_data[5]},
-{"MagnaParamCSReq_.meta_req_data[6](uint8_t)" , &MagnaParamCSReq_.meta_req_data[6]},
-{"MagnaParamCSReq_.meta_req_data[7](uint8_t)" , &MagnaParamCSReq_.meta_req_data[7]},
-{"MagnaParamCSReq_.meta_req_data[8](uint8_t)" , &MagnaParamCSReq_.meta_req_data[8]},
-{"MagnaParamCSReq_.meta_req_data[9](uint8_t)" , &MagnaParamCSReq_.meta_req_data[9]},
-{"MagnaParamCSReq_.meta_req_data[10](uint8_t)" , &MagnaParamCSReq_.meta_req_data[10]},
-{"MagnaParamCSReq_.meta_req_data[11](uint8_t)" , &MagnaParamCSReq_.meta_req_data[11]},
-{"MagnaParamCSReq_.meta_req_data[12](uint8_t)" , &MagnaParamCSReq_.meta_req_data[12]},
-{"MagnaParamCSReq_.meta_req_data[13](uint8_t)" , &MagnaParamCSReq_.meta_req_data[13]},
-{"MagnaParamCSReq_.meta_req_data[14](uint8_t)" , &MagnaParamCSReq_.meta_req_data[14]},
-{"MagnaParamCSReq_.meta_req_data[15](uint8_t)" , &MagnaParamCSReq_.meta_req_data[15]},
-{"MagnaParamCSReq_.meta_req_data[16](uint8_t)" , &MagnaParamCSReq_.meta_req_data[16]},
-{"MagnaParamCSReq_.meta_req_data[17](uint8_t)" , &MagnaParamCSReq_.meta_req_data[17]},
-{"MagnaParamCSReq_.meta_req_data[18](uint8_t)" , &MagnaParamCSReq_.meta_req_data[18]},
-{"MagnaParamCSReq_.meta_req_data[19](uint8_t)" , &MagnaParamCSReq_.meta_req_data[19]},
-{"MagnaParamCSReq_.meta_req_data[20](uint8_t)" , &MagnaParamCSReq_.meta_req_data[20]},
-{"MagnaParamCSReq_.meta_req_data[21](uint8_t)" , &MagnaParamCSReq_.meta_req_data[21]},
-{"MagnaParamCSReq_.meta_req_data[22](uint8_t)" , &MagnaParamCSReq_.meta_req_data[22]},
-{"MagnaParamCSReq_.meta_req_data[23](uint8_t)" , &MagnaParamCSReq_.meta_req_data[23]},
-{"MagnaParamCSReq_.meta_req_data[24](uint8_t)" , &MagnaParamCSReq_.meta_req_data[24]},
-{"MagnaParamCSReq_.meta_req_data[25](uint8_t)" , &MagnaParamCSReq_.meta_req_data[25]},
-{"MagnaParamCSReq_.meta_req_data[26](uint8_t)" , &MagnaParamCSReq_.meta_req_data[26]},
-{"MagnaParamCSReq_.meta_req_data[27](uint8_t)" , &MagnaParamCSReq_.meta_req_data[27]},
-{"MagnaParamCSReq_.meta_req_data[28](uint8_t)" , &MagnaParamCSReq_.meta_req_data[28]},
-{"MagnaParamCSReq_.meta_req_data[29](uint8_t)" , &MagnaParamCSReq_.meta_req_data[29]},
-{"MagnaParamCSReq_.meta_req_data[30](uint8_t)" , &MagnaParamCSReq_.meta_req_data[30]},
-{"MagnaParamCSReq_.meta_req_data[31](uint8_t)" , &MagnaParamCSReq_.meta_req_data[31]},
-{"MagnaParamCSReq_.meta_req_data[32](uint8_t)" , &MagnaParamCSReq_.meta_req_data[32]},
-{"MagnaParamCSReq_.meta_req_data[33](uint8_t)" , &MagnaParamCSReq_.meta_req_data[33]},
-{"MagnaParamCSReq_.meta_req_data[34](uint8_t)" , &MagnaParamCSReq_.meta_req_data[34]},
-{"MagnaParamCSReq_.meta_req_data[35](uint8_t)" , &MagnaParamCSReq_.meta_req_data[35]},
-{"MagnaParamCSReq_.meta_req_data[36](uint8_t)" , &MagnaParamCSReq_.meta_req_data[36]},
-{"MagnaParamCSReq_.meta_req_data[37](uint8_t)" , &MagnaParamCSReq_.meta_req_data[37]},
-{"MagnaParamCSReq_.meta_req_data[38](uint8_t)" , &MagnaParamCSReq_.meta_req_data[38]},
-{"MagnaParamCSReq_.meta_req_data[39](uint8_t)" , &MagnaParamCSReq_.meta_req_data[39]},
-{"MagnaParamCSReq_.meta_req_data[40](uint8_t)" , &MagnaParamCSReq_.meta_req_data[40]},
-{"MagnaParamCSReq_.meta_req_data[41](uint8_t)" , &MagnaParamCSReq_.meta_req_data[41]},
-{"MagnaParamCSReq_.meta_req_data[42](uint8_t)" , &MagnaParamCSReq_.meta_req_data[42]},
-{"MagnaParamCSReq_.meta_req_data[43](uint8_t)" , &MagnaParamCSReq_.meta_req_data[43]},
-{"MagnaParamCSReq_.meta_req_data[44](uint8_t)" , &MagnaParamCSReq_.meta_req_data[44]},
-{"MagnaParamCSReq_.meta_req_data[45](uint8_t)" , &MagnaParamCSReq_.meta_req_data[45]},
-{"MagnaParamCSReq_.meta_req_data[46](uint8_t)" , &MagnaParamCSReq_.meta_req_data[46]},
-{"MagnaParamCSReq_.meta_req_data[47](uint8_t)" , &MagnaParamCSReq_.meta_req_data[47]},
-{"MagnaParamCSReq_.meta_req_data[48](uint8_t)" , &MagnaParamCSReq_.meta_req_data[48]},
-{"MagnaParamCSReq_.meta_req_data[49](uint8_t)" , &MagnaParamCSReq_.meta_req_data[49]},
-{"MagnaParamCSReq_.meta_req_data[50](uint8_t)" , &MagnaParamCSReq_.meta_req_data[50]},
-{"MagnaParamCSReq_.meta_req_data[51](uint8_t)" , &MagnaParamCSReq_.meta_req_data[51]},
-{"MagnaParamCSReq_.meta_req_data[52](uint8_t)" , &MagnaParamCSReq_.meta_req_data[52]},
-{"MagnaParamCSReq_.meta_req_data[53](uint8_t)" , &MagnaParamCSReq_.meta_req_data[53]},
-{"MagnaParamCSReq_.meta_req_data[54](uint8_t)" , &MagnaParamCSReq_.meta_req_data[54]},
-{"MagnaParamCSReq_.meta_req_data[55](uint8_t)" , &MagnaParamCSReq_.meta_req_data[55]},
-{"MagnaParamCSReq_.meta_req_data[56](uint8_t)" , &MagnaParamCSReq_.meta_req_data[56]},
-{"MagnaParamCSReq_.meta_req_data[57](uint8_t)" , &MagnaParamCSReq_.meta_req_data[57]},
-{"MagnaParamCSReq_.meta_req_data[58](uint8_t)" , &MagnaParamCSReq_.meta_req_data[58]},
-{"MagnaParamCSReq_.meta_req_data[59](uint8_t)" , &MagnaParamCSReq_.meta_req_data[59]},
-{"MagnaParamCSReq_.meta_req_data[60](uint8_t)" , &MagnaParamCSReq_.meta_req_data[60]},
-{"MagnaParamCSReq_.meta_req_data[61](uint8_t)" , &MagnaParamCSReq_.meta_req_data[61]},
-{"MagnaParamCSReq_.meta_req_data[62](uint8_t)" , &MagnaParamCSReq_.meta_req_data[62]},
-{"MagnaParamCSReq_.meta_req_data[63](uint8_t)" , &MagnaParamCSReq_.meta_req_data[63]},
-{"MagnaParamCSReq_.meta_req_data[64](uint8_t)" , &MagnaParamCSReq_.meta_req_data[64]},
-{"MagnaParamCSReq_.meta_req_data[65](uint8_t)" , &MagnaParamCSReq_.meta_req_data[65]},
-{"MagnaParamCSReq_.meta_req_data[66](uint8_t)" , &MagnaParamCSReq_.meta_req_data[66]},
-{"MagnaParamCSReq_.meta_req_data[67](uint8_t)" , &MagnaParamCSReq_.meta_req_data[67]},
-{"MagnaParamCSReq_.meta_req_data[68](uint8_t)" , &MagnaParamCSReq_.meta_req_data[68]},
-{"MagnaParamCSReq_.meta_req_data[69](uint8_t)" , &MagnaParamCSReq_.meta_req_data[69]},
-{"MagnaParamCSReq_.meta_req_data[70](uint8_t)" , &MagnaParamCSReq_.meta_req_data[70]},
-{"MagnaParamCSReq_.meta_req_data[71](uint8_t)" , &MagnaParamCSReq_.meta_req_data[71]},
-{"MagnaParamCSReq_.meta_req_data[72](uint8_t)" , &MagnaParamCSReq_.meta_req_data[72]},
-{"MagnaParamCSReq_.meta_req_data[73](uint8_t)" , &MagnaParamCSReq_.meta_req_data[73]},
-{"MagnaParamCSReq_.meta_req_data[74](uint8_t)" , &MagnaParamCSReq_.meta_req_data[74]},
-{"MagnaParamCSReq_.meta_req_data[75](uint8_t)" , &MagnaParamCSReq_.meta_req_data[75]},
-{"MagnaParamCSReq_.meta_req_data[76](uint8_t)" , &MagnaParamCSReq_.meta_req_data[76]},
-{"MagnaParamCSReq_.meta_req_data[77](uint8_t)" , &MagnaParamCSReq_.meta_req_data[77]},
-{"MagnaParamCSReq_.meta_req_data[78](uint8_t)" , &MagnaParamCSReq_.meta_req_data[78]},
-{"MagnaParamCSReq_.meta_req_data[79](uint8_t)" , &MagnaParamCSReq_.meta_req_data[79]},
-{"MagnaParamCSReq_.meta_req_data[80](uint8_t)" , &MagnaParamCSReq_.meta_req_data[80]},
-{"MagnaParamCSReq_.meta_req_data[81](uint8_t)" , &MagnaParamCSReq_.meta_req_data[81]},
-{"MagnaParamCSReq_.meta_req_data[82](uint8_t)" , &MagnaParamCSReq_.meta_req_data[82]},
-{"MagnaParamCSReq_.meta_req_data[83](uint8_t)" , &MagnaParamCSReq_.meta_req_data[83]},
-{"MagnaParamCSReq_.meta_req_data[84](uint8_t)" , &MagnaParamCSReq_.meta_req_data[84]},
-{"MagnaParamCSReq_.meta_req_data[85](uint8_t)" , &MagnaParamCSReq_.meta_req_data[85]},
-{"MagnaParamCSReq_.meta_req_data[86](uint8_t)" , &MagnaParamCSReq_.meta_req_data[86]},
-{"MagnaParamCSReq_.meta_req_data[87](uint8_t)" , &MagnaParamCSReq_.meta_req_data[87]},
-{"MagnaParamCSReq_.meta_req_data[88](uint8_t)" , &MagnaParamCSReq_.meta_req_data[88]},
-{"MagnaParamCSReq_.meta_req_data[89](uint8_t)" , &MagnaParamCSReq_.meta_req_data[89]},
-{"MagnaParamCSReq_.meta_req_data[90](uint8_t)" , &MagnaParamCSReq_.meta_req_data[90]},
-{"MagnaParamCSReq_.meta_req_data[91](uint8_t)" , &MagnaParamCSReq_.meta_req_data[91]},
-{"MagnaParamCSReq_.meta_req_data[92](uint8_t)" , &MagnaParamCSReq_.meta_req_data[92]},
-{"MagnaParamCSReq_.meta_req_data[93](uint8_t)" , &MagnaParamCSReq_.meta_req_data[93]},
-{"MagnaParamCSReq_.meta_req_data[94](uint8_t)" , &MagnaParamCSReq_.meta_req_data[94]},
-{"MagnaParamCSReq_.meta_req_data[95](uint8_t)" , &MagnaParamCSReq_.meta_req_data[95]},
-{"MagnaParamCSReq_.meta_req_data[96](uint8_t)" , &MagnaParamCSReq_.meta_req_data[96]},
-{"MagnaParamCSReq_.meta_req_data[97](uint8_t)" , &MagnaParamCSReq_.meta_req_data[97]},
-{"MagnaParamCSReq_.meta_req_data[98](uint8_t)" , &MagnaParamCSReq_.meta_req_data[98]},
-{"MagnaParamCSReq_.meta_req_data[99](uint8_t)" , &MagnaParamCSReq_.meta_req_data[99]},
-{"MagnaParamCSReq_.meta_req_data[100](uint8_t)" , &MagnaParamCSReq_.meta_req_data[100]},
-{"MagnaParamCSReq_.meta_req_data[101](uint8_t)" , &MagnaParamCSReq_.meta_req_data[101]},
-{"MagnaParamCSReq_.meta_req_data[102](uint8_t)" , &MagnaParamCSReq_.meta_req_data[102]},
-{"MagnaParamCSReq_.meta_req_data[103](uint8_t)" , &MagnaParamCSReq_.meta_req_data[103]},
-{"MagnaParamCSReq_.meta_req_data[104](uint8_t)" , &MagnaParamCSReq_.meta_req_data[104]},
-{"MagnaParamCSReq_.meta_req_data[105](uint8_t)" , &MagnaParamCSReq_.meta_req_data[105]},
-{"MagnaParamCSReq_.meta_req_data[106](uint8_t)" , &MagnaParamCSReq_.meta_req_data[106]},
-{"MagnaParamCSReq_.meta_req_data[107](uint8_t)" , &MagnaParamCSReq_.meta_req_data[107]},
-{"MagnaParamCSReq_.meta_req_data[108](uint8_t)" , &MagnaParamCSReq_.meta_req_data[108]},
-{"MagnaParamCSReq_.meta_req_data[109](uint8_t)" , &MagnaParamCSReq_.meta_req_data[109]},
-{"MagnaParamCSReq_.meta_req_data[110](uint8_t)" , &MagnaParamCSReq_.meta_req_data[110]},
-{"MagnaParamCSReq_.meta_req_data[111](uint8_t)" , &MagnaParamCSReq_.meta_req_data[111]},
-{"MagnaParamCSReq_.meta_req_data[112](uint8_t)" , &MagnaParamCSReq_.meta_req_data[112]},
-{"MagnaParamCSReq_.meta_req_data[113](uint8_t)" , &MagnaParamCSReq_.meta_req_data[113]},
-{"MagnaParamCSReq_.meta_req_data[114](uint8_t)" , &MagnaParamCSReq_.meta_req_data[114]},
-{"MagnaParamCSReq_.meta_req_data[115](uint8_t)" , &MagnaParamCSReq_.meta_req_data[115]},
-{"MagnaParamCSReq_.meta_req_data[116](uint8_t)" , &MagnaParamCSReq_.meta_req_data[116]},
-{"MagnaParamCSReq_.meta_req_data[117](uint8_t)" , &MagnaParamCSReq_.meta_req_data[117]},
-{"MagnaParamCSReq_.meta_req_data[118](uint8_t)" , &MagnaParamCSReq_.meta_req_data[118]},
-{"MagnaParamCSReq_.meta_req_data[119](uint8_t)" , &MagnaParamCSReq_.meta_req_data[119]},
-{"MagnaParamCSReq_.meta_req_data[120](uint8_t)" , &MagnaParamCSReq_.meta_req_data[120]},
-{"MagnaParamCSReq_.meta_req_data[121](uint8_t)" , &MagnaParamCSReq_.meta_req_data[121]},
-{"MagnaParamCSReq_.meta_req_data[122](uint8_t)" , &MagnaParamCSReq_.meta_req_data[122]},
-{"MagnaParamCSReq_.meta_req_data[123](uint8_t)" , &MagnaParamCSReq_.meta_req_data[123]},
-{"MagnaParamCSReq_.meta_req_data[124](uint8_t)" , &MagnaParamCSReq_.meta_req_data[124]},
-{"MagnaParamCSReq_.meta_req_data[125](uint8_t)" , &MagnaParamCSReq_.meta_req_data[125]},
-{"MagnaParamCSReq_.meta_req_data[126](uint8_t)" , &MagnaParamCSReq_.meta_req_data[126]},
-{"MagnaParamCSReq_.meta_req_data[127](uint8_t)" , &MagnaParamCSReq_.meta_req_data[127]},
-{"MagnaParamCSReq_.meta_req_data[128](uint8_t)" , &MagnaParamCSReq_.meta_req_data[128]},
-{"MagnaParamCSReq_.meta_req_data[129](uint8_t)" , &MagnaParamCSReq_.meta_req_data[129]},
-{"MagnaParamCSReq_.meta_req_data[130](uint8_t)" , &MagnaParamCSReq_.meta_req_data[130]},
-{"MagnaParamCSReq_.meta_req_data[131](uint8_t)" , &MagnaParamCSReq_.meta_req_data[131]},
-{"MagnaParamCSReq_.meta_req_data[132](uint8_t)" , &MagnaParamCSReq_.meta_req_data[132]},
-{"MagnaParamCSReq_.meta_req_data[133](uint8_t)" , &MagnaParamCSReq_.meta_req_data[133]},
-{"MagnaParamCSReq_.meta_req_data[134](uint8_t)" , &MagnaParamCSReq_.meta_req_data[134]},
-{"MagnaParamCSReq_.meta_req_data[135](uint8_t)" , &MagnaParamCSReq_.meta_req_data[135]},
-{"MagnaParamCSReq_.meta_req_data[136](uint8_t)" , &MagnaParamCSReq_.meta_req_data[136]},
-{"MagnaParamCSReq_.meta_req_data[137](uint8_t)" , &MagnaParamCSReq_.meta_req_data[137]},
-{"MagnaParamCSReq_.meta_req_data[138](uint8_t)" , &MagnaParamCSReq_.meta_req_data[138]},
-{"MagnaParamCSReq_.meta_req_data[139](uint8_t)" , &MagnaParamCSReq_.meta_req_data[139]},
-{"MagnaParamCSReq_.meta_req_data[140](uint8_t)" , &MagnaParamCSReq_.meta_req_data[140]},
-{"MagnaParamCSReq_.meta_req_data[141](uint8_t)" , &MagnaParamCSReq_.meta_req_data[141]},
-{"MagnaParamCSReq_.meta_req_data[142](uint8_t)" , &MagnaParamCSReq_.meta_req_data[142]},
-{"MagnaParamCSReq_.meta_req_data[143](uint8_t)" , &MagnaParamCSReq_.meta_req_data[143]},
-{"MagnaParamCSReq_.meta_req_data[144](uint8_t)" , &MagnaParamCSReq_.meta_req_data[144]},
-{"MagnaParamCSReq_.meta_req_data[145](uint8_t)" , &MagnaParamCSReq_.meta_req_data[145]},
-{"MagnaParamCSReq_.meta_req_data[146](uint8_t)" , &MagnaParamCSReq_.meta_req_data[146]},
-{"MagnaParamCSReq_.meta_req_data[147](uint8_t)" , &MagnaParamCSReq_.meta_req_data[147]},
-{"MagnaParamCSReq_.meta_req_data[148](uint8_t)" , &MagnaParamCSReq_.meta_req_data[148]},
-{"MagnaParamCSReq_.meta_req_data[149](uint8_t)" , &MagnaParamCSReq_.meta_req_data[149]},
-{"MagnaParamCSReq_.meta_req_data[150](uint8_t)" , &MagnaParamCSReq_.meta_req_data[150]},
-{"MagnaParamCSReq_.meta_req_data[151](uint8_t)" , &MagnaParamCSReq_.meta_req_data[151]},
-{"MagnaParamCSReq_.meta_req_data[152](uint8_t)" , &MagnaParamCSReq_.meta_req_data[152]},
-{"MagnaParamCSReq_.meta_req_data[153](uint8_t)" , &MagnaParamCSReq_.meta_req_data[153]},
-{"MagnaParamCSReq_.meta_req_data[154](uint8_t)" , &MagnaParamCSReq_.meta_req_data[154]},
-{"MagnaParamCSReq_.meta_req_data[155](uint8_t)" , &MagnaParamCSReq_.meta_req_data[155]},
-{"MagnaParamCSReq_.meta_req_data[156](uint8_t)" , &MagnaParamCSReq_.meta_req_data[156]},
-{"MagnaParamCSReq_.meta_req_data[157](uint8_t)" , &MagnaParamCSReq_.meta_req_data[157]},
-{"MagnaParamCSReq_.meta_req_data[158](uint8_t)" , &MagnaParamCSReq_.meta_req_data[158]},
-{"MagnaParamCSReq_.meta_req_data[159](uint8_t)" , &MagnaParamCSReq_.meta_req_data[159]},
-{"MagnaParamCSReq_.meta_req_data[160](uint8_t)" , &MagnaParamCSReq_.meta_req_data[160]},
-{"MagnaParamCSReq_.meta_req_data[161](uint8_t)" , &MagnaParamCSReq_.meta_req_data[161]},
-{"MagnaParamCSReq_.meta_req_data[162](uint8_t)" , &MagnaParamCSReq_.meta_req_data[162]},
-{"MagnaParamCSReq_.meta_req_data[163](uint8_t)" , &MagnaParamCSReq_.meta_req_data[163]},
-{"MagnaParamCSReq_.meta_req_data[164](uint8_t)" , &MagnaParamCSReq_.meta_req_data[164]},
-{"MagnaParamCSReq_.meta_req_data[165](uint8_t)" , &MagnaParamCSReq_.meta_req_data[165]},
-{"MagnaParamCSReq_.meta_req_data[166](uint8_t)" , &MagnaParamCSReq_.meta_req_data[166]},
-{"MagnaParamCSReq_.meta_req_data[167](uint8_t)" , &MagnaParamCSReq_.meta_req_data[167]},
-{"MagnaParamCSReq_.meta_req_data[168](uint8_t)" , &MagnaParamCSReq_.meta_req_data[168]},
-{"MagnaParamCSReq_.meta_req_data[169](uint8_t)" , &MagnaParamCSReq_.meta_req_data[169]},
-{"MagnaParamCSReq_.meta_req_data[170](uint8_t)" , &MagnaParamCSReq_.meta_req_data[170]},
-{"MagnaParamCSReq_.meta_req_data[171](uint8_t)" , &MagnaParamCSReq_.meta_req_data[171]},
-{"MagnaParamCSReq_.meta_req_data[172](uint8_t)" , &MagnaParamCSReq_.meta_req_data[172]},
-{"MagnaParamCSReq_.meta_req_data[173](uint8_t)" , &MagnaParamCSReq_.meta_req_data[173]},
-{"MagnaParamCSReq_.meta_req_data[174](uint8_t)" , &MagnaParamCSReq_.meta_req_data[174]},
-{"MagnaParamCSReq_.meta_req_data[175](uint8_t)" , &MagnaParamCSReq_.meta_req_data[175]},
-{"MagnaParamCSReq_.meta_req_data[176](uint8_t)" , &MagnaParamCSReq_.meta_req_data[176]},
-{"MagnaParamCSReq_.meta_req_data[177](uint8_t)" , &MagnaParamCSReq_.meta_req_data[177]},
-{"MagnaParamCSReq_.meta_req_data[178](uint8_t)" , &MagnaParamCSReq_.meta_req_data[178]},
-{"MagnaParamCSReq_.meta_req_data[179](uint8_t)" , &MagnaParamCSReq_.meta_req_data[179]},
-{"MagnaParamCSReq_.meta_req_data[180](uint8_t)" , &MagnaParamCSReq_.meta_req_data[180]},
-{"MagnaParamCSReq_.meta_req_data[181](uint8_t)" , &MagnaParamCSReq_.meta_req_data[181]},
-{"MagnaParamCSReq_.meta_req_data[182](uint8_t)" , &MagnaParamCSReq_.meta_req_data[182]},
-{"MagnaParamCSReq_.meta_req_data[183](uint8_t)" , &MagnaParamCSReq_.meta_req_data[183]},
-{"MagnaParamCSReq_.meta_req_data[184](uint8_t)" , &MagnaParamCSReq_.meta_req_data[184]},
-{"MagnaParamCSReq_.meta_req_data[185](uint8_t)" , &MagnaParamCSReq_.meta_req_data[185]},
-{"MagnaParamCSReq_.meta_req_data[186](uint8_t)" , &MagnaParamCSReq_.meta_req_data[186]},
-{"MagnaParamCSReq_.meta_req_data[187](uint8_t)" , &MagnaParamCSReq_.meta_req_data[187]},
-{"MagnaParamCSReq_.meta_req_data[188](uint8_t)" , &MagnaParamCSReq_.meta_req_data[188]},
-{"MagnaParamCSReq_.meta_req_data[189](uint8_t)" , &MagnaParamCSReq_.meta_req_data[189]},
-{"MagnaParamCSReq_.meta_req_data[190](uint8_t)" , &MagnaParamCSReq_.meta_req_data[190]},
-{"MagnaParamCSReq_.meta_req_data[191](uint8_t)" , &MagnaParamCSReq_.meta_req_data[191]},
-{"MagnaParamCSReq_.meta_req_data[192](uint8_t)" , &MagnaParamCSReq_.meta_req_data[192]},
-{"MagnaParamCSReq_.meta_req_data[193](uint8_t)" , &MagnaParamCSReq_.meta_req_data[193]},
-{"MagnaParamCSReq_.meta_req_data[194](uint8_t)" , &MagnaParamCSReq_.meta_req_data[194]},
-{"MagnaParamCSReq_.meta_req_data[195](uint8_t)" , &MagnaParamCSReq_.meta_req_data[195]},
-{"MagnaParamCSReq_.meta_req_data[196](uint8_t)" , &MagnaParamCSReq_.meta_req_data[196]},
-{"MagnaParamCSReq_.meta_req_data[197](uint8_t)" , &MagnaParamCSReq_.meta_req_data[197]},
-{"MagnaParamCSReq_.meta_req_data[198](uint8_t)" , &MagnaParamCSReq_.meta_req_data[198]},
-{"MagnaParamCSReq_.meta_req_data[199](uint8_t)" , &MagnaParamCSReq_.meta_req_data[199]},
-{"MagnaParamCSReq_.meta_req_data[200](uint8_t)" , &MagnaParamCSReq_.meta_req_data[200]},
-{"MagnaParamCSReq_.meta_req_data[201](uint8_t)" , &MagnaParamCSReq_.meta_req_data[201]},
-{"MagnaParamCSReq_.meta_req_data[202](uint8_t)" , &MagnaParamCSReq_.meta_req_data[202]},
-{"MagnaParamCSReq_.meta_req_data[203](uint8_t)" , &MagnaParamCSReq_.meta_req_data[203]},
-{"MagnaParamCSReq_.meta_req_data[204](uint8_t)" , &MagnaParamCSReq_.meta_req_data[204]},
-{"MagnaParamCSReq_.meta_req_data[205](uint8_t)" , &MagnaParamCSReq_.meta_req_data[205]},
-{"MagnaParamCSReq_.meta_req_data[206](uint8_t)" , &MagnaParamCSReq_.meta_req_data[206]},
-{"MagnaParamCSReq_.meta_req_data[207](uint8_t)" , &MagnaParamCSReq_.meta_req_data[207]},
-{"MagnaParamCSReq_.meta_req_data[208](uint8_t)" , &MagnaParamCSReq_.meta_req_data[208]},
-{"MagnaParamCSReq_.meta_req_data[209](uint8_t)" , &MagnaParamCSReq_.meta_req_data[209]},
-{"MagnaParamCSReq_.meta_req_data[210](uint8_t)" , &MagnaParamCSReq_.meta_req_data[210]},
-{"MagnaParamCSReq_.meta_req_data[211](uint8_t)" , &MagnaParamCSReq_.meta_req_data[211]},
-{"MagnaParamCSReq_.meta_req_data[212](uint8_t)" , &MagnaParamCSReq_.meta_req_data[212]},
-{"MagnaParamCSReq_.meta_req_data[213](uint8_t)" , &MagnaParamCSReq_.meta_req_data[213]},
-{"MagnaParamCSReq_.meta_req_data[214](uint8_t)" , &MagnaParamCSReq_.meta_req_data[214]},
-{"MagnaParamCSReq_.meta_req_data[215](uint8_t)" , &MagnaParamCSReq_.meta_req_data[215]},
-{"MagnaParamCSReq_.meta_req_data[216](uint8_t)" , &MagnaParamCSReq_.meta_req_data[216]},
-{"MagnaParamCSReq_.meta_req_data[217](uint8_t)" , &MagnaParamCSReq_.meta_req_data[217]},
-{"MagnaParamCSReq_.meta_req_data[218](uint8_t)" , &MagnaParamCSReq_.meta_req_data[218]},
-{"MagnaParamCSReq_.meta_req_data[219](uint8_t)" , &MagnaParamCSReq_.meta_req_data[219]},
-{"MagnaParamCSReq_.meta_req_data[220](uint8_t)" , &MagnaParamCSReq_.meta_req_data[220]},
-{"MagnaParamCSReq_.meta_req_data[221](uint8_t)" , &MagnaParamCSReq_.meta_req_data[221]},
-{"MagnaParamCSReq_.meta_req_data[222](uint8_t)" , &MagnaParamCSReq_.meta_req_data[222]},
-{"MagnaParamCSReq_.meta_req_data[223](uint8_t)" , &MagnaParamCSReq_.meta_req_data[223]},
-{"MagnaParamCSReq_.meta_req_data[224](uint8_t)" , &MagnaParamCSReq_.meta_req_data[224]},
-{"MagnaParamCSReq_.meta_req_data[225](uint8_t)" , &MagnaParamCSReq_.meta_req_data[225]},
-{"MagnaParamCSReq_.meta_req_data[226](uint8_t)" , &MagnaParamCSReq_.meta_req_data[226]},
-{"MagnaParamCSReq_.meta_req_data[227](uint8_t)" , &MagnaParamCSReq_.meta_req_data[227]},
-{"MagnaParamCSReq_.meta_req_data[228](uint8_t)" , &MagnaParamCSReq_.meta_req_data[228]},
-{"MagnaParamCSReq_.meta_req_data[229](uint8_t)" , &MagnaParamCSReq_.meta_req_data[229]},
-{"MagnaParamCSReq_.meta_req_data[230](uint8_t)" , &MagnaParamCSReq_.meta_req_data[230]},
-{"MagnaParamCSReq_.meta_req_data[231](uint8_t)" , &MagnaParamCSReq_.meta_req_data[231]},
-{"MagnaParamCSReq_.meta_req_data[232](uint8_t)" , &MagnaParamCSReq_.meta_req_data[232]},
-{"MagnaParamCSReq_.meta_req_data[233](uint8_t)" , &MagnaParamCSReq_.meta_req_data[233]},
-{"MagnaParamCSReq_.meta_req_data[234](uint8_t)" , &MagnaParamCSReq_.meta_req_data[234]},
-{"MagnaParamCSReq_.meta_req_data[235](uint8_t)" , &MagnaParamCSReq_.meta_req_data[235]},
-{"MagnaParamCSReq_.meta_req_data[236](uint8_t)" , &MagnaParamCSReq_.meta_req_data[236]},
-{"MagnaParamCSReq_.meta_req_data[237](uint8_t)" , &MagnaParamCSReq_.meta_req_data[237]},
-{"MagnaParamCSReq_.meta_req_data[238](uint8_t)" , &MagnaParamCSReq_.meta_req_data[238]},
-{"MagnaParamCSReq_.meta_req_data[239](uint8_t)" , &MagnaParamCSReq_.meta_req_data[239]},
-{"MagnaParamCSReq_.meta_req_data[240](uint8_t)" , &MagnaParamCSReq_.meta_req_data[240]},
-{"MagnaParamCSReq_.meta_req_data[241](uint8_t)" , &MagnaParamCSReq_.meta_req_data[241]},
-{"MagnaParamCSReq_.meta_req_data[242](uint8_t)" , &MagnaParamCSReq_.meta_req_data[242]},
-{"MagnaParamCSReq_.meta_req_data[243](uint8_t)" , &MagnaParamCSReq_.meta_req_data[243]},
-{"MagnaParamCSReq_.meta_req_data[244](uint8_t)" , &MagnaParamCSReq_.meta_req_data[244]},
-{"MagnaParamCSReq_.meta_req_data[245](uint8_t)" , &MagnaParamCSReq_.meta_req_data[245]},
-{"MagnaParamCSReq_.meta_req_data[246](uint8_t)" , &MagnaParamCSReq_.meta_req_data[246]},
-{"MagnaParamCSReq_.meta_req_data[247](uint8_t)" , &MagnaParamCSReq_.meta_req_data[247]},
-{"MagnaParamCSReq_.meta_req_data[248](uint8_t)" , &MagnaParamCSReq_.meta_req_data[248]},
-{"MagnaParamCSReq_.meta_req_data[249](uint8_t)" , &MagnaParamCSReq_.meta_req_data[249]},
-{"MagnaParamCSReq_.meta_req_data[250](uint8_t)" , &MagnaParamCSReq_.meta_req_data[250]},
-{"MagnaParamCSReq_.meta_req_data[251](uint8_t)" , &MagnaParamCSReq_.meta_req_data[251]},
-{"MagnaParamCSReq_.meta_req_data[252](uint8_t)" , &MagnaParamCSReq_.meta_req_data[252]},
-{"MagnaParamCSReq_.meta_req_data[253](uint8_t)" , &MagnaParamCSReq_.meta_req_data[253]},
-{"MagnaParamCSReq_.meta_req_data[254](uint8_t)" , &MagnaParamCSReq_.meta_req_data[254]},
-{"MagnaParamCSReq_.meta_req_data[255](uint8_t)" , &MagnaParamCSReq_.meta_req_data[255]},
+    while (true) {
 
-
-
-{"MagnaParamCSRes_.is_success(uint8_t)" , &MagnaParamCSRes_.is_success},
-{"MagnaParamCSRes_.status_code(uint8_t)" , &MagnaParamCSRes_.status_code},
-{"MagnaParamCSRes_.meta_res_data[0](uint8_t)" , &MagnaParamCSRes_.meta_res_data[0]},
-{"MagnaParamCSRes_.meta_res_data[1](uint8_t)" , &MagnaParamCSRes_.meta_res_data[1]},
-{"MagnaParamCSRes_.meta_res_data[2](uint8_t)" , &MagnaParamCSRes_.meta_res_data[2]},
-{"MagnaParamCSRes_.meta_res_data[3](uint8_t)" , &MagnaParamCSRes_.meta_res_data[3]},
-{"MagnaParamCSRes_.meta_res_data[4](uint8_t)" , &MagnaParamCSRes_.meta_res_data[4]},
-{"MagnaParamCSRes_.meta_res_data[5](uint8_t)" , &MagnaParamCSRes_.meta_res_data[5]},
-{"MagnaParamCSRes_.meta_res_data[6](uint8_t)" , &MagnaParamCSRes_.meta_res_data[6]},
-{"MagnaParamCSRes_.meta_res_data[7](uint8_t)" , &MagnaParamCSRes_.meta_res_data[7]},
-{"MagnaParamCSRes_.meta_res_data[8](uint8_t)" , &MagnaParamCSRes_.meta_res_data[8]},
-{"MagnaParamCSRes_.meta_res_data[9](uint8_t)" , &MagnaParamCSRes_.meta_res_data[9]},
-{"MagnaParamCSRes_.meta_res_data[10](uint8_t)" , &MagnaParamCSRes_.meta_res_data[10]},
-{"MagnaParamCSRes_.meta_res_data[11](uint8_t)" , &MagnaParamCSRes_.meta_res_data[11]},
-{"MagnaParamCSRes_.meta_res_data[12](uint8_t)" , &MagnaParamCSRes_.meta_res_data[12]},
-{"MagnaParamCSRes_.meta_res_data[13](uint8_t)" , &MagnaParamCSRes_.meta_res_data[13]},
-{"MagnaParamCSRes_.meta_res_data[14](uint8_t)" , &MagnaParamCSRes_.meta_res_data[14]},
-{"MagnaParamCSRes_.meta_res_data[15](uint8_t)" , &MagnaParamCSRes_.meta_res_data[15]},
-{"MagnaParamCSRes_.meta_res_data[16](uint8_t)" , &MagnaParamCSRes_.meta_res_data[16]},
-{"MagnaParamCSRes_.meta_res_data[17](uint8_t)" , &MagnaParamCSRes_.meta_res_data[17]},
-{"MagnaParamCSRes_.meta_res_data[18](uint8_t)" , &MagnaParamCSRes_.meta_res_data[18]},
-{"MagnaParamCSRes_.meta_res_data[19](uint8_t)" , &MagnaParamCSRes_.meta_res_data[19]},
-{"MagnaParamCSRes_.meta_res_data[20](uint8_t)" , &MagnaParamCSRes_.meta_res_data[20]},
-{"MagnaParamCSRes_.meta_res_data[21](uint8_t)" , &MagnaParamCSRes_.meta_res_data[21]},
-{"MagnaParamCSRes_.meta_res_data[22](uint8_t)" , &MagnaParamCSRes_.meta_res_data[22]},
-{"MagnaParamCSRes_.meta_res_data[23](uint8_t)" , &MagnaParamCSRes_.meta_res_data[23]},
-{"MagnaParamCSRes_.meta_res_data[24](uint8_t)" , &MagnaParamCSRes_.meta_res_data[24]},
-{"MagnaParamCSRes_.meta_res_data[25](uint8_t)" , &MagnaParamCSRes_.meta_res_data[25]},
-{"MagnaParamCSRes_.meta_res_data[26](uint8_t)" , &MagnaParamCSRes_.meta_res_data[26]},
-{"MagnaParamCSRes_.meta_res_data[27](uint8_t)" , &MagnaParamCSRes_.meta_res_data[27]},
-{"MagnaParamCSRes_.meta_res_data[28](uint8_t)" , &MagnaParamCSRes_.meta_res_data[28]},
-{"MagnaParamCSRes_.meta_res_data[29](uint8_t)" , &MagnaParamCSRes_.meta_res_data[29]},
-{"MagnaParamCSRes_.meta_res_data[30](uint8_t)" , &MagnaParamCSRes_.meta_res_data[30]},
-{"MagnaParamCSRes_.meta_res_data[31](uint8_t)" , &MagnaParamCSRes_.meta_res_data[31]},
-{"MagnaParamCSRes_.meta_res_data[32](uint8_t)" , &MagnaParamCSRes_.meta_res_data[32]},
-{"MagnaParamCSRes_.meta_res_data[33](uint8_t)" , &MagnaParamCSRes_.meta_res_data[33]},
-{"MagnaParamCSRes_.meta_res_data[34](uint8_t)" , &MagnaParamCSRes_.meta_res_data[34]},
-{"MagnaParamCSRes_.meta_res_data[35](uint8_t)" , &MagnaParamCSRes_.meta_res_data[35]},
-{"MagnaParamCSRes_.meta_res_data[36](uint8_t)" , &MagnaParamCSRes_.meta_res_data[36]},
-{"MagnaParamCSRes_.meta_res_data[37](uint8_t)" , &MagnaParamCSRes_.meta_res_data[37]},
-{"MagnaParamCSRes_.meta_res_data[38](uint8_t)" , &MagnaParamCSRes_.meta_res_data[38]},
-{"MagnaParamCSRes_.meta_res_data[39](uint8_t)" , &MagnaParamCSRes_.meta_res_data[39]},
-{"MagnaParamCSRes_.meta_res_data[40](uint8_t)" , &MagnaParamCSRes_.meta_res_data[40]},
-{"MagnaParamCSRes_.meta_res_data[41](uint8_t)" , &MagnaParamCSRes_.meta_res_data[41]},
-{"MagnaParamCSRes_.meta_res_data[42](uint8_t)" , &MagnaParamCSRes_.meta_res_data[42]},
-{"MagnaParamCSRes_.meta_res_data[43](uint8_t)" , &MagnaParamCSRes_.meta_res_data[43]},
-{"MagnaParamCSRes_.meta_res_data[44](uint8_t)" , &MagnaParamCSRes_.meta_res_data[44]},
-{"MagnaParamCSRes_.meta_res_data[45](uint8_t)" , &MagnaParamCSRes_.meta_res_data[45]},
-{"MagnaParamCSRes_.meta_res_data[46](uint8_t)" , &MagnaParamCSRes_.meta_res_data[46]},
-{"MagnaParamCSRes_.meta_res_data[47](uint8_t)" , &MagnaParamCSRes_.meta_res_data[47]},
-{"MagnaParamCSRes_.meta_res_data[48](uint8_t)" , &MagnaParamCSRes_.meta_res_data[48]},
-{"MagnaParamCSRes_.meta_res_data[49](uint8_t)" , &MagnaParamCSRes_.meta_res_data[49]},
-{"MagnaParamCSRes_.meta_res_data[50](uint8_t)" , &MagnaParamCSRes_.meta_res_data[50]},
-{"MagnaParamCSRes_.meta_res_data[51](uint8_t)" , &MagnaParamCSRes_.meta_res_data[51]},
-{"MagnaParamCSRes_.meta_res_data[52](uint8_t)" , &MagnaParamCSRes_.meta_res_data[52]},
-{"MagnaParamCSRes_.meta_res_data[53](uint8_t)" , &MagnaParamCSRes_.meta_res_data[53]},
-{"MagnaParamCSRes_.meta_res_data[54](uint8_t)" , &MagnaParamCSRes_.meta_res_data[54]},
-{"MagnaParamCSRes_.meta_res_data[55](uint8_t)" , &MagnaParamCSRes_.meta_res_data[55]},
-{"MagnaParamCSRes_.meta_res_data[56](uint8_t)" , &MagnaParamCSRes_.meta_res_data[56]},
-{"MagnaParamCSRes_.meta_res_data[57](uint8_t)" , &MagnaParamCSRes_.meta_res_data[57]},
-{"MagnaParamCSRes_.meta_res_data[58](uint8_t)" , &MagnaParamCSRes_.meta_res_data[58]},
-{"MagnaParamCSRes_.meta_res_data[59](uint8_t)" , &MagnaParamCSRes_.meta_res_data[59]},
-{"MagnaParamCSRes_.meta_res_data[60](uint8_t)" , &MagnaParamCSRes_.meta_res_data[60]},
-{"MagnaParamCSRes_.meta_res_data[61](uint8_t)" , &MagnaParamCSRes_.meta_res_data[61]},
-{"MagnaParamCSRes_.meta_res_data[62](uint8_t)" , &MagnaParamCSRes_.meta_res_data[62]},
-{"MagnaParamCSRes_.meta_res_data[63](uint8_t)" , &MagnaParamCSRes_.meta_res_data[63]},
-{"MagnaParamCSRes_.meta_res_data[64](uint8_t)" , &MagnaParamCSRes_.meta_res_data[64]},
-{"MagnaParamCSRes_.meta_res_data[65](uint8_t)" , &MagnaParamCSRes_.meta_res_data[65]},
-{"MagnaParamCSRes_.meta_res_data[66](uint8_t)" , &MagnaParamCSRes_.meta_res_data[66]},
-{"MagnaParamCSRes_.meta_res_data[67](uint8_t)" , &MagnaParamCSRes_.meta_res_data[67]},
-{"MagnaParamCSRes_.meta_res_data[68](uint8_t)" , &MagnaParamCSRes_.meta_res_data[68]},
-{"MagnaParamCSRes_.meta_res_data[69](uint8_t)" , &MagnaParamCSRes_.meta_res_data[69]},
-{"MagnaParamCSRes_.meta_res_data[70](uint8_t)" , &MagnaParamCSRes_.meta_res_data[70]},
-{"MagnaParamCSRes_.meta_res_data[71](uint8_t)" , &MagnaParamCSRes_.meta_res_data[71]},
-{"MagnaParamCSRes_.meta_res_data[72](uint8_t)" , &MagnaParamCSRes_.meta_res_data[72]},
-{"MagnaParamCSRes_.meta_res_data[73](uint8_t)" , &MagnaParamCSRes_.meta_res_data[73]},
-{"MagnaParamCSRes_.meta_res_data[74](uint8_t)" , &MagnaParamCSRes_.meta_res_data[74]},
-{"MagnaParamCSRes_.meta_res_data[75](uint8_t)" , &MagnaParamCSRes_.meta_res_data[75]},
-{"MagnaParamCSRes_.meta_res_data[76](uint8_t)" , &MagnaParamCSRes_.meta_res_data[76]},
-{"MagnaParamCSRes_.meta_res_data[77](uint8_t)" , &MagnaParamCSRes_.meta_res_data[77]},
-{"MagnaParamCSRes_.meta_res_data[78](uint8_t)" , &MagnaParamCSRes_.meta_res_data[78]},
-{"MagnaParamCSRes_.meta_res_data[79](uint8_t)" , &MagnaParamCSRes_.meta_res_data[79]},
-{"MagnaParamCSRes_.meta_res_data[80](uint8_t)" , &MagnaParamCSRes_.meta_res_data[80]},
-{"MagnaParamCSRes_.meta_res_data[81](uint8_t)" , &MagnaParamCSRes_.meta_res_data[81]},
-{"MagnaParamCSRes_.meta_res_data[82](uint8_t)" , &MagnaParamCSRes_.meta_res_data[82]},
-{"MagnaParamCSRes_.meta_res_data[83](uint8_t)" , &MagnaParamCSRes_.meta_res_data[83]},
-{"MagnaParamCSRes_.meta_res_data[84](uint8_t)" , &MagnaParamCSRes_.meta_res_data[84]},
-{"MagnaParamCSRes_.meta_res_data[85](uint8_t)" , &MagnaParamCSRes_.meta_res_data[85]},
-{"MagnaParamCSRes_.meta_res_data[86](uint8_t)" , &MagnaParamCSRes_.meta_res_data[86]},
-{"MagnaParamCSRes_.meta_res_data[87](uint8_t)" , &MagnaParamCSRes_.meta_res_data[87]},
-{"MagnaParamCSRes_.meta_res_data[88](uint8_t)" , &MagnaParamCSRes_.meta_res_data[88]},
-{"MagnaParamCSRes_.meta_res_data[89](uint8_t)" , &MagnaParamCSRes_.meta_res_data[89]},
-{"MagnaParamCSRes_.meta_res_data[90](uint8_t)" , &MagnaParamCSRes_.meta_res_data[90]},
-{"MagnaParamCSRes_.meta_res_data[91](uint8_t)" , &MagnaParamCSRes_.meta_res_data[91]},
-{"MagnaParamCSRes_.meta_res_data[92](uint8_t)" , &MagnaParamCSRes_.meta_res_data[92]},
-{"MagnaParamCSRes_.meta_res_data[93](uint8_t)" , &MagnaParamCSRes_.meta_res_data[93]},
-{"MagnaParamCSRes_.meta_res_data[94](uint8_t)" , &MagnaParamCSRes_.meta_res_data[94]},
-{"MagnaParamCSRes_.meta_res_data[95](uint8_t)" , &MagnaParamCSRes_.meta_res_data[95]},
-{"MagnaParamCSRes_.meta_res_data[96](uint8_t)" , &MagnaParamCSRes_.meta_res_data[96]},
-{"MagnaParamCSRes_.meta_res_data[97](uint8_t)" , &MagnaParamCSRes_.meta_res_data[97]},
-{"MagnaParamCSRes_.meta_res_data[98](uint8_t)" , &MagnaParamCSRes_.meta_res_data[98]},
-{"MagnaParamCSRes_.meta_res_data[99](uint8_t)" , &MagnaParamCSRes_.meta_res_data[99]},
-{"MagnaParamCSRes_.meta_res_data[100](uint8_t)" , &MagnaParamCSRes_.meta_res_data[100]},
-{"MagnaParamCSRes_.meta_res_data[101](uint8_t)" , &MagnaParamCSRes_.meta_res_data[101]},
-{"MagnaParamCSRes_.meta_res_data[102](uint8_t)" , &MagnaParamCSRes_.meta_res_data[102]},
-{"MagnaParamCSRes_.meta_res_data[103](uint8_t)" , &MagnaParamCSRes_.meta_res_data[103]},
-{"MagnaParamCSRes_.meta_res_data[104](uint8_t)" , &MagnaParamCSRes_.meta_res_data[104]},
-{"MagnaParamCSRes_.meta_res_data[105](uint8_t)" , &MagnaParamCSRes_.meta_res_data[105]},
-{"MagnaParamCSRes_.meta_res_data[106](uint8_t)" , &MagnaParamCSRes_.meta_res_data[106]},
-{"MagnaParamCSRes_.meta_res_data[107](uint8_t)" , &MagnaParamCSRes_.meta_res_data[107]},
-{"MagnaParamCSRes_.meta_res_data[108](uint8_t)" , &MagnaParamCSRes_.meta_res_data[108]},
-{"MagnaParamCSRes_.meta_res_data[109](uint8_t)" , &MagnaParamCSRes_.meta_res_data[109]},
-{"MagnaParamCSRes_.meta_res_data[110](uint8_t)" , &MagnaParamCSRes_.meta_res_data[110]},
-{"MagnaParamCSRes_.meta_res_data[111](uint8_t)" , &MagnaParamCSRes_.meta_res_data[111]},
-{"MagnaParamCSRes_.meta_res_data[112](uint8_t)" , &MagnaParamCSRes_.meta_res_data[112]},
-{"MagnaParamCSRes_.meta_res_data[113](uint8_t)" , &MagnaParamCSRes_.meta_res_data[113]},
-{"MagnaParamCSRes_.meta_res_data[114](uint8_t)" , &MagnaParamCSRes_.meta_res_data[114]},
-{"MagnaParamCSRes_.meta_res_data[115](uint8_t)" , &MagnaParamCSRes_.meta_res_data[115]},
-{"MagnaParamCSRes_.meta_res_data[116](uint8_t)" , &MagnaParamCSRes_.meta_res_data[116]},
-{"MagnaParamCSRes_.meta_res_data[117](uint8_t)" , &MagnaParamCSRes_.meta_res_data[117]},
-{"MagnaParamCSRes_.meta_res_data[118](uint8_t)" , &MagnaParamCSRes_.meta_res_data[118]},
-{"MagnaParamCSRes_.meta_res_data[119](uint8_t)" , &MagnaParamCSRes_.meta_res_data[119]},
-{"MagnaParamCSRes_.meta_res_data[120](uint8_t)" , &MagnaParamCSRes_.meta_res_data[120]},
-{"MagnaParamCSRes_.meta_res_data[121](uint8_t)" , &MagnaParamCSRes_.meta_res_data[121]},
-{"MagnaParamCSRes_.meta_res_data[122](uint8_t)" , &MagnaParamCSRes_.meta_res_data[122]},
-{"MagnaParamCSRes_.meta_res_data[123](uint8_t)" , &MagnaParamCSRes_.meta_res_data[123]},
-{"MagnaParamCSRes_.meta_res_data[124](uint8_t)" , &MagnaParamCSRes_.meta_res_data[124]},
-{"MagnaParamCSRes_.meta_res_data[125](uint8_t)" , &MagnaParamCSRes_.meta_res_data[125]},
-{"MagnaParamCSRes_.meta_res_data[126](uint8_t)" , &MagnaParamCSRes_.meta_res_data[126]},
-{"MagnaParamCSRes_.meta_res_data[127](uint8_t)" , &MagnaParamCSRes_.meta_res_data[127]},
-{"MagnaParamCSRes_.meta_res_data[128](uint8_t)" , &MagnaParamCSRes_.meta_res_data[128]},
-{"MagnaParamCSRes_.meta_res_data[129](uint8_t)" , &MagnaParamCSRes_.meta_res_data[129]},
-{"MagnaParamCSRes_.meta_res_data[130](uint8_t)" , &MagnaParamCSRes_.meta_res_data[130]},
-{"MagnaParamCSRes_.meta_res_data[131](uint8_t)" , &MagnaParamCSRes_.meta_res_data[131]},
-{"MagnaParamCSRes_.meta_res_data[132](uint8_t)" , &MagnaParamCSRes_.meta_res_data[132]},
-{"MagnaParamCSRes_.meta_res_data[133](uint8_t)" , &MagnaParamCSRes_.meta_res_data[133]},
-{"MagnaParamCSRes_.meta_res_data[134](uint8_t)" , &MagnaParamCSRes_.meta_res_data[134]},
-{"MagnaParamCSRes_.meta_res_data[135](uint8_t)" , &MagnaParamCSRes_.meta_res_data[135]},
-{"MagnaParamCSRes_.meta_res_data[136](uint8_t)" , &MagnaParamCSRes_.meta_res_data[136]},
-{"MagnaParamCSRes_.meta_res_data[137](uint8_t)" , &MagnaParamCSRes_.meta_res_data[137]},
-{"MagnaParamCSRes_.meta_res_data[138](uint8_t)" , &MagnaParamCSRes_.meta_res_data[138]},
-{"MagnaParamCSRes_.meta_res_data[139](uint8_t)" , &MagnaParamCSRes_.meta_res_data[139]},
-{"MagnaParamCSRes_.meta_res_data[140](uint8_t)" , &MagnaParamCSRes_.meta_res_data[140]},
-{"MagnaParamCSRes_.meta_res_data[141](uint8_t)" , &MagnaParamCSRes_.meta_res_data[141]},
-{"MagnaParamCSRes_.meta_res_data[142](uint8_t)" , &MagnaParamCSRes_.meta_res_data[142]},
-{"MagnaParamCSRes_.meta_res_data[143](uint8_t)" , &MagnaParamCSRes_.meta_res_data[143]},
-{"MagnaParamCSRes_.meta_res_data[144](uint8_t)" , &MagnaParamCSRes_.meta_res_data[144]},
-{"MagnaParamCSRes_.meta_res_data[145](uint8_t)" , &MagnaParamCSRes_.meta_res_data[145]},
-{"MagnaParamCSRes_.meta_res_data[146](uint8_t)" , &MagnaParamCSRes_.meta_res_data[146]},
-{"MagnaParamCSRes_.meta_res_data[147](uint8_t)" , &MagnaParamCSRes_.meta_res_data[147]},
-{"MagnaParamCSRes_.meta_res_data[148](uint8_t)" , &MagnaParamCSRes_.meta_res_data[148]},
-{"MagnaParamCSRes_.meta_res_data[149](uint8_t)" , &MagnaParamCSRes_.meta_res_data[149]},
-{"MagnaParamCSRes_.meta_res_data[150](uint8_t)" , &MagnaParamCSRes_.meta_res_data[150]},
-{"MagnaParamCSRes_.meta_res_data[151](uint8_t)" , &MagnaParamCSRes_.meta_res_data[151]},
-{"MagnaParamCSRes_.meta_res_data[152](uint8_t)" , &MagnaParamCSRes_.meta_res_data[152]},
-{"MagnaParamCSRes_.meta_res_data[153](uint8_t)" , &MagnaParamCSRes_.meta_res_data[153]},
-{"MagnaParamCSRes_.meta_res_data[154](uint8_t)" , &MagnaParamCSRes_.meta_res_data[154]},
-{"MagnaParamCSRes_.meta_res_data[155](uint8_t)" , &MagnaParamCSRes_.meta_res_data[155]},
-{"MagnaParamCSRes_.meta_res_data[156](uint8_t)" , &MagnaParamCSRes_.meta_res_data[156]},
-{"MagnaParamCSRes_.meta_res_data[157](uint8_t)" , &MagnaParamCSRes_.meta_res_data[157]},
-{"MagnaParamCSRes_.meta_res_data[158](uint8_t)" , &MagnaParamCSRes_.meta_res_data[158]},
-{"MagnaParamCSRes_.meta_res_data[159](uint8_t)" , &MagnaParamCSRes_.meta_res_data[159]},
-{"MagnaParamCSRes_.meta_res_data[160](uint8_t)" , &MagnaParamCSRes_.meta_res_data[160]},
-{"MagnaParamCSRes_.meta_res_data[161](uint8_t)" , &MagnaParamCSRes_.meta_res_data[161]},
-{"MagnaParamCSRes_.meta_res_data[162](uint8_t)" , &MagnaParamCSRes_.meta_res_data[162]},
-{"MagnaParamCSRes_.meta_res_data[163](uint8_t)" , &MagnaParamCSRes_.meta_res_data[163]},
-{"MagnaParamCSRes_.meta_res_data[164](uint8_t)" , &MagnaParamCSRes_.meta_res_data[164]},
-{"MagnaParamCSRes_.meta_res_data[165](uint8_t)" , &MagnaParamCSRes_.meta_res_data[165]},
-{"MagnaParamCSRes_.meta_res_data[166](uint8_t)" , &MagnaParamCSRes_.meta_res_data[166]},
-{"MagnaParamCSRes_.meta_res_data[167](uint8_t)" , &MagnaParamCSRes_.meta_res_data[167]},
-{"MagnaParamCSRes_.meta_res_data[168](uint8_t)" , &MagnaParamCSRes_.meta_res_data[168]},
-{"MagnaParamCSRes_.meta_res_data[169](uint8_t)" , &MagnaParamCSRes_.meta_res_data[169]},
-{"MagnaParamCSRes_.meta_res_data[170](uint8_t)" , &MagnaParamCSRes_.meta_res_data[170]},
-{"MagnaParamCSRes_.meta_res_data[171](uint8_t)" , &MagnaParamCSRes_.meta_res_data[171]},
-{"MagnaParamCSRes_.meta_res_data[172](uint8_t)" , &MagnaParamCSRes_.meta_res_data[172]},
-{"MagnaParamCSRes_.meta_res_data[173](uint8_t)" , &MagnaParamCSRes_.meta_res_data[173]},
-{"MagnaParamCSRes_.meta_res_data[174](uint8_t)" , &MagnaParamCSRes_.meta_res_data[174]},
-{"MagnaParamCSRes_.meta_res_data[175](uint8_t)" , &MagnaParamCSRes_.meta_res_data[175]},
-{"MagnaParamCSRes_.meta_res_data[176](uint8_t)" , &MagnaParamCSRes_.meta_res_data[176]},
-{"MagnaParamCSRes_.meta_res_data[177](uint8_t)" , &MagnaParamCSRes_.meta_res_data[177]},
-{"MagnaParamCSRes_.meta_res_data[178](uint8_t)" , &MagnaParamCSRes_.meta_res_data[178]},
-{"MagnaParamCSRes_.meta_res_data[179](uint8_t)" , &MagnaParamCSRes_.meta_res_data[179]},
-{"MagnaParamCSRes_.meta_res_data[180](uint8_t)" , &MagnaParamCSRes_.meta_res_data[180]},
-{"MagnaParamCSRes_.meta_res_data[181](uint8_t)" , &MagnaParamCSRes_.meta_res_data[181]},
-{"MagnaParamCSRes_.meta_res_data[182](uint8_t)" , &MagnaParamCSRes_.meta_res_data[182]},
-{"MagnaParamCSRes_.meta_res_data[183](uint8_t)" , &MagnaParamCSRes_.meta_res_data[183]},
-{"MagnaParamCSRes_.meta_res_data[184](uint8_t)" , &MagnaParamCSRes_.meta_res_data[184]},
-{"MagnaParamCSRes_.meta_res_data[185](uint8_t)" , &MagnaParamCSRes_.meta_res_data[185]},
-{"MagnaParamCSRes_.meta_res_data[186](uint8_t)" , &MagnaParamCSRes_.meta_res_data[186]},
-{"MagnaParamCSRes_.meta_res_data[187](uint8_t)" , &MagnaParamCSRes_.meta_res_data[187]},
-{"MagnaParamCSRes_.meta_res_data[188](uint8_t)" , &MagnaParamCSRes_.meta_res_data[188]},
-{"MagnaParamCSRes_.meta_res_data[189](uint8_t)" , &MagnaParamCSRes_.meta_res_data[189]},
-{"MagnaParamCSRes_.meta_res_data[190](uint8_t)" , &MagnaParamCSRes_.meta_res_data[190]},
-{"MagnaParamCSRes_.meta_res_data[191](uint8_t)" , &MagnaParamCSRes_.meta_res_data[191]},
-{"MagnaParamCSRes_.meta_res_data[192](uint8_t)" , &MagnaParamCSRes_.meta_res_data[192]},
-{"MagnaParamCSRes_.meta_res_data[193](uint8_t)" , &MagnaParamCSRes_.meta_res_data[193]},
-{"MagnaParamCSRes_.meta_res_data[194](uint8_t)" , &MagnaParamCSRes_.meta_res_data[194]},
-{"MagnaParamCSRes_.meta_res_data[195](uint8_t)" , &MagnaParamCSRes_.meta_res_data[195]},
-{"MagnaParamCSRes_.meta_res_data[196](uint8_t)" , &MagnaParamCSRes_.meta_res_data[196]},
-{"MagnaParamCSRes_.meta_res_data[197](uint8_t)" , &MagnaParamCSRes_.meta_res_data[197]},
-{"MagnaParamCSRes_.meta_res_data[198](uint8_t)" , &MagnaParamCSRes_.meta_res_data[198]},
-{"MagnaParamCSRes_.meta_res_data[199](uint8_t)" , &MagnaParamCSRes_.meta_res_data[199]},
-{"MagnaParamCSRes_.meta_res_data[200](uint8_t)" , &MagnaParamCSRes_.meta_res_data[200]},
-{"MagnaParamCSRes_.meta_res_data[201](uint8_t)" , &MagnaParamCSRes_.meta_res_data[201]},
-{"MagnaParamCSRes_.meta_res_data[202](uint8_t)" , &MagnaParamCSRes_.meta_res_data[202]},
-{"MagnaParamCSRes_.meta_res_data[203](uint8_t)" , &MagnaParamCSRes_.meta_res_data[203]},
-{"MagnaParamCSRes_.meta_res_data[204](uint8_t)" , &MagnaParamCSRes_.meta_res_data[204]},
-{"MagnaParamCSRes_.meta_res_data[205](uint8_t)" , &MagnaParamCSRes_.meta_res_data[205]},
-{"MagnaParamCSRes_.meta_res_data[206](uint8_t)" , &MagnaParamCSRes_.meta_res_data[206]},
-{"MagnaParamCSRes_.meta_res_data[207](uint8_t)" , &MagnaParamCSRes_.meta_res_data[207]},
-{"MagnaParamCSRes_.meta_res_data[208](uint8_t)" , &MagnaParamCSRes_.meta_res_data[208]},
-{"MagnaParamCSRes_.meta_res_data[209](uint8_t)" , &MagnaParamCSRes_.meta_res_data[209]},
-{"MagnaParamCSRes_.meta_res_data[210](uint8_t)" , &MagnaParamCSRes_.meta_res_data[210]},
-{"MagnaParamCSRes_.meta_res_data[211](uint8_t)" , &MagnaParamCSRes_.meta_res_data[211]},
-{"MagnaParamCSRes_.meta_res_data[212](uint8_t)" , &MagnaParamCSRes_.meta_res_data[212]},
-{"MagnaParamCSRes_.meta_res_data[213](uint8_t)" , &MagnaParamCSRes_.meta_res_data[213]},
-{"MagnaParamCSRes_.meta_res_data[214](uint8_t)" , &MagnaParamCSRes_.meta_res_data[214]},
-{"MagnaParamCSRes_.meta_res_data[215](uint8_t)" , &MagnaParamCSRes_.meta_res_data[215]},
-{"MagnaParamCSRes_.meta_res_data[216](uint8_t)" , &MagnaParamCSRes_.meta_res_data[216]},
-{"MagnaParamCSRes_.meta_res_data[217](uint8_t)" , &MagnaParamCSRes_.meta_res_data[217]},
-{"MagnaParamCSRes_.meta_res_data[218](uint8_t)" , &MagnaParamCSRes_.meta_res_data[218]},
-{"MagnaParamCSRes_.meta_res_data[219](uint8_t)" , &MagnaParamCSRes_.meta_res_data[219]},
-{"MagnaParamCSRes_.meta_res_data[220](uint8_t)" , &MagnaParamCSRes_.meta_res_data[220]},
-{"MagnaParamCSRes_.meta_res_data[221](uint8_t)" , &MagnaParamCSRes_.meta_res_data[221]},
-{"MagnaParamCSRes_.meta_res_data[222](uint8_t)" , &MagnaParamCSRes_.meta_res_data[222]},
-{"MagnaParamCSRes_.meta_res_data[223](uint8_t)" , &MagnaParamCSRes_.meta_res_data[223]},
-{"MagnaParamCSRes_.meta_res_data[224](uint8_t)" , &MagnaParamCSRes_.meta_res_data[224]},
-{"MagnaParamCSRes_.meta_res_data[225](uint8_t)" , &MagnaParamCSRes_.meta_res_data[225]},
-{"MagnaParamCSRes_.meta_res_data[226](uint8_t)" , &MagnaParamCSRes_.meta_res_data[226]},
-{"MagnaParamCSRes_.meta_res_data[227](uint8_t)" , &MagnaParamCSRes_.meta_res_data[227]},
-{"MagnaParamCSRes_.meta_res_data[228](uint8_t)" , &MagnaParamCSRes_.meta_res_data[228]},
-{"MagnaParamCSRes_.meta_res_data[229](uint8_t)" , &MagnaParamCSRes_.meta_res_data[229]},
-{"MagnaParamCSRes_.meta_res_data[230](uint8_t)" , &MagnaParamCSRes_.meta_res_data[230]},
-{"MagnaParamCSRes_.meta_res_data[231](uint8_t)" , &MagnaParamCSRes_.meta_res_data[231]},
-{"MagnaParamCSRes_.meta_res_data[232](uint8_t)" , &MagnaParamCSRes_.meta_res_data[232]},
-{"MagnaParamCSRes_.meta_res_data[233](uint8_t)" , &MagnaParamCSRes_.meta_res_data[233]},
-{"MagnaParamCSRes_.meta_res_data[234](uint8_t)" , &MagnaParamCSRes_.meta_res_data[234]},
-{"MagnaParamCSRes_.meta_res_data[235](uint8_t)" , &MagnaParamCSRes_.meta_res_data[235]},
-{"MagnaParamCSRes_.meta_res_data[236](uint8_t)" , &MagnaParamCSRes_.meta_res_data[236]},
-{"MagnaParamCSRes_.meta_res_data[237](uint8_t)" , &MagnaParamCSRes_.meta_res_data[237]},
-{"MagnaParamCSRes_.meta_res_data[238](uint8_t)" , &MagnaParamCSRes_.meta_res_data[238]},
-{"MagnaParamCSRes_.meta_res_data[239](uint8_t)" , &MagnaParamCSRes_.meta_res_data[239]},
-{"MagnaParamCSRes_.meta_res_data[240](uint8_t)" , &MagnaParamCSRes_.meta_res_data[240]},
-{"MagnaParamCSRes_.meta_res_data[241](uint8_t)" , &MagnaParamCSRes_.meta_res_data[241]},
-{"MagnaParamCSRes_.meta_res_data[242](uint8_t)" , &MagnaParamCSRes_.meta_res_data[242]},
-{"MagnaParamCSRes_.meta_res_data[243](uint8_t)" , &MagnaParamCSRes_.meta_res_data[243]},
-{"MagnaParamCSRes_.meta_res_data[244](uint8_t)" , &MagnaParamCSRes_.meta_res_data[244]},
-{"MagnaParamCSRes_.meta_res_data[245](uint8_t)" , &MagnaParamCSRes_.meta_res_data[245]},
-{"MagnaParamCSRes_.meta_res_data[246](uint8_t)" , &MagnaParamCSRes_.meta_res_data[246]},
-{"MagnaParamCSRes_.meta_res_data[247](uint8_t)" , &MagnaParamCSRes_.meta_res_data[247]},
-{"MagnaParamCSRes_.meta_res_data[248](uint8_t)" , &MagnaParamCSRes_.meta_res_data[248]},
-{"MagnaParamCSRes_.meta_res_data[249](uint8_t)" , &MagnaParamCSRes_.meta_res_data[249]},
-{"MagnaParamCSRes_.meta_res_data[250](uint8_t)" , &MagnaParamCSRes_.meta_res_data[250]},
-{"MagnaParamCSRes_.meta_res_data[251](uint8_t)" , &MagnaParamCSRes_.meta_res_data[251]},
-{"MagnaParamCSRes_.meta_res_data[252](uint8_t)" , &MagnaParamCSRes_.meta_res_data[252]},
-{"MagnaParamCSRes_.meta_res_data[253](uint8_t)" , &MagnaParamCSRes_.meta_res_data[253]},
-{"MagnaParamCSRes_.meta_res_data[254](uint8_t)" , &MagnaParamCSRes_.meta_res_data[254]},
-{"MagnaParamCSRes_.meta_res_data[255](uint8_t)" , &MagnaParamCSRes_.meta_res_data[255]},
-
-
-
-
-{"MagnaCamExtParam_.yaw(float)" , &MagnaCamExtParam_.yaw},
-{"MagnaCamExtParam_.roll(float)" , &MagnaCamExtParam_.roll},
-{"MagnaCamExtParam_.pitch(float)" , &MagnaCamExtParam_.pitch},
-
-
-
-
-{"MagnaCalibResult_.result_code(uint8_t)" , &MagnaCalibResult_.result_code},
-{"MagnaCalibResult_.yaw(float)" , &MagnaCalibResult_.yaw},
-{"MagnaCalibResult_.roll(float)" , &MagnaCalibResult_.roll},
-{"MagnaCalibResult_.pitch(float)" , &MagnaCalibResult_.pitch},
-
-
-
-
-{"MagnaCamIntParam_.pixelPitch_X(float)" , &MagnaCamIntParam_.pixelPitch_X},
-{"MagnaCamIntParam_.pixelPitch_Y(float)" , &MagnaCamIntParam_.pixelPitch_Y},
-{"MagnaCamIntParam_.focalLength(float)" , &MagnaCamIntParam_.focalLength},
-{"MagnaCamIntParam_.focalLength_X(float)" , &MagnaCamIntParam_.focalLength_X},
-{"MagnaCamIntParam_.focalLength_Y(float)" , &MagnaCamIntParam_.focalLength_Y},
-{"MagnaCamIntParam_.undistort_focalLength(float)" , &MagnaCamIntParam_.undistort_focalLength},
-{"MagnaCamIntParam_.undistort_focalLength_X(float)" , &MagnaCamIntParam_.undistort_focalLength_X},
-{"MagnaCamIntParam_.undistort_focalLength_Y(float)" , &MagnaCamIntParam_.undistort_focalLength_Y},
-{"MagnaCamIntParam_.distort_imgWidth(int16_t)" , &MagnaCamIntParam_.distort_imgWidth},
-{"MagnaCamIntParam_.distort_imgHeight(int16_t)" , &MagnaCamIntParam_.distort_imgHeight},
-{"MagnaCamIntParam_.distort_principalPoint_X(float)" , &MagnaCamIntParam_.distort_principalPoint_X},
-{"MagnaCamIntParam_.distort_principalPoint_Y(float)" , &MagnaCamIntParam_.distort_principalPoint_Y},
-{"MagnaCamIntParam_.undistort_imgWidth(int16_t)" , &MagnaCamIntParam_.undistort_imgWidth},
-{"MagnaCamIntParam_.undistort_imgHeight(int16_t)" , &MagnaCamIntParam_.undistort_imgHeight},
-{"MagnaCamIntParam_.undistort_principalPoint_X(float)" , &MagnaCamIntParam_.undistort_principalPoint_X},
-{"MagnaCamIntParam_.undistort_principalPoint_Y(float)" , &MagnaCamIntParam_.undistort_principalPoint_Y},
-{"MagnaCamIntParam_.k1(float)" , &MagnaCamIntParam_.k1},
-{"MagnaCamIntParam_.k2(float)" , &MagnaCamIntParam_.k2},
-{"MagnaCamIntParam_.k3(float)" , &MagnaCamIntParam_.k3},
-{"MagnaCamIntParam_.k4(float)" , &MagnaCamIntParam_.k4},
-{"MagnaCamIntParam_.k5(float)" , &MagnaCamIntParam_.k5},
-{"MagnaCamIntParam_.k6(float)" , &MagnaCamIntParam_.k6},
-{"MagnaCamIntParam_.p1(float)" , &MagnaCamIntParam_.p1},
-{"MagnaCamIntParam_.p2(float)" , &MagnaCamIntParam_.p2},
-
-
-
-
-{"MagnaTACCalibInput_.cam_pos_x(float)" , &MagnaTACCalibInput_.cam_pos_x},
-{"MagnaTACCalibInput_.cam_pos_y(float)" , &MagnaTACCalibInput_.cam_pos_y},
-{"MagnaTACCalibInput_.cam_pos_z(float)" , &MagnaTACCalibInput_.cam_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[0].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[0].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[0].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[0].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[0].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[0].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[0].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[0].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[0].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[0].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[1].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[1].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[1].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[1].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[1].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[1].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[1].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[1].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[1].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[1].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[2].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[2].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[2].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[2].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[2].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[2].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[2].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[2].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[2].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[2].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[3].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[3].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[3].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[3].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[3].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[3].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[3].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[3].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[3].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[3].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[4].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[4].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[4].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[4].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[4].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[4].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[4].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[4].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[4].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[4].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[5].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[5].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[5].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[5].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[5].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[5].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[5].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[5].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[5].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[5].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[6].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[6].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[6].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[6].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[6].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[6].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[6].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[6].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[6].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[6].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[7].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[7].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[7].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[7].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[7].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[7].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[7].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[7].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[7].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[7].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[8].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[8].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[8].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[8].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[8].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[8].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[8].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[8].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[8].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[8].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_info[9].plate_pos_x(float)" , &MagnaTACCalibInput_.april_tag_info[9].plate_pos_x},
-{"MagnaTACCalibInput_.april_tag_info[9].plate_pos_y(float)" , &MagnaTACCalibInput_.april_tag_info[9].plate_pos_y},
-{"MagnaTACCalibInput_.april_tag_info[9].plate_pos_z(float)" , &MagnaTACCalibInput_.april_tag_info[9].plate_pos_z},
-{"MagnaTACCalibInput_.april_tag_info[9].plate_width(float)" , &MagnaTACCalibInput_.april_tag_info[9].plate_width},
-{"MagnaTACCalibInput_.april_tag_info[9].april_tag_id(int16_t)" , &MagnaTACCalibInput_.april_tag_info[9].april_tag_id},
-{"MagnaTACCalibInput_.april_tag_num(int16_t)" , &MagnaTACCalibInput_.april_tag_num},
-
-
-        };
-
-
-    auto sub = MOS::communication::Subscriber::New(
-        Adapter_PARAM_CS_.domain_id,
-        Adapter_PARAM_CS_.topic, 
-        proto_info, 
-        [&data_in](MOS::message::spMsg tmp) {
-
-        auto data_vec = tmp->GetDataRef()->GetDataVec();
-        auto data_size_vec = tmp->GetDataRef()->GetDataSizeVec();
-        auto size = data_size_vec.size();
-
-        for (int i = 0; i < size; i++) {
-        auto vec_size = data_size_vec[i];
-        uint8_t* vec_data = static_cast<uint8_t*>(data_vec[i]);
-        data_in = std::string(reinterpret_cast<const char*>(vec_data), vec_size);
-
-        }
-    }
-);
-
-
-    // std::thread inputThread(asyncInputThread);
-    std::thread inputThread2(asyncInputThreadTTY);
-
-    while (true) {//while (!stop.load()) {
-        //std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        if(data_in.length()>0)
-        {
-            switch (data_in.length())
-            {
-                case sizeof(MagnaParamCSReq):
-                {
-                    std::memcpy(&MagnaParamCSReq_, data_in.data(), sizeof(MagnaParamCSReq));
-                    print_MagnaParamCSReq(MagnaParamCSReq_,MagnaParamCSReq_old);
-                    MagnaParamCSReq_old = MagnaParamCSReq_;                
-                    break;
-                }
-                case sizeof(MagnaParamCSRes):
-                {
-                    std::memcpy(&MagnaParamCSRes_, data_in.data(), sizeof(MagnaParamCSRes));
-                    print_MagnaParamCSRes(MagnaParamCSRes_,MagnaParamCSRes_old);
-                    MagnaParamCSRes_old = MagnaParamCSRes_;                
-                    break;
-                }
-                case sizeof(MagnaCamExtParam):
-                {
-                    std::memcpy(&MagnaCamExtParam_, data_in.data(), sizeof(MagnaCamExtParam));
-                    print_MagnaCamExtParam(MagnaCamExtParam_,MagnaCamExtParam_old);
-                    MagnaCamExtParam_old = MagnaCamExtParam_;                
-                    break;
-                }
-                case sizeof(MagnaCalibResult):
-                {
-                    std::memcpy(&MagnaCalibResult_, data_in.data(), sizeof(MagnaCalibResult));
-                    print_MagnaCalibResult(MagnaCalibResult_,MagnaCalibResult_old);
-                    MagnaCalibResult_old = MagnaCalibResult_;                
-                    break;
-                }
-                case sizeof(MagnaCamIntParam):
-                {
-                    std::memcpy(&MagnaCamIntParam_, data_in.data(), sizeof(MagnaCamIntParam));
-                    print_MagnaCamIntParam(MagnaCamIntParam_,MagnaCamIntParam_old);
-                    MagnaCamIntParam_old = MagnaCamIntParam_;                
-                    break;
-                }
-                case sizeof(MagnaTACCalibInput):
-                {
-                    std::memcpy(&MagnaTACCalibInput_, data_in.data(), sizeof(MagnaTACCalibInput));
-                    print_MagnaTACCalibInput(MagnaTACCalibInput_,MagnaTACCalibInput_old);
-                    MagnaTACCalibInput_old = MagnaTACCalibInput_;                
-                    break;
-                }
-            }
-        }
+        print_MagnaParamCSReq(MagnaParamCSReq_, MagnaParamCSReq_old);
+        MagnaParamCSReq_old = MagnaParamCSReq_;
 
         if (!inputQueue.empty())
         {
@@ -946,14 +343,13 @@ int config_async_sub(std::string json_file) {
             inputQueue.pop();
         }
 
-        data_in.clear();
     }
     return 0;
 }
 
 void Adapter_PARAM_CS::run()
 {
-    config_async_sub(json_file);
+    config_async_service(json_file);
 }
 Adapter_PARAM_CS::Adapter_PARAM_CS()
 {
@@ -2542,293 +1938,6 @@ void print_MagnaParamCSRes(MagnaParamCSRes& MagnaParamCSRes_,MagnaParamCSRes& Ma
         std::cout << "MagnaParamCSRes_.meta_res_data[255](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(MagnaParamCSRes_.meta_res_data[255]) << std::dec  << std::endl;
         }
 }
-
-
-
-/* Print struct MagnaCamExtParam changed value */
-void print_MagnaCamExtParam(MagnaCamExtParam& MagnaCamExtParam_,MagnaCamExtParam& MagnaCamExtParam_old){
-// std::cout << "MagnaCamExtParam all variable:" << std::endl;
-    if(MagnaCamExtParam_.yaw != MagnaCamExtParam_old.yaw){
-        std::cout << "MagnaCamExtParam_.yaw(float): " << std::fixed << std::setprecision(2) << MagnaCamExtParam_.yaw << std::endl;
-        }
-    if(MagnaCamExtParam_.roll != MagnaCamExtParam_old.roll){
-        std::cout << "MagnaCamExtParam_.roll(float): " << std::fixed << std::setprecision(2) << MagnaCamExtParam_.roll << std::endl;
-        }
-    if(MagnaCamExtParam_.pitch != MagnaCamExtParam_old.pitch){
-        std::cout << "MagnaCamExtParam_.pitch(float): " << std::fixed << std::setprecision(2) << MagnaCamExtParam_.pitch << std::endl;
-        }
-}
-
-
-
-/* Print struct MagnaCalibResult changed value */
-void print_MagnaCalibResult(MagnaCalibResult& MagnaCalibResult_,MagnaCalibResult& MagnaCalibResult_old){
-// std::cout << "MagnaCalibResult all variable:" << std::endl;
-    if(MagnaCalibResult_.result_code != MagnaCalibResult_old.result_code){
-        std::cout << "MagnaCalibResult_.result_code(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(MagnaCalibResult_.result_code) << std::dec  << std::endl;
-        }
-    if(MagnaCalibResult_.yaw != MagnaCalibResult_old.yaw){
-        std::cout << "MagnaCalibResult_.yaw(float): " << std::fixed << std::setprecision(2) << MagnaCalibResult_.yaw << std::endl;
-        }
-    if(MagnaCalibResult_.roll != MagnaCalibResult_old.roll){
-        std::cout << "MagnaCalibResult_.roll(float): " << std::fixed << std::setprecision(2) << MagnaCalibResult_.roll << std::endl;
-        }
-    if(MagnaCalibResult_.pitch != MagnaCalibResult_old.pitch){
-        std::cout << "MagnaCalibResult_.pitch(float): " << std::fixed << std::setprecision(2) << MagnaCalibResult_.pitch << std::endl;
-        }
-}
-
-
-
-/* Print struct MagnaCamIntParam changed value */
-void print_MagnaCamIntParam(MagnaCamIntParam& MagnaCamIntParam_,MagnaCamIntParam& MagnaCamIntParam_old){
-// std::cout << "MagnaCamIntParam all variable:" << std::endl;
-    if(MagnaCamIntParam_.pixelPitch_X != MagnaCamIntParam_old.pixelPitch_X){
-        std::cout << "MagnaCamIntParam_.pixelPitch_X(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.pixelPitch_X << std::endl;
-        }
-    if(MagnaCamIntParam_.pixelPitch_Y != MagnaCamIntParam_old.pixelPitch_Y){
-        std::cout << "MagnaCamIntParam_.pixelPitch_Y(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.pixelPitch_Y << std::endl;
-        }
-    if(MagnaCamIntParam_.focalLength != MagnaCamIntParam_old.focalLength){
-        std::cout << "MagnaCamIntParam_.focalLength(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.focalLength << std::endl;
-        }
-    if(MagnaCamIntParam_.focalLength_X != MagnaCamIntParam_old.focalLength_X){
-        std::cout << "MagnaCamIntParam_.focalLength_X(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.focalLength_X << std::endl;
-        }
-    if(MagnaCamIntParam_.focalLength_Y != MagnaCamIntParam_old.focalLength_Y){
-        std::cout << "MagnaCamIntParam_.focalLength_Y(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.focalLength_Y << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_focalLength != MagnaCamIntParam_old.undistort_focalLength){
-        std::cout << "MagnaCamIntParam_.undistort_focalLength(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.undistort_focalLength << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_focalLength_X != MagnaCamIntParam_old.undistort_focalLength_X){
-        std::cout << "MagnaCamIntParam_.undistort_focalLength_X(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.undistort_focalLength_X << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_focalLength_Y != MagnaCamIntParam_old.undistort_focalLength_Y){
-        std::cout << "MagnaCamIntParam_.undistort_focalLength_Y(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.undistort_focalLength_Y << std::endl;
-        }
-    if(MagnaCamIntParam_.distort_imgWidth != MagnaCamIntParam_old.distort_imgWidth){
-        std::cout << "MagnaCamIntParam_.distort_imgWidth(int16_t): " << static_cast<int>(MagnaCamIntParam_.distort_imgWidth) << std::dec  << std::endl;
-        }
-    if(MagnaCamIntParam_.distort_imgHeight != MagnaCamIntParam_old.distort_imgHeight){
-        std::cout << "MagnaCamIntParam_.distort_imgHeight(int16_t): " << static_cast<int>(MagnaCamIntParam_.distort_imgHeight) << std::dec  << std::endl;
-        }
-    if(MagnaCamIntParam_.distort_principalPoint_X != MagnaCamIntParam_old.distort_principalPoint_X){
-        std::cout << "MagnaCamIntParam_.distort_principalPoint_X(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.distort_principalPoint_X << std::endl;
-        }
-    if(MagnaCamIntParam_.distort_principalPoint_Y != MagnaCamIntParam_old.distort_principalPoint_Y){
-        std::cout << "MagnaCamIntParam_.distort_principalPoint_Y(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.distort_principalPoint_Y << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_imgWidth != MagnaCamIntParam_old.undistort_imgWidth){
-        std::cout << "MagnaCamIntParam_.undistort_imgWidth(int16_t): " << static_cast<int>(MagnaCamIntParam_.undistort_imgWidth) << std::dec  << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_imgHeight != MagnaCamIntParam_old.undistort_imgHeight){
-        std::cout << "MagnaCamIntParam_.undistort_imgHeight(int16_t): " << static_cast<int>(MagnaCamIntParam_.undistort_imgHeight) << std::dec  << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_principalPoint_X != MagnaCamIntParam_old.undistort_principalPoint_X){
-        std::cout << "MagnaCamIntParam_.undistort_principalPoint_X(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.undistort_principalPoint_X << std::endl;
-        }
-    if(MagnaCamIntParam_.undistort_principalPoint_Y != MagnaCamIntParam_old.undistort_principalPoint_Y){
-        std::cout << "MagnaCamIntParam_.undistort_principalPoint_Y(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.undistort_principalPoint_Y << std::endl;
-        }
-    if(MagnaCamIntParam_.k1 != MagnaCamIntParam_old.k1){
-        std::cout << "MagnaCamIntParam_.k1(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k1 << std::endl;
-        }
-    if(MagnaCamIntParam_.k2 != MagnaCamIntParam_old.k2){
-        std::cout << "MagnaCamIntParam_.k2(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k2 << std::endl;
-        }
-    if(MagnaCamIntParam_.k3 != MagnaCamIntParam_old.k3){
-        std::cout << "MagnaCamIntParam_.k3(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k3 << std::endl;
-        }
-    if(MagnaCamIntParam_.k4 != MagnaCamIntParam_old.k4){
-        std::cout << "MagnaCamIntParam_.k4(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k4 << std::endl;
-        }
-    if(MagnaCamIntParam_.k5 != MagnaCamIntParam_old.k5){
-        std::cout << "MagnaCamIntParam_.k5(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k5 << std::endl;
-        }
-    if(MagnaCamIntParam_.k6 != MagnaCamIntParam_old.k6){
-        std::cout << "MagnaCamIntParam_.k6(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.k6 << std::endl;
-        }
-    if(MagnaCamIntParam_.p1 != MagnaCamIntParam_old.p1){
-        std::cout << "MagnaCamIntParam_.p1(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.p1 << std::endl;
-        }
-    if(MagnaCamIntParam_.p2 != MagnaCamIntParam_old.p2){
-        std::cout << "MagnaCamIntParam_.p2(float): " << std::fixed << std::setprecision(2) << MagnaCamIntParam_.p2 << std::endl;
-        }
-}
-
-
-
-/* Print struct MagnaTACCalibInput changed value */
-void print_MagnaTACCalibInput(MagnaTACCalibInput& MagnaTACCalibInput_,MagnaTACCalibInput& MagnaTACCalibInput_old){
-// std::cout << "MagnaTACCalibInput all variable:" << std::endl;
-    if(MagnaTACCalibInput_.cam_pos_x != MagnaTACCalibInput_old.cam_pos_x){
-        std::cout << "MagnaTACCalibInput_.cam_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.cam_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.cam_pos_y != MagnaTACCalibInput_old.cam_pos_y){
-        std::cout << "MagnaTACCalibInput_.cam_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.cam_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.cam_pos_z != MagnaTACCalibInput_old.cam_pos_z){
-        std::cout << "MagnaTACCalibInput_.cam_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.cam_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[0].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[0].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[0].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[0].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[0].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[0].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[0].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[0].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[0].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[0].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[0].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[0].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[0].plate_width != MagnaTACCalibInput_old.april_tag_info[0].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[0].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[0].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[0].april_tag_id != MagnaTACCalibInput_old.april_tag_info[0].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[0].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[0].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[1].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[1].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[1].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[1].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[1].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[1].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[1].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[1].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[1].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[1].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[1].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[1].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[1].plate_width != MagnaTACCalibInput_old.april_tag_info[1].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[1].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[1].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[1].april_tag_id != MagnaTACCalibInput_old.april_tag_info[1].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[1].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[1].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[2].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[2].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[2].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[2].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[2].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[2].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[2].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[2].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[2].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[2].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[2].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[2].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[2].plate_width != MagnaTACCalibInput_old.april_tag_info[2].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[2].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[2].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[2].april_tag_id != MagnaTACCalibInput_old.april_tag_info[2].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[2].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[2].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[3].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[3].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[3].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[3].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[3].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[3].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[3].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[3].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[3].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[3].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[3].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[3].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[3].plate_width != MagnaTACCalibInput_old.april_tag_info[3].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[3].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[3].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[3].april_tag_id != MagnaTACCalibInput_old.april_tag_info[3].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[3].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[3].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[4].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[4].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[4].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[4].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[4].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[4].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[4].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[4].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[4].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[4].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[4].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[4].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[4].plate_width != MagnaTACCalibInput_old.april_tag_info[4].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[4].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[4].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[4].april_tag_id != MagnaTACCalibInput_old.april_tag_info[4].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[4].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[4].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[5].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[5].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[5].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[5].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[5].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[5].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[5].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[5].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[5].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[5].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[5].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[5].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[5].plate_width != MagnaTACCalibInput_old.april_tag_info[5].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[5].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[5].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[5].april_tag_id != MagnaTACCalibInput_old.april_tag_info[5].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[5].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[5].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[6].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[6].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[6].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[6].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[6].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[6].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[6].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[6].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[6].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[6].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[6].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[6].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[6].plate_width != MagnaTACCalibInput_old.april_tag_info[6].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[6].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[6].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[6].april_tag_id != MagnaTACCalibInput_old.april_tag_info[6].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[6].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[6].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[7].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[7].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[7].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[7].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[7].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[7].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[7].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[7].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[7].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[7].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[7].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[7].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[7].plate_width != MagnaTACCalibInput_old.april_tag_info[7].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[7].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[7].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[7].april_tag_id != MagnaTACCalibInput_old.april_tag_info[7].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[7].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[7].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[8].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[8].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[8].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[8].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[8].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[8].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[8].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[8].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[8].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[8].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[8].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[8].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[8].plate_width != MagnaTACCalibInput_old.april_tag_info[8].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[8].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[8].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[8].april_tag_id != MagnaTACCalibInput_old.april_tag_info[8].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[8].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[8].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[9].plate_pos_x != MagnaTACCalibInput_old.april_tag_info[9].plate_pos_x){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[9].plate_pos_x(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[9].plate_pos_x << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[9].plate_pos_y != MagnaTACCalibInput_old.april_tag_info[9].plate_pos_y){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[9].plate_pos_y(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[9].plate_pos_y << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[9].plate_pos_z != MagnaTACCalibInput_old.april_tag_info[9].plate_pos_z){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[9].plate_pos_z(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[9].plate_pos_z << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[9].plate_width != MagnaTACCalibInput_old.april_tag_info[9].plate_width){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[9].plate_width(float): " << std::fixed << std::setprecision(2) << MagnaTACCalibInput_.april_tag_info[9].plate_width << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_info[9].april_tag_id != MagnaTACCalibInput_old.april_tag_info[9].april_tag_id){
-        std::cout << "MagnaTACCalibInput_.april_tag_info[9].april_tag_id(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_info[9].april_tag_id) << std::dec  << std::endl;
-        }
-    if(MagnaTACCalibInput_.april_tag_num != MagnaTACCalibInput_old.april_tag_num){
-        std::cout << "MagnaTACCalibInput_.april_tag_num(int16_t): " << static_cast<int>(MagnaTACCalibInput_.april_tag_num) << std::dec  << std::endl;
-        }
-}
-
-
-
-
 
 
 

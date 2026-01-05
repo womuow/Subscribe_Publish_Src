@@ -75,7 +75,7 @@ public:
 	
 	int domain_id = 0;
 	bool type = false;
-	std::string topic = "Veh/PARAM_CS";
+	std::string topic = "CS/Calib";
 	
 	std::string data_in = "";
 	uint32_t cycle_ms = 100;
@@ -92,7 +92,10 @@ public:
 // 全局变量
 std::queue<std::string> inputQueue;
 int flag=true;
-
+// MOS::message::TestResponse res;
+MagnaParamCSReq MagnaParamCSReq_;
+MagnaParamCSReq MagnaParamCSReq_old;
+MagnaParamCSRes MagnaParamCSRes_;
 
 /* Print struct MagnaParamCSReq changed value */
 void print_MagnaParamCSReq(MagnaParamCSReq& MagnaParamCSReq_,MagnaParamCSReq& MagnaParamCSReq_old);

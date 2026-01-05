@@ -20,6 +20,22 @@ enum class CameraDistortType {
     FISHEYE
 };
 
+typedef enum {
+  kMetCamFront = 0,
+  kMetCamFront30,
+  kMetCamRear,
+  kMetCamAvmFront,
+  kMetCamAvmRear,
+  kMetCamAvmLeft,
+  kMetCamAvmRight,
+  kMetCamLeftFront,
+  kMetCamRightFront,
+  kMetCamLeftRear,
+  kMetCamRightRear,
+  kMetCamNum
+} MetCamIdx;
+
+
 enum class  CamParamUpdateType {
     TAC,
     SPC,
@@ -36,7 +52,7 @@ typedef struct MET_SOC_CamParam
 {
     uint8_t support_update;
     CameraDistortType distort_type;
-    uint8_t cam_idx;
+    uint8_t cam_idx;//    MetCamIdx cam_idx;
 
     MET_SOC_PinholeCamParam data;
 
@@ -50,7 +66,7 @@ typedef struct MET_SOC_CamsParam
 
     uint16_t cams_num;                              ///< Number of cams
 
-    MET_SOC_CamParam cams[1];//[MetCamIdx::kMetCamNum];
+    MET_SOC_CamParam cams[MetCamIdx::kMetCamNum];
 
 } MET_SOC_CamsParam;
 

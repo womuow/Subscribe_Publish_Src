@@ -81,7 +81,7 @@ void asyncInputThreadTTY() {
     // if (flag)
     {
         std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
-        print_memory(data_in.data(),data_in.size());  
+        //print_memory(data_in.data(),data_in.size());  
         // flag=false;
     }
 
@@ -503,7 +503,7 @@ int config_async_sub(std::string json_file) {
     while (true) {//while (!stop.load()) {
         //std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-        std::memcpy(&MET_SOC_CamsParam_, data_in.data(), sizeof(MET_SOC_CamsParam));
+        std::memcpy(&MET_SOC_CamsParam_, data_in.data(), data_in.length());
 
 
         print_MET_SOC_CamsParam(MET_SOC_CamsParam_,MET_SOC_CamsParam_old);
