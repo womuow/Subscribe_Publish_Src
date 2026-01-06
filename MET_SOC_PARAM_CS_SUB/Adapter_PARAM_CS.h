@@ -96,6 +96,10 @@ int flag=true;
 MagnaParamCSReq MagnaParamCSReq_;
 MagnaParamCSReq MagnaParamCSReq_old;
 MagnaParamCSRes MagnaParamCSRes_;
+std::string data_in;
+
+
+
 
 /* Print struct MagnaParamCSReq changed value */
 void print_MagnaParamCSReq(MagnaParamCSReq& MagnaParamCSReq_,MagnaParamCSReq& MagnaParamCSReq_old);

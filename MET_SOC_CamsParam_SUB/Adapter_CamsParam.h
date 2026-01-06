@@ -93,6 +93,6 @@ public:
 std::queue<std::string> inputQueue;
 int flag=true;
 std::string data_in;
-
+// std::map<std::string, VariableVariant > variableMap;
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_CamsParam(MET_SOC_CamsParam& MET_SOC_CamsParam_,MET_SOC_CamsParam& MET_SOC_CamsParam_old);

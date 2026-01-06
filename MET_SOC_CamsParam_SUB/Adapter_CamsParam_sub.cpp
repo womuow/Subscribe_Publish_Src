@@ -242,7 +242,7 @@ int config_async_sub(std::string json_file) {
     MET_SOC_CamsParam MET_SOC_CamsParam_;
     MET_SOC_CamsParam MET_SOC_CamsParam_old;
 
-        std::map<std::string, VariableVariant > variableMap = {
+std::map<std::string, VariableVariant > variableMap = {
             
             
 {"MET_SOC_CamsParam_.update_count(uint32_t)" , &MET_SOC_CamsParam_.update_count},
