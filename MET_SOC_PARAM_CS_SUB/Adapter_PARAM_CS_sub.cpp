@@ -132,8 +132,9 @@ void asyncInputThreadTTY() {
             {
                 if ( line.compare("quit\n")==0 || line.compare("Quit\n")==0||line.compare("QUIT\n")==0)
                 {
-                    if(tcsetattr(serial_fd,TCSANOW,&options_old)==0)
-                             std::cout << "串口设置已恢复" << std::endl;
+                    if(tcsetattr(serial_fd,TCSANOW,&options_old)==0){
+                            stop.store(true);
+                             std::cout << "串口设置已恢复" << std::endl;}
                     else
                         std::cerr << "恢复串口设置失败: " << strerror(errno) << std::endl;
                     close(serial_fd);
@@ -225,32 +226,25 @@ void TestServiceCallback(MOS::message::spMsg request, MOS::message::spMsg & resp
         auto vec_size = data_size_vec[i];
         uint8_t* vec_data = static_cast<uint8_t*>(data_vec[i]);
         data_in = std::string(reinterpret_cast<const char*>(vec_data), vec_size);
-        std::cout<<"vec_size="<< vec_size  <<std::endl;
+        // std::cout<<"vec_size="<< vec_size  <<std::endl;
 
         }
 
 
-    print_memory(data_in.data(), data_in.size());
-    std::cout<<" data_size_vec.size() = "<< size  <<std::endl;
-    std::cout<<" data_in size = "<< data_in.size()  <<std::endl;
+    // print_memory(data_in.data(), data_in.size());
+    // std::cout<<" data_size_vec.size() = "<< size  <<std::endl;
+    // std::cout<<" data_in size = "<< data_in.size()  <<std::endl;
 
-    std::cout<<" data_in[1] = "<< static_cast<int>(data_in.data()[1])  <<std::endl;
+    // std::cout<<" data_in[1] = "<< static_cast<int>(data_in.data()[1])  <<std::endl;
 
-    std::cout<<" data_in.length() = "<< data_in.length()  <<";MagnaParamCSReq_ length="<< sizeof(MagnaParamCSReq_) <<std::endl;
+    // std::cout<<" data_in.length() = "<< data_in.length()  <<";MagnaParamCSReq_ length="<< sizeof(MagnaParamCSReq_) <<std::endl;
 
 
     std::memcpy(&MagnaParamCSReq_, data_in.data(), data_in.length());
 
-    
+    std::cout<<"receive request, gen_ts = "<< request->GetGenTimestamp() <<std::endl;
+    print_MagnaParamCSReq(MagnaParamCSReq_, MagnaParamCSReq_old);
 
-    // auto request_gen_ts = request->GetGenTimestamp();
-    // auto request_first_data = static_cast<MagnaParamCSReq*>(request->GetDataRef()->GetDataVec()[0]);
-    // MagnaParamCSReq_ = *request_first_data;
-
-    // std::cout<<"receive client request, gen_ts = "<< request_gen_ts<<", req.meta_req_data[0] = "<< (int)(request_first_data->meta_req_data[0]) <<std::endl;
-  
-
-//   LOG_DEBUG("receive client request, gen_ts = %ld, event = %d", request_gen_ts, request_first_data->event);
 
     //  MagnaParamCSRes_ res;
 //   res.rev = request_first_data->event + 1;
@@ -259,7 +253,7 @@ MagnaParamCSRes_.meta_res_data[0] = MagnaParamCSReq_.meta_req_data[0] + 1;
   response->SetDataRef(res_data_ref);
   response->SetGenTimestamp(MOS::TimeUtils::NowNsec());
 
-    print_memory(&MagnaParamCSRes_, sizeof(MagnaParamCSRes));
+  
 //   LOG_DEBUG("send response, gen_ts = %ld, rev = %d", response->GetGenTimestamp(), res.rev);
 }
 
@@ -283,7 +277,7 @@ int config_client(int domain_id, std::string service_name, bool type, std::strin
                   uint32_t port) {
   // 初始化Communication中间件
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::seconds(3));
 
 
   MOS::communication::Init(discovery_json_file);
@@ -297,10 +291,12 @@ int config_client(int domain_id, std::string service_name, bool type, std::strin
   uint8_t count = 0;
   int timeout_ms = 10000;
   MagnaParamCSReq req;
-  while (true) {
+  MagnaParamCSRes response_old;
+  while (!stop.load()) 
+  {
     count++;
     req.meta_req_data[0] = count;
-    std::cout<<"output req.meta_req_data[0] = 0x"<<static_cast<int>(req.meta_req_data[0])<<std::endl;
+    // std::cout<<"output req.meta_req_data[0] = 0x"<<static_cast<int>(req.meta_req_data[0])<<std::endl;
     
     auto request_msg = std::make_shared<MOS::message::Message>();
     auto response_msg = std::make_shared<MOS::message::Message>();
@@ -308,26 +304,28 @@ int config_client(int domain_id, std::string service_name, bool type, std::strin
     request_msg->SetDataRef(data_ref);
 
     
-    print_memory(&req, sizeof(MagnaParamCSReq));
+    // print_memory(&req, sizeof(MagnaParamCSReq));
 
     // 发送 request
     auto ret = client->SendRequest(request_msg, response_msg, timeout_ms);
     if (ret == MOS::communication::COMM_CODE_OK) {
       auto response = static_cast<MagnaParamCSRes*>(response_msg->GetDataRef()->GetDataVec()[0]);
-        std::cout<<"get response success, ret = "<< static_cast<int>(ret) <<std::endl;
-        std::cout<<"response->meta_res_data[0] = "<< static_cast<int>(response->meta_res_data[0]) <<std::endl;
+        // std::cout<<"get response success, ret = "<< static_cast<int>(ret) <<std::endl;
+        // std::cout<<"response->meta_res_data[0] = "<< static_cast<int>(response->meta_res_data[0]) <<std::endl;
+        print_MagnaParamCSRes(*response,response_old);
+        response_old =*response;
+
       // 处理 response
     //   auto response = static_cast<MagnaParamCSRes*>(response_msg->GetDataRef()->GetDataVec()[0]);
     //   LOG_DEBUG("get response success, gen_ts = %ld, rev = %d", response_msg->GetGenTimestamp(), response->rev);
-
-    } else if (ret == MOS::communication::COMM_CODE_CLIENT_TIMEOUT)
+    } 
+    else if (ret == MOS::communication::COMM_CODE_CLIENT_TIMEOUT)
     {
         std::cout<<"get response failed, ret = "<< static_cast<int>(ret) <<"Client operation timed out."<<std::endl; 
 
     }
-    
-    
-    else {
+    else 
+    {
         std::cout<<"get response failed, ret = "<< static_cast<int>(ret) <<std::endl;
     //   LOG_WARNING("get response failed, ret = %d", ret);
     }
@@ -343,10 +341,10 @@ int config_client(int domain_id, std::string service_name, bool type, std::strin
 
 
 
-void asyncClientThread() {
+void asyncClientThread(std::string json_file) {
+    Adapter_PARAM_CS Adapter_PARAM_CS_;    
 
-    config_client(0, "CS/Calib", false, "discovery_config.json", "127.0.0.1",12352);
-
+    config_client(Adapter_PARAM_CS_.domain_id, Adapter_PARAM_CS_.topic, false, json_file, Adapter_PARAM_CS_.ip,Adapter_PARAM_CS_.port);
 
 }
 
@@ -366,28 +364,17 @@ int config_async_service(std::string json_file) {
     set_proto_info(proto_info, Adapter_PARAM_CS_.type, Adapter_PARAM_CS_.port, Adapter_PARAM_CS_.ip, sizeof(MagnaParamCSRes));//block_size 设置为要发出去的
 
 
-    
-    MagnaParamCSReq MagnaParamCSReq_;
-    MagnaParamCSReq MagnaParamCSReq_old;
-
-    MagnaParamCSRes MagnaParamCSRes_;
-    MagnaParamCSRes MagnaParamCSRes_old;
-
-
-
     std::map<std::string, VariableVariant > variableMap = {};
     
-
-
     // 创建Service
     auto service = MOS::communication::Service::New(Adapter_PARAM_CS_.domain_id, Adapter_PARAM_CS_.topic, proto_info, TestServiceCallback);
 
 
-    std::thread inputThread(asyncClientThread);
+    // std::thread inputThread(asyncClientThread,json_file);
     // std::thread inputThread2(asyncInputThreadTTY);
 
-    while (true) {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    while (!stop.load()) {
+     std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // print_MagnaParamCSReq(MagnaParamCSReq_, MagnaParamCSReq_old);
         // MagnaParamCSReq_old = MagnaParamCSReq_;
@@ -399,11 +386,13 @@ int config_async_service(std::string json_file) {
         // }
 
     }
+    // inputThread.join();//阻塞当前线程（通常是主线程），直到 inputThread线程执行完成
     return 0;
 }
 
 void Adapter_PARAM_CS::run()
 {
+    // asyncClientThread(json_file);
     config_async_service(json_file);
 }
 Adapter_PARAM_CS::Adapter_PARAM_CS()

@@ -75,14 +75,14 @@ public:
 	
 	int domain_id = 0;
 	bool type = false;
-	std::string topic = "CS/Calib";
+	std::string topic = "CS/Calib";//"paramserver_calib";//param_service
 	
 	std::string data_in = "";
 	uint32_t cycle_ms = 100;
 	uint32_t port = 12352;
 	std::string ip = "127.0.0.1";
 	MOS::communication::ProtocolInfo proto_info;
-	std::atomic_bool stop{ false };
+
 
 	auto maxeye_midware_init();
 	void maxeye_data_init();
@@ -90,12 +90,14 @@ public:
 };
 
 // 全局变量
+std::atomic_bool stop{ false };
 std::queue<std::string> inputQueue;
 int flag=true;
 // MOS::message::TestResponse res;
 MagnaParamCSReq MagnaParamCSReq_;
 MagnaParamCSReq MagnaParamCSReq_old;
 MagnaParamCSRes MagnaParamCSRes_;
+MagnaParamCSRes MagnaParamCSRes_old;
 std::string data_in;
 
 
