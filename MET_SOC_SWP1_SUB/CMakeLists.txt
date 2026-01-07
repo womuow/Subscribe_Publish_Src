@@ -25,9 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DMET_SOC_SWP1_PARAM_H=1)
+
 add_executable(${libSWP1}
-	/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_SWP1_SUB/Adapter_SWP1_sub.cpp )
-  #/home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
+  /home/c/MAXEYE/ADCU/dds_mos/Src/Maxieye_C_headfile/MET_SOC_ALLMapPrint.cpp
+	/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_SWP1_SUB/Adapter_SWP1_sub.cpp ) #add_library
 
 
 target_link_libraries(${libSWP1} PUBLIC mos::met_pack rt pthread mos::communication)

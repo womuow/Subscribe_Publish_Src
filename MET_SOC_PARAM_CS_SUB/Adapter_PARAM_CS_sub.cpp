@@ -240,21 +240,27 @@ void TestServiceCallback(MOS::message::spMsg request, MOS::message::spMsg & resp
     // std::cout<<" data_in.length() = "<< data_in.length()  <<";MagnaParamCSReq_ length="<< sizeof(MagnaParamCSReq_) <<std::endl;
 
 
+    print_memory(data_in.data(), data_in.size());
+    /*
     std::memcpy(&MagnaParamCSReq_, data_in.data(), data_in.length());
 
     std::cout<<"receive request, gen_ts = "<< request->GetGenTimestamp() <<std::endl;
     print_MagnaParamCSReq(MagnaParamCSReq_, MagnaParamCSReq_old);
 
-
+    MagnaParamCSReq_old = MagnaParamCSReq_;
     //  MagnaParamCSRes_ res;
 //   res.rev = request_first_data->event + 1;
-MagnaParamCSRes_.meta_res_data[0] = MagnaParamCSReq_.meta_req_data[0] + 1;
-  auto res_data_ref = std::make_shared<MOS::message::DataRef>(&MagnaParamCSRes_, sizeof(MagnaParamCSRes));
-  response->SetDataRef(res_data_ref);
-  response->SetGenTimestamp(MOS::TimeUtils::NowNsec());
+    MagnaParamCSRes_.meta_res_data[0] = MagnaParamCSReq_.meta_req_data[0] + 1;
+    auto res_data_ref = std::make_shared<MOS::message::DataRef>(&MagnaParamCSRes_, sizeof(MagnaParamCSRes));
+    response->SetDataRef(res_data_ref);
+    response->SetGenTimestamp(MOS::TimeUtils::NowNsec());
 
-  
-//   LOG_DEBUG("send response, gen_ts = %ld, rev = %d", response->GetGenTimestamp(), res.rev);
+    print_MagnaParamCSRes(MagnaParamCSRes_, MagnaParamCSRes_old);
+    MagnaParamCSRes_old = MagnaParamCSRes_;*/
+
+    auto res_data_ref = std::make_shared<MOS::message::DataRef>(data_in.data(),  data_in.size());
+    response->SetDataRef(res_data_ref);
+    response->SetGenTimestamp(MOS::TimeUtils::NowNsec());
 }
 
 void set_proto_info(MOS::communication::ProtocolInfo& proto_info, bool type, int port, const std::string& ip,
@@ -268,6 +274,7 @@ void set_proto_info(MOS::communication::ProtocolInfo& proto_info, bool type, int
     proto_info.shm_info.block_count = block_count;
     proto_info.shm_info.block_size = block_size;
     proto_info.shm_info.fast_mode = false;
+    
 //   }
 }
 
@@ -361,7 +368,7 @@ int config_async_service(std::string json_file) {
     MOS::communication::Init(json_file);
     // 配置通信属性
     MOS::communication::ProtocolInfo proto_info;
-    set_proto_info(proto_info, Adapter_PARAM_CS_.type, Adapter_PARAM_CS_.port, Adapter_PARAM_CS_.ip, sizeof(MagnaParamCSRes));//block_size 设置为要发出去的
+    set_proto_info(proto_info, Adapter_PARAM_CS_.type, Adapter_PARAM_CS_.port, Adapter_PARAM_CS_.ip, 452,20);//sizeof(MagnaParamCSRes));//block_size 设置为要发出去的
 
 
     std::map<std::string, VariableVariant > variableMap = {};
@@ -370,7 +377,6 @@ int config_async_service(std::string json_file) {
     auto service = MOS::communication::Service::New(Adapter_PARAM_CS_.domain_id, Adapter_PARAM_CS_.topic, proto_info, TestServiceCallback);
 
 
-    // std::thread inputThread(asyncClientThread,json_file);
     // std::thread inputThread2(asyncInputThreadTTY);
 
     while (!stop.load()) {

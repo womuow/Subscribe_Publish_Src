@@ -75,7 +75,7 @@ public:
 	
 	int domain_id = 0;
 	bool type = false;
-	std::string topic = "CS/Calib";//"paramserver_calib";//param_service
+	std::string topic = "paramserver_calib";//"CS/Calib";////param_service
 	
 	std::string data_in = "";
 	uint32_t cycle_ms = 100;

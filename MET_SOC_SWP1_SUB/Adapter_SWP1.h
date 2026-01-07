@@ -51,16 +51,15 @@
 #include "mos-com/interface/subscriber.hpp"
 #include "mos-com/message/message.h"
 #include "mos-com/utils/debug_log.h"
-#include"MET_SOC_SWP1.h"
 #include"mos-pack/met_pack.h"
-#include <termios.h>
-#include <unistd.h>
-#include <cstring>
-#include <variant>
-#include <iomanip>
-#include <map>
-
+#include"MET_SOC_SWP1.h"
+#include"MET_SOC_ALLMapPrint.h"
 using namespace std::chrono_literals;
+
+#ifndef ADAPTER_SWP1_H
+#define ADAPTER_SWP1_H
+
+
 
 class Adapter_SWP1
 {
@@ -82,7 +81,7 @@ public:
 	uint32_t port = 12352;
 	std::string ip = "127.0.0.1";
 	MOS::communication::ProtocolInfo proto_info;
-	std::atomic_bool stop{ false };
+
 
 	auto maxeye_midware_init();
 	void maxeye_data_init();
@@ -90,9 +89,19 @@ public:
 };
 
 // 全局变量
-std::queue<std::string> inputQueue;
-int flag=true;
-std::string data_in;
 
-/* Print struct FuncTgtVisnID changed value */
+
+
+
+extern std::queue<std::string> inputQueue;
+extern std::string data_in;
+extern std::atomic_bool stop;
+extern int flag;
+extern MET_SOC_SWP1_Param MET_SOC_SWP1_Param_;
+extern std::map<std::string, VariableVariant > MET_SOC_SWP1_Param_Map;
+/* Print struct MET_SOC_SWP1_Param changed value */
 void print_MET_SOC_SWP1_Param(MET_SOC_SWP1_Param& MET_SOC_SWP1_Param_,MET_SOC_SWP1_Param& MET_SOC_SWP1_Param_old);
+
+
+
+#endif
