@@ -60,7 +60,13 @@
 #include <iomanip>
 #include <map>
 
+
+#include "MET_SOC_ALLMapPrint.h"
+#ifndef ADAPTER_CAMSPARAM_H
+#define ADAPTER_CAMSPARAM_H
+
 using namespace std::chrono_literals;
+
 
 class Adapter_CamsParam
 {
@@ -90,9 +96,13 @@ public:
 };
 
 // 全局变量
-std::queue<std::string> inputQueue;
-int flag=true;
-std::string data_in;
-// std::map<std::string, VariableVariant > variableMap;
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in;
+extern MET_SOC_CamsParam MET_SOC_CamsParam_;
+extern MET_SOC_CamsParam MET_SOC_CamsParam_old;
+extern std::map<std::string, VariableVariant > MET_SOC_CamsParam_Map;
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_CamsParam(MET_SOC_CamsParam& MET_SOC_CamsParam_,MET_SOC_CamsParam& MET_SOC_CamsParam_old);
+
+#endif
