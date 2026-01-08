@@ -60,6 +60,11 @@
 #include <iomanip>
 #include <map>
 
+#include "MET_SOC_ALLMapPrint.h"
+#ifndef ADAPTER_AUTOFIXCAMERA_H
+#define ADAPTER_AUTOFIXCAMERA_H
+
+
 using namespace std::chrono_literals;
 
 class Adapter_AutofixCamera
@@ -90,9 +95,14 @@ public:
 };
 
 // 全局变量
-std::queue<std::string> inputQueue;
-int flag=true;
-std::string data_in;
-
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in;
+extern std::atomic_bool stop;
+extern MET_SOC_BEVAutofixResult MET_SOC_BEVAutofixResult_;
+extern MET_SOC_BEVAutofixResult MET_SOC_BEVAutofixResult_old;
+extern std::map<std::string, VariableVariant > MET_SOC_BEVAutofixResult_Map;
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_BEVAutofixResult(MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_,MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_old);
+
+#endif

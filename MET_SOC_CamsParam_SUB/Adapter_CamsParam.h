@@ -99,6 +99,7 @@ public:
 extern std::queue<std::string> inputQueue;
 extern int flag;
 extern std::string data_in;
+extern std::atomic_bool stop;
 extern MET_SOC_CamsParam MET_SOC_CamsParam_;
 extern MET_SOC_CamsParam MET_SOC_CamsParam_old;
 extern std::map<std::string, VariableVariant > MET_SOC_CamsParam_Map;

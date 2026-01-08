@@ -25,7 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+
+add_definitions(-DMET_SOC_BEVAUTOFIXRESULT_H=1)
+
 add_executable(${libAutofixCamera}
+  /home/c/MAXEYE/ADCU/dds_mos/Src/Maxieye_C_headfile/MET_SOC_ALLMapPrint.cpp
 	/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_Autofix_Camera_SUB/Adapter_AutofixCamera_sub.cpp )
   #/home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
 

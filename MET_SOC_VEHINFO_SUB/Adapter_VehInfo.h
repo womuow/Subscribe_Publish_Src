@@ -59,7 +59,9 @@
 #include <variant>
 #include <iomanip>
 #include <map>
-
+#include "MET_SOC_ALLMapPrint.h"
+#ifndef VARIABLEVARIANT_DEFINED_H
+#define VARIABLEVARIANT_DEFINED_H
 using namespace std::chrono_literals;
 
 class Adapter_VEHINFO
@@ -90,9 +92,16 @@ public:
 };
 
 // 全局变量
-std::queue<std::string> inputQueue;
-int flag=true;
-std::string data_in ="";
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in ;
+extern std::atomic_bool stop;
+extern MET_SOC_VehInfo MET_SOC_VehInfo_;
+extern MET_SOC_VehInfo MET_SOC_VehInfo_old;
+
+extern std::map<std::string, VariableVariant > MET_SOC_VehInfo_Map;
+
 
 /* Print struct FuncTgtVisnID changed value */
 void print_MET_SOC_VehInfo(MET_SOC_VehInfo& MET_SOC_VehInfo_,MET_SOC_VehInfo& MET_SOC_VehInfo_old);
+#endif // VARIABLEVARIANT_DEFINED_H

@@ -48,6 +48,7 @@ std::map<std::string, VariableVariant > variableMap = MET_SOC_CamsParam_Map;
         data_in = std::string(reinterpret_cast<const char*>(vec_data), vec_size);
 
         }
+        stop.store(true);        
     }
 );
 
@@ -59,12 +60,18 @@ std::map<std::string, VariableVariant > variableMap = MET_SOC_CamsParam_Map;
 
     while (true) {//while (!stop.load()) {
         //std::this_thread::sleep_for(std::chrono::milliseconds(5));
-
+        if(stop.load())
+        {
         std::memcpy(&MET_SOC_CamsParam_, data_in.data(), data_in.length());
 
 
         print_MET_SOC_CamsParam(MET_SOC_CamsParam_,MET_SOC_CamsParam_old);
-
+        if (flag)
+        {
+            std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
+            print_memory(data_in.data(),data_in.size());  
+            flag=false;
+        }
 
         MET_SOC_CamsParam_old = MET_SOC_CamsParam_;
 
@@ -72,6 +79,7 @@ std::map<std::string, VariableVariant > variableMap = MET_SOC_CamsParam_Map;
         {
             getVariableValue(variableMap,inputQueue.front());
             inputQueue.pop();
+        }
         }
 
         // std::this_thread::sleep_for(std::chrono::milliseconds(500));

@@ -8,6 +8,11 @@ std::atomic_bool stop{ false };
 
 
 
+
+
+
+
+
 void print_memory(const void* ptr, size_t size) {
     const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
     for (size_t i = 0; i < size; ++i) {
@@ -218,10 +223,8 @@ void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string 
 
 
 
-
 #ifdef MET_SOC_SWP1_PARAM_H
 
-#include "Adapter_SWP1.h"
 
 
 std::map<std::string, VariableVariant > MET_SOC_SWP1_Param_Map = {
@@ -871,7 +874,6 @@ void print_MET_SOC_SWP1_Param(MET_SOC_SWP1_Param& MET_SOC_SWP1_Param_,MET_SOC_SW
 
 #ifdef MET_SOC_CAMSPARAM_H
 
-#include"Adapter_CamsParam.h"
 
 
 std::map<std::string, VariableVariant > MET_SOC_CamsParam_Map = {
@@ -1101,6 +1103,7 @@ std::map<std::string, VariableVariant > MET_SOC_CamsParam_Map = {
 /* Print struct MET_SOC_CamsParam changed value */
 void print_MET_SOC_CamsParam(MET_SOC_CamsParam& MET_SOC_CamsParam_,MET_SOC_CamsParam& MET_SOC_CamsParam_old){
 // std::cout << "MET_SOC_CamsParam all variable:" << std::endl;
+
     if(MET_SOC_CamsParam_.update_count != MET_SOC_CamsParam_old.update_count){
         std::cout << "MET_SOC_CamsParam_.update_count(uint32_t): 0x" << std::hex << std::setw(8) << std::setfill('0') << MET_SOC_CamsParam_.update_count << std::dec  << std::endl;
         }
@@ -2150,6 +2153,8 @@ std::map<std::string, VariableVariant > MET_SOC_BEVAutofixResult_Map = {
 /* Print struct MET_SOC_BEVAutofixResult changed value */
 void print_MET_SOC_BEVAutofixResult(MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_,MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofixResult_old){
 // std::cout << "MET_SOC_BEVAutofixResult all variable:" << std::endl;
+    if(flag)
+    {
     if(MET_SOC_BEVAutofixResult_.frameID != MET_SOC_BEVAutofixResult_old.frameID){
         std::cout << "MET_SOC_BEVAutofixResult_.frameID(uint32_t): 0x" << std::hex << std::setw(8) << std::setfill('0') << MET_SOC_BEVAutofixResult_.frameID << std::dec  << std::endl;
         }
@@ -2159,6 +2164,7 @@ void print_MET_SOC_BEVAutofixResult(MET_SOC_BEVAutofixResult& MET_SOC_BEVAutofix
     if(MET_SOC_BEVAutofixResult_.result_time_stamp != MET_SOC_BEVAutofixResult_old.result_time_stamp){
         std::cout << "MET_SOC_BEVAutofixResult_.result_time_stamp(uint64_t): 0x" << std::hex << std::setw(16) << std::setfill('0') << MET_SOC_BEVAutofixResult_.result_time_stamp << std::dec  << std::endl;
         }
+    }
     if(MET_SOC_BEVAutofixResult_.autofixBuffer.confidence != MET_SOC_BEVAutofixResult_old.autofixBuffer.confidence){
         std::cout << "MET_SOC_BEVAutofixResult_.autofixBuffer.confidence(float): " << std::fixed << std::setprecision(2) << MET_SOC_BEVAutofixResult_.autofixBuffer.confidence << std::endl;
         }
@@ -3423,12 +3429,15 @@ std::map<std::string, VariableVariant > MET_SOC_VehInfo_Map = {
 /* Print struct MET_SOC_VehInfo changed value */
 void print_MET_SOC_VehInfo(MET_SOC_VehInfo& MET_SOC_VehInfo_,MET_SOC_VehInfo& MET_SOC_VehInfo_old){
 // std::cout << "MET_SOC_VehInfo all variable:" << std::endl;
+    if(flag)
+    {
     if(MET_SOC_VehInfo_.frameID != MET_SOC_VehInfo_old.frameID){
         std::cout << "MET_SOC_VehInfo_.frameID(uint32_t): 0x" << std::hex << std::setw(8) << std::setfill('0') << MET_SOC_VehInfo_.frameID << std::dec  << std::endl;
         }
     if(MET_SOC_VehInfo_.timestamp != MET_SOC_VehInfo_old.timestamp){
         std::cout << "MET_SOC_VehInfo_.timestamp(uint64_t): 0x" << std::hex << std::setw(16) << std::setfill('0') << MET_SOC_VehInfo_.timestamp << std::dec  << std::endl;
         }
+    }
     if(MET_SOC_VehInfo_.Speed_Mode != MET_SOC_VehInfo_old.Speed_Mode){
         std::cout << "MET_SOC_VehInfo_.Speed_Mode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(MET_SOC_VehInfo_.Speed_Mode) << std::dec  << std::endl;
         }
@@ -3776,6 +3785,16 @@ void print_MET_SOC_VehInfo(MET_SOC_VehInfo& MET_SOC_VehInfo_,MET_SOC_VehInfo& ME
         }
 }
 #endif
+
+
+
+
+
+
+
+
+
+
 
 
 
