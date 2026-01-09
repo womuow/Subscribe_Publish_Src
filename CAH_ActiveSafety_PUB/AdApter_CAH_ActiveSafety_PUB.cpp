@@ -1,15 +1,5 @@
 #include"AdApter_CAH_ActiveSafety_PUB.h"
 
-void print_memory(const void* ptr, size_t size) {
-    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
-    for (size_t i = 0; i < size; ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') 
-                  << static_cast<int>(bytes[i]) << " ";
-    }
-    std::cout << std::dec << std::endl;
-}
-
-
 
 AdApter_CAH_ActiveSafetyPUB::AdApter_CAH_ActiveSafetyPUB()
 {
@@ -82,44 +72,6 @@ return 0;
 
 
 
-
-
-/* Set and Print struct CAH_ActiveSafety initial value */
-void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
-    std::cout << "Set struct CAH_ActiveSafety variable and Publish:" << std::endl;
-    CAH_ActiveSafety_.fcw_flag.FCW_State = 1;
-    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_State(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_State) << std::dec  << std::endl;
-    CAH_ActiveSafety_.fcw_flag.FCW_WarningState = 2;
-    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_WarningState(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_WarningState) << std::dec  << std::endl;
-    CAH_ActiveSafety_.fcw_flag.FCW_LatentWarning = 3;
-    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_LatentWarning(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_LatentWarning) << std::dec  << std::endl;
-    CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState = 4;
-    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_AcuteWarningState) << std::dec  << std::endl;
-    CAH_ActiveSafety_.fcw_flag.FCW_TargetId = 5;
-    std::cout << "CAH_ActiveSafety_.fcw_flag.FCW_TargetId(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.fcw_flag.FCW_TargetId) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_FunConfig = 1;
-    std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_FunConfig(uint32): " << std::hex << std::setw(8) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_FunConfig) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_State = 6;
-    std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_State(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_State) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq = 7;
-    std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_PrefillReq) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_Level = 8;
-    std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_Level(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_Level) << std::dec  << std::endl;
-    CAH_ActiveSafety_.aeb_flag.AEB_Type = 9;
-    std::cout << "CAH_ActiveSafety_.aeb_flag.AEB_Type(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aeb_flag.AEB_Type) << std::dec  << std::endl;
-    CAH_ActiveSafety_.drt.DRT_TTC = 1.10;
-    std::cout << "CAH_ActiveSafety_.drt.DRT_TTC(float32): " << CAH_ActiveSafety_.drt.DRT_TTC << std::endl;
-    CAH_ActiveSafety_.drt.DRT_ID = 10;
-    std::cout << "CAH_ActiveSafety_.drt.DRT_ID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.drt.DRT_ID) << std::dec  << std::endl;
-    CAH_ActiveSafety_.drt.DRT_ObjectClass = 11;
-    std::cout << "CAH_ActiveSafety_.drt.DRT_ObjectClass(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.drt.DRT_ObjectClass) << std::dec  << std::endl;
-    CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime = 2.20;
-    std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_ReactionTime << std::endl;
-    CAH_ActiveSafety_.fcw_dev.FCW_TTCThres = 3.30;
-    std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_TTCThres(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_TTCThres << std::endl;
-    CAH_ActiveSafety_.fcw_dev.FCW_TTC = 4.40;
-    std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_TTC(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_TTC << std::endl;
-}
 
 
 

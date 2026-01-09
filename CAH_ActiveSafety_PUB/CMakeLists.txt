@@ -25,7 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DCAH_ACTIVESAFETY_H=1)
+
+
 add_executable(${libCAH_ActiveSafetyPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/CAH_ActiveSafety_PUB/AdApter_CAH_ActiveSafety_PUB.cpp ) #add_library
 
 
