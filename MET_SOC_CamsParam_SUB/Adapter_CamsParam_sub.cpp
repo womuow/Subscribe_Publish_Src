@@ -17,14 +17,14 @@ int config_async_sub(std::string json_file) {
 
 
     MOS::communication::Init(json_file);
-    MOS::utils::Register::get().register_version("libCamsParam", "1.1.0");
+    // MOS::utils::Register::get().register_version("libCamsParam", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
     // std::string data_in = Adapter_CamsParam_.data_in;
     data_in = "";
 
 
-std::map<std::string, VariableVariant > variableMap = MET_SOC_CamsParam_Map;
+        std::map<std::string, VariableVariant > variableMap = MET_SOC_CamsParam_Map;
             
                 
 

@@ -51,8 +51,7 @@
 #include "mos-com/interface/subscriber.hpp"
 #include "mos-com/message/message.h"
 #include "mos-com/utils/debug_log.h"
-#include "MET_SOC_CAMS_PARAM.h"
-#include"mos-pack/met_pack.h"
+#include "mos-pack/met_pack.h"
 #include <termios.h>
 #include <unistd.h>
 #include <cstring>
@@ -61,6 +60,7 @@
 #include <map>
 
 
+#include "MET_SOC_CAMS_PARAM.h"
 #include "MET_SOC_ALLMapPrint.h"
 #ifndef ADAPTER_CAMSPARAM_H
 #define ADAPTER_CAMSPARAM_H

@@ -10,7 +10,7 @@
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(MOS_LIB /home/c/MAXEYE/ADCU/dds_mos/linux-ax750)
+set(MOS_LIB ${CMAKE_SOURCE_DIR}/linux-ax750)
 set(CMAKE_PREFIX_PATH ${MOS_LIB})
 set(CMAKE_BUILD_TYPE Release)
 set(libEMCMD libEM_CMD_SUB)
@@ -26,8 +26,8 @@ if(NOT TARGET communication)
 endif()
 
 add_executable(${libEMCMD}
-	/home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_EM_CMD_SUB/Adapter_EM_CMD_sub.cpp)
-  #/home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
+	${CMAKE_SOURCE_DIR}/Src/MET_SOC_EM_CMD_SUB/Adapter_EM_CMD_sub.cpp)
+  #${CMAKE_SOURCE_DIR}/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
 
 
 target_link_libraries(${libEMCMD} PUBLIC mos::met_pack rt pthread mos::communication)
@@ -36,9 +36,9 @@ target_link_libraries(${libEMCMD} PUBLIC mos::met_pack rt pthread mos::communica
 target_include_directories(
     ${libEMCMD} 
     PUBLIC 
-    /home/c/MAXEYE/ADCU/dds_mos/linux-ax750/include
-    /home/c/MAXEYE/ADCU/dds_mos/Src/Maxieye_C_headfile
-    /home/c/MAXEYE/ADCU/dds_mos/Src/MET_SOC_EM_CMD_SUB
+    ${CMAKE_SOURCE_DIR}/linux-ax750/include
+    ${CMAKE_SOURCE_DIR}/Src/Maxieye_C_headfile
+    ${CMAKE_SOURCE_DIR}/Src/MET_SOC_EM_CMD_SUB
     /home/c/ExternalLib/json/include
     )
 

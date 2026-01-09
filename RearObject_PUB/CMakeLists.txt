@@ -10,7 +10,7 @@
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(MOS_LIB /home/c/MAXEYE/ADCU/dds_mos/linux-ax750)
+set(MOS_LIB ${CMAKE_SOURCE_DIR}/linux-ax750)
 set(CMAKE_PREFIX_PATH ${MOS_LIB})
 set(CMAKE_BUILD_TYPE Release)
 set(libRearObjectPUB libRearObject_PUB)
@@ -26,7 +26,7 @@ if(NOT TARGET communication)
 endif()
 
 add_executable(${libRearObjectPUB}
-/home/c/MAXEYE/ADCU/dds_mos/Src/RearObject_PUB/AdApter_RearObject_PUB.cpp ) #add_library
+${CMAKE_SOURCE_DIR}/Src/RearObject_PUB/AdApter_RearObject_PUB.cpp ) #add_library
 
 
  target_link_libraries(${libRearObjectPUB} PUBLIC mos::met_pack rt pthread mos::communication)
@@ -35,9 +35,9 @@ add_executable(${libRearObjectPUB}
 target_include_directories(
     ${libRearObjectPUB} 
     PUBLIC 
-    /home/c/MAXEYE/ADCU/dds_mos/linux-ax750/include
-    /home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile
-    /home/c/MAXEYE/ADCU/dds_mos/Src/RearObject_PUB
+    ${CMAKE_SOURCE_DIR}/linux-ax750/include
+    ${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile
+    ${CMAKE_SOURCE_DIR}/Src/RearObject_PUB
     /home/c/ExternalLib/json/include
     )
 

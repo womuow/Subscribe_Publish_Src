@@ -10,7 +10,7 @@
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(MOS_LIB /home/c/MAXEYE/ADCU/dds_mos/linux-ax750)
+set(MOS_LIB ${CMAKE_SOURCE_DIR}/linux-ax750)
 set(CMAKE_PREFIX_PATH ${MOS_LIB})
 set(CMAKE_BUILD_TYPE Release)
 set(libIPCC libIPCC_SUB)
@@ -30,9 +30,9 @@ add_definitions(-DIPC_MSG_DATA_SIZE_MAX_H=1)
 
 
 add_executable(${libIPCC}
-    /home/c/MAXEYE/ADCU/dds_mos/Src/IPCC_SUB/ALLMapPrint/IPCC_ALLMapPrint.cpp
-	/home/c/MAXEYE/ADCU/dds_mos/Src/IPCC_SUB/Adapter_IPCC_sub.cpp )
-  #/home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
+    ${CMAKE_SOURCE_DIR}/Src/IPCC_SUB/ALLMapPrint/IPCC_ALLMapPrint.cpp
+	${CMAKE_SOURCE_DIR}/Src/IPCC_SUB/Adapter_IPCC_sub.cpp )
+  #${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
 
 
 target_link_libraries(${libIPCC} PUBLIC mos::met_pack rt pthread mos::communication)
@@ -41,9 +41,9 @@ target_link_libraries(${libIPCC} PUBLIC mos::met_pack rt pthread mos::communicat
 target_include_directories(
     ${libIPCC} 
     PUBLIC 
-    /home/c/MAXEYE/ADCU/dds_mos/linux-ax750/include
+    ${CMAKE_SOURCE_DIR}/linux-ax750/include
     
-    /home/c/MAXEYE/ADCU/dds_mos/Src/IPCC_SUB
+    ${CMAKE_SOURCE_DIR}/Src/IPCC_SUB
     /home/c/ExternalLib/json/include
     )
 

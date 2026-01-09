@@ -10,7 +10,7 @@
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(MOS_LIB /home/c/MAXEYE/ADCU/dds_mos/linux-ax750)
+set(MOS_LIB ${CMAKE_SOURCE_DIR}/linux-ax750)
 set(CMAKE_PREFIX_PATH ${MOS_LIB})
 set(CMAKE_BUILD_TYPE Release)
 set(libLDP_ObjPUB libLDP_Obj_PUB)
@@ -27,7 +27,7 @@ if(NOT TARGET communication)
 endif()
 
 add_executable(${libLDP_ObjPUB}
-/home/c/MAXEYE/ADCU/dds_mos/Src/LDP_Obj_PUB/AdApter_LDP_Obj_PUB.cpp 
+${CMAKE_SOURCE_DIR}/Src/LDP_Obj_PUB/AdApter_LDP_Obj_PUB.cpp 
 ) #add_library
 
 
@@ -37,9 +37,9 @@ add_executable(${libLDP_ObjPUB}
 target_include_directories(
     ${libLDP_ObjPUB} 
     PUBLIC 
-    /home/c/MAXEYE/ADCU/dds_mos/linux-ax750/include
-    /home/c/MAXEYE/ADCU/dds_mos/Feature_Acore_Release/requirements/headerfile
-    /home/c/MAXEYE/ADCU/dds_mos/Src/LDP_Obj_PUB
+    ${CMAKE_SOURCE_DIR}/linux-ax750/include
+    ${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile
+    ${CMAKE_SOURCE_DIR}/Src/LDP_Obj_PUB
     /home/c/ExternalLib/json/include
     )
 
