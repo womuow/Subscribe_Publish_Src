@@ -67,6 +67,9 @@ void setIntialValue_RearObject(RearObject& RearObject_);
 void setIntialValue_RoadEdge(RoadEdge& RoadEdge_);
 #endif
 
+#ifdef ROADPATH_H
+void setIntialValue_RoadPath(RoadPath& RoadPath_);
+#endif
 
 #endif // FEATURE_ALL
 void print_memory(const void* ptr, size_t size);

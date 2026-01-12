@@ -24,7 +24,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DROADPATH_H=1)
+
+
 add_executable(${libRoadPathPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/RoadPath_PUB/AdApter_RoadPath_PUB.cpp ) #add_library
 
 
