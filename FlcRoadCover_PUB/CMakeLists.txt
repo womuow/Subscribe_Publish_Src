@@ -26,7 +26,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DFLCROADCOVER_H=1)
+
+
 add_executable(${libFlcRoadCoverPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/FlcRoadCover_PUB/AdApter_FlcRoadCover_PUB.cpp ) #add_library
 
 

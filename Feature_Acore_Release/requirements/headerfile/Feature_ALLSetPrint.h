@@ -34,13 +34,14 @@ void setIntialValue_CrossingObject(CrossingObject& CrossingObject_);
 void setIntialValue_EgoVehicleState(EgoVehicleState& EgoVehicleState_);
 #endif
 
-
+#ifdef FLCROADCOVER_H
+void setIntialValue_FlcRoadCover(FlcRoadCover& FlcRoadCover_);    
 #endif
 
 
 
 
-
+#endif // FEATURE_ALL
 void print_memory(const void* ptr, size_t size);
 // void printVariableVariant(const std::string& name, VariableVariant var) ;
 void asyncInputThreadTTY() ;

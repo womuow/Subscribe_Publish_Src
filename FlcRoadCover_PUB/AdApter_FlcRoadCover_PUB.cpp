@@ -1,16 +1,5 @@
 #include"AdApter_FlcRoadCover_PUB.h"
 
-void print_memory(const void* ptr, size_t size) {
-    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
-    for (size_t i = 0; i < size; ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') 
-                  << static_cast<int>(bytes[i]) << " ";
-    }
-    std::cout << std::dec << std::endl;
-}
-
-
-
 
 
 
@@ -78,24 +67,6 @@ int main()
     objtest.json_file = configPath;
     objtest.run();
 return 0;
-}
-
-
-/* Set and Print struct FlcRoadCover initial value */
-void setIntialValue_FlcRoadCover(FlcRoadCover& FlcRoadCover_){
-    std::cout << "Set struct FlcRoadCover variable and Publish:" << std::endl;
-    FlcRoadCover_.Snow.isDetected = 1;
-    std::cout << "FlcRoadCover_.Snow.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Snow.isDetected) << std::dec  << std::endl;
-    FlcRoadCover_.Snow.confidence = 1.10;
-    std::cout << "FlcRoadCover_.Snow.confidence(float32): " << FlcRoadCover_.Snow.confidence << std::endl;
-    FlcRoadCover_.Gravel.isDetected = 2;
-    std::cout << "FlcRoadCover_.Gravel.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Gravel.isDetected) << std::dec  << std::endl;
-    FlcRoadCover_.Gravel.confidence = 2.20;
-    std::cout << "FlcRoadCover_.Gravel.confidence(float32): " << FlcRoadCover_.Gravel.confidence << std::endl;
-    FlcRoadCover_.Wet.isDetected = 3;
-    std::cout << "FlcRoadCover_.Wet.isDetected(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FlcRoadCover_.Wet.isDetected) << std::dec  << std::endl;
-    FlcRoadCover_.Wet.confidence = 3.30;
-    std::cout << "FlcRoadCover_.Wet.confidence(float32): " << FlcRoadCover_.Wet.confidence << std::endl;
 }
 
 
