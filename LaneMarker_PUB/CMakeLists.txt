@@ -25,7 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DLANEMARKER_H=1)
+
+
 add_executable(${libLaneMarkerPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/LaneMarker_PUB/AdApter_LaneMarker_PUB.cpp ) #add_library
 
 

@@ -42,6 +42,10 @@ void setIntialValue_FlcRoadCover(FlcRoadCover& FlcRoadCover_);
 void setIntialValue_FusedFrontObject(FusedFrontObject& FusedFrontObject_);
 #endif
 
+#ifdef LANEMARKER_H
+void setIntialValue_LaneMarker(LaneMarker& LaneMarker_);
+#endif
+
 
 
 #endif // FEATURE_ALL
