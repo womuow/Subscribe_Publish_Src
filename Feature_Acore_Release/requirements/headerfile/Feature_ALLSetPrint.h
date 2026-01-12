@@ -59,7 +59,9 @@ void setIntialValue_LDPPath(LDPPath& LDPPath_);
 void setIntialValue_LongCtrlObjInfo(LongCtrlObjInfo& LongCtrlObjInfo_);
 #endif
 
-
+#ifdef REAROBJECT_H
+void setIntialValue_RearObject(RearObject& RearObject_);
+#endif
 
 
 

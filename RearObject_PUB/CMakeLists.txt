@@ -25,7 +25,13 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DREAROBJECT_H=1)
+
+
+
 add_executable(${libRearObjectPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/RearObject_PUB/AdApter_RearObject_PUB.cpp ) #add_library
 
 
