@@ -26,7 +26,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DLDPPATH_H=1)
+
+
 add_executable(${libLDPPathPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/LDPPath_PUB/AdApter_LDPPath_PUB.cpp 
 ) #add_library
 

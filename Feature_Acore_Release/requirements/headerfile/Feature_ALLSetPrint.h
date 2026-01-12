@@ -51,7 +51,9 @@ void setIntialValue_LaneMarker(LaneMarker& LaneMarker_);
 void setIntialValue_LDP_Obj(LDP_Obj& LDP_Obj_);
 #endif
 
-
+#ifdef LDPPATH_H
+void setIntialValue_LDPPath(LDPPath& LDPPath_);
+#endif
 
 
 
