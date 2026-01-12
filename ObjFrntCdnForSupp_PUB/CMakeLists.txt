@@ -17,7 +17,7 @@ set(libObjFrntCdnForSuppPUB libObjFrntCdnForSupp_PUB)
 
 
 # 设置可执行文件的输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/MOS_PUB)
 
 
 find_package(met_pack REQUIRED)

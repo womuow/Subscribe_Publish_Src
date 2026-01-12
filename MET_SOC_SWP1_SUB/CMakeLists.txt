@@ -16,7 +16,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(libSWP1 libSWP1_SUB)
 
 # 设置可执行文件的输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/MET_SOC_SUB)
 
 
 find_package(met_pack REQUIRED)
