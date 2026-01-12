@@ -47,6 +47,18 @@ void setIntialValue_LaneMarker(LaneMarker& LaneMarker_);
 #endif
 
 
+#ifdef LDP_OBJ_H
+void setIntialValue_LDP_Obj(LDP_Obj& LDP_Obj_);
+#endif
+
+
+
+
+
+
+
+
+
 
 #endif // FEATURE_ALL
 void print_memory(const void* ptr, size_t size);

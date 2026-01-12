@@ -1,7 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include "IPC_Pub.h"
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -41,6 +40,13 @@
 #include "mos-com/interface/subscriber.hpp"
 #include <mos-com/message/message.h>
 #include "mos-com/utils/debug_log.h"
+
+#include "Feature_ALLSetPrint.h"
+#include "IPC_Pub.h"
+
+#ifndef ADAPTER_LDP_OBJ_PUB_H
+#define ADAPTER_LDP_OBJ_PUB_H
+
 using namespace std::chrono_literals;
 // using namespace org::eclipse::cyclonedds;
 class AdApter_LDP_ObjPUB
@@ -69,4 +75,4 @@ private:
 
 
 
-void setIntialValue_LDP_Obj(LDP_Obj& LDP_Obj_);
+#endif // ADAPTER_LDP_OBJ_PUB_H
