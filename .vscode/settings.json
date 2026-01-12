@@ -69,6 +69,10 @@
         "thread": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "charconv": "cpp",
+        "cinttypes": "cpp",
+        "format": "cpp",
+        "shared_mutex": "cpp"
     }
 }

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include "IPC_Pub.h"
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -41,10 +40,17 @@
 #include "mos-com/interface/subscriber.hpp"
 #include "mos-com/message/message.h"
 #include "mos-com/utils/debug_log.h"
-
+#include <fstream>
+#include <termios.h>
 #include <variant>
 #include <iomanip>
 #include <map>
+
+#include "Feature_ALLSetPrint.h"
+#include "IPC_Pub.h"
+#ifndef ADAPTER_VEHPARAMTX_H
+#define ADAPTER_VEHPARAMTX_H
+
 
 using namespace std::chrono_literals;
 
@@ -72,11 +78,15 @@ public:
 private:
 };
 // 全局变量
-std::atomic<bool> keepRunning(true);
-std::mutex inputMutex;
-std::queue<std::string> inputQueue;
-std::string currentInput;
-
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in;
+extern std::atomic_bool stop;
+extern VehParam_Tx VehParam_Tx_;
+extern VehParam_Tx VehParam_Tx_old;
+extern std::map<std::string, VariableVariant > VehParam_Tx_Map;
 
 /* Print struct VehParam_Tx changed value */
 void print_VehParam_Tx(VehParam_Tx& VehParam_Tx_,VehParam_Tx& VehParam_Tx_old);
+
+#endif // ADAPTER_VEHPARAMTX_H

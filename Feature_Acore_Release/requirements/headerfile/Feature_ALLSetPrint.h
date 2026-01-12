@@ -75,11 +75,17 @@ void setIntialValue_RoadPath(RoadPath& RoadPath_);
 void setIntialValue_TrafficFlow(TrafficFlow& TrafficFlow_);
 #endif
 
+#ifdef VEHPARAM_TX_H
+using VariableVariant = std::variant<uint8*, uint16* ,uint32*,float32*,sint8*,sint16*,sint32*>;
+#include "AdApter_VehParamTx_sub.h"
 
-
-#endif // FEATURE_ALL
-void print_memory(const void* ptr, size_t size);
-// void printVariableVariant(const std::string& name, VariableVariant var) ;
+void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input);
+void printVariableVariant(const std::string& name, VariableVariant var) ;
 void asyncInputThreadTTY() ;
-// void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input);
+#endif
 
+
+
+
+void print_memory(const void* ptr, size_t size);
+#endif // FEATURE_ALL

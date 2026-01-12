@@ -1,15 +1,31 @@
 #include "Feature_ALLSetPrint.h"
 
 
-std::queue<std::string> inputQueue;
-int flag=true;
-std::string data_in={0x0};
-std::atomic_bool stop{ false };
 
 
-
-
-
+// std::string getCurrentTime() {
+// auto now = std::chrono::high_resolution_clock::now();
+    
+//     // 转换为time_t用于日历时间
+//     auto now_time_t = std::chrono::system_clock::to_time_t(
+//         std::chrono::system_clock::now()
+//     );
+    
+//     // 获取本地时间
+//     std::tm* local_time = std::localtime(&now_time_t);
+    
+//     // 获取纳秒部分
+//     auto duration = now.time_since_epoch();
+//     auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(
+//         duration
+//     ).count() % 1000000000;  // 取模1秒内的纳秒数
+    
+//     std::ostringstream oss;
+//     oss << "[" << std::put_time(local_time, "%Y-%m-%d %H:%M:%S")
+//         << "." << std::setfill('0') << std::setw(9) << nanoseconds << "] ";
+    
+//     return oss.str();
+// }
 
 
 
@@ -20,6 +36,89 @@ void print_memory(const void* ptr, size_t size) {
                   << static_cast<int>(bytes[i]) << " ";
     }
     std::cout << std::dec << std::endl;
+}
+
+
+#if defined(VEHBUSIN_H)  || defined(VEHPARAM_TX_H) || defined(IDT_FUNCTGTVISNID_H)
+
+std::queue<std::string> inputQueue;
+int flag=true;
+std::string data_in={0x0};
+std::atomic_bool stop{ false };
+
+
+uint32_t floatToUint32Memcpy(float f) {
+    // 注意：使用reinterpret_cast将float指针转换为uint32_t指针
+    //return *reinterpret_cast<uint32_t*>(&f);
+    uint32_t bits=0;
+    memcpy(&bits, &f, sizeof(f));
+    return bits;
+}
+// 1. sint8 转 uint32 (保持位模式)
+uint32_t sint8ToUint32Memcpy(int8_t value) {
+    uint32_t result = 0;
+    std::memcpy(&result, &value, sizeof(int8_t));
+    return result;
+}
+
+// 2. sint16 转 uint32 (保持位模式)
+uint32_t sint16ToUint32Memcpy(int16_t value) {
+    uint32_t result = 0;
+    std::memcpy(&result, &value, sizeof(int16_t));
+    return result;
+}
+
+// 3. sint32 转 uint32 (保持位模式)
+uint32_t sint32ToUint32Memcpy(int32_t value) {
+    uint32_t result = 0;
+    std::memcpy(&result, &value, sizeof(int32_t));
+    return result;
+}
+
+
+
+
+
+
+void printVariableVariant(const std::string& name, VariableVariant var) {
+    std::visit([&name](auto&& ptr) {
+        using T = std::decay_t<decltype(*ptr)>;
+        
+        // 根据类型决定打印格式
+        if constexpr (std::is_same_v<T, uint8> ) {
+            // 8位类型：宽度2
+            std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') 
+                      << static_cast<int>(*ptr) << std::dec << std::endl;
+        } 
+        else if constexpr (std::is_same_v<T, uint16> ) {
+            // 16位类型：宽度4
+            std::cout << name << ": 0x" << std::hex << std::setw(4) << std::setfill('0') 
+                      << *ptr << std::dec << std::endl;
+        }
+        else if constexpr (std::is_same_v<T, uint32> ) {
+            // 32位类型：宽度8
+            std::cout << name << ": 0x" << std::hex << std::setw(8) << std::setfill('0') 
+                      << *ptr << std::dec << std::endl;
+        }
+        
+        else if constexpr (std::is_same_v<T, sint8>) {
+            // 8位类型：宽度2
+            std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') << sint8ToUint32Memcpy(*ptr)<< ";" << std::dec << std::setfill('0') << static_cast<int>(*ptr) << std::dec << std::endl;
+        } 
+        else if constexpr ( std::is_same_v<T, sint16>) {
+            // 16位类型：宽度4
+            std::cout << name << ": 0x" << std::hex << std::setw(4) << std::setfill('0') <<sint16ToUint32Memcpy(*ptr)<< ";" << std::dec << std::setfill('0') << static_cast<int>(*ptr) << std::dec << std::endl;
+        }
+        else if constexpr ( std::is_same_v<T, sint32>) {
+            // 32位类型：宽度8
+            std::cout << name << ": 0x" << std::hex << std::setw(8) << std::setfill('0') <<sint32ToUint32Memcpy(*ptr) << ";" << std::dec<< std::setfill('0') << static_cast<int>(*ptr) << std::dec << std::endl;
+        }
+
+        else if constexpr (std::is_same_v<T, float32>) {
+            // 浮点类型：十进制
+            std::cout << name <<  ": 0x" << std::hex << std::setw(8) << std::setfill('0')  <<floatToUint32Memcpy(*ptr)<<";"  << std::fixed <<std::setprecision(2) << *ptr << std::endl;
+        }
+    }, var);
 }
 
 // void printVariableVariant(const std::string& name, VariableVariant var) {
@@ -192,35 +291,35 @@ void asyncInputThreadTTY() {
     }
 }
 
-// void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input)
-// {
+void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input)
+{
     
 
-//     if (input.length()<=6)
-//     {
-//         std::cout << "error: '" << input << "' is too short" << std::endl;
-//         return ;
-//     }
-//     // 去除首尾空格
-//     size_t start = input.find_first_not_of("\n");
-//     if (start == std::string::npos) {
-//         return ; //空输入
-//     }
+    if (input.length()<=6)
+    {
+        std::cout << "error: '" << input << "' is too short" << std::endl;
+        return ;
+    }
+    // 去除首尾空格
+    size_t start = input.find_first_not_of("\n");
+    if (start == std::string::npos) {
+        return ; //空输入
+    }
     
-//     size_t end = input.find_last_not_of(" \t");
-//     input = input.substr(start, end - start + 1);
+    size_t end = input.find_last_not_of(" \t");
+    input = input.substr(start, end - start + 1);
 
-//     //std::string varName = input.substr(6);
-//     auto it = VarMap.find(input);
-//     if (it != VarMap.end()) {
-//         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-//         printVariableVariant(input,it->second);
-//     } else {
-//         std::cout << "error: '" << input << "' no found" << std::endl;
-//         return ;
-//     }
-// }
-
+    //std::string varName = input.substr(6);
+    auto it = VarMap.find(input);
+    if (it != VarMap.end()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        printVariableVariant(input,it->second);
+    } else {
+        std::cout << "error: '" << input << "' no found" << std::endl;
+        return ;
+    }
+}
+#endif
 
 
 
@@ -5733,130 +5832,1151 @@ void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
 };
 #endif
 
+#ifdef VEHBUSIN_H
+std::map<std::string, VariableVariant > VehBusIn_Map = {
+//[VehBusIn]
+{"VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB(float32)" , &VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB},
+{"VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB(float32)" , &VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB},
+{"VehBusIn_.SysSigGrp_HPCGW_CB_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_HPCGW_CB_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected(float32)" , &VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected},
+{"VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD(uint8)" , &VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD},
+{"VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts(uint8)" , &VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts},
+{"VehBusIn_.SysSigGrp_HPCGW_3B0_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_HPCGW_3B0_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition(float32)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque(float32)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque(float32)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque},
+{"VehBusIn_.SysSigGrp_HPCVCU_B6_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B6_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap(uint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB(sint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag(uint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag(uint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt(uint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct(uint16)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent(float32)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available},
+{"VehBusIn_.SysSigGrp_HPCVCU_B7_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_HPCVCU_B7_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BackDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BackDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FRDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FRDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RRDoorSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RRDoorSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts},
+{"VehBusIn_.SysSigGrp_HPCBCM_290.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_290.MessageQf},
+{"VehBusIn_.SysSigGrp_ICU_24D.ICU_AccelerationMode(uint8)" , &VehBusIn_.SysSigGrp_ICU_24D.ICU_AccelerationMode},
+{"VehBusIn_.SysSigGrp_ICU_24D.ICU_TotalOdometerkm(uint32)" , &VehBusIn_.SysSigGrp_ICU_24D.ICU_TotalOdometerkm},
+{"VehBusIn_.SysSigGrp_ICU_24D.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_ICU_24D.MessageQf},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset(sint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ELK_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ELK_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LKA_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LKA_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LCC_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LCC_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IHBC_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IHBC_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_AEB_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_AEB_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTB_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTB_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCW_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCW_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTA_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTA_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_DOW_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_DOW_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.ICU_BSD_SW(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.ICU_BSD_SW},
+{"VehBusIn_.SysSigGrp_ICU_332_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_ICU_332_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Data(uint8)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Data},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Hour(uint8)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Hour},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Minute(uint8)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Minute},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Month(uint8)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Month},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Second(uint8)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Second},
+{"VehBusIn_.SysSigGrp_IVI_5CE.IVI_Year(uint16)" , &VehBusIn_.SysSigGrp_IVI_5CE.IVI_Year},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_CrashOutputSts(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_CrashOutputSts},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt},
+{"VehBusIn_.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt},
+{"VehBusIn_.SysSigGrp_ACU_2A3.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_ACU_2A3.MessageQf},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcce(float32)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcce},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcce(float32)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcce},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid(uint8)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid(uint8)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRate(float32)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRate},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRateValid(uint8)" , &VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRateValid},
+{"VehBusIn_.SysSigGrp_ACU_233_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_ACU_233_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq(float32)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_MotorTorque(float32)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_MotorTorque},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralActive(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralActive},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque(float32)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_(uint16)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle(float32)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_FailureSts(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_FailureSts},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_Fault(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_Fault},
+{"VehBusIn_.SysSigGrp_EPS_18D_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_EPS_18D_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCFailed(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCFailed},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCActive(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCActive},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_EBDFailed(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_EBDFailed},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSFailed(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSFailed},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSActive(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSActive},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSFailed(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSFailed},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSActive(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSActive},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed(float32)" , &VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed},
+{"VehBusIn_.SysSigGrp_IBC_182_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_IBC_182_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied(uint8)" , &VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied},
+{"VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q(uint8)" , &VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q},
+{"VehBusIn_.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct(uint16)" , &VehBusIn_.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct},
+{"VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer(uint8)" , &VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer},
+{"VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q(uint8)" , &VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q},
+{"VehBusIn_.SysSigGrp_IBC_183.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_IBC_183.MessageQf},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC(uint16)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC(uint16)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC(uint16)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC(uint16)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH(float32)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH(float32)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH(float32)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH(float32)" , &VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH},
+{"VehBusIn_.SysSigGrp_IBC_184_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_IBC_184_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_HDCStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_HDCStatus},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCACC(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCACC},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCAEB(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCAEB},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHAvailable(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHAvailable},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHStatus},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEB_active(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEB_active},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LdmBLC(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LdmBLC},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABP_active(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABP_active},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABPAviliable(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABPAviliable},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWB_active(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWB_active},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABA_active(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABA_active},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct(float32)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure(float32)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus},
+{"VehBusIn_.SysSigGrp_IBC_185_APP.Message_QF(uint8)" , &VehBusIn_.SysSigGrp_IBC_185_APP.Message_QF},
+{"VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available(uint8)" , &VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available},
+{"VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_FailStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_FailStatus},
+{"VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_Status(uint8)" , &VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_Status},
+{"VehBusIn_.SysSigGrp_IBC_227.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_IBC_227.MessageQf},
+{"VehBusIn_.SysSigGrp_IBC_3CE.iTPMS_SystemStatus(uint8)" , &VehBusIn_.SysSigGrp_IBC_3CE.iTPMS_SystemStatus},
+{"VehBusIn_.SysSigGrp_IBC_3CE.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_IBC_3CE.MessageQf},
+{"VehBusIn_.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq(uint8)" , &VehBusIn_.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C},
+{"VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D(uint8)" , &VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW1(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW1},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW10(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW10},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW2(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW2},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW3(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW3},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW4(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW4},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW5(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW5},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW6(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW6},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW7(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW7},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW8(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW8},
+{"VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW9(uint8)" , &VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW9},
+{"VehBusIn_.SysSigGrp_LMC_25A.LMC_LSFCActiveSt(uint8)" , &VehBusIn_.SysSigGrp_LMC_25A.LMC_LSFCActiveSt},
+{"VehBusIn_.SysSigGrp_LMC_25A.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_LMC_25A.MessageQf},
+{"VehBusIn_.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt(uint8)" , &VehBusIn_.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt},
+{"VehBusIn_.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt(uint8)" , &VehBusIn_.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt},
+{"VehBusIn_.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt(uint8)" , &VehBusIn_.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt},
+{"VehBusIn_.SysSigGrp_LMC_FD.MessageQf(uint8)" , &VehBusIn_.SysSigGrp_LMC_FD.MessageQf},
+};
+#endif
+
 
 
 #ifdef VEHPARAM_TX_H
-/* Set and Print struct VehParam_Tx initial value */
-void setIntialValue_VehParam_Tx(VehParam_Tx& VehParam_Tx_){
-    std::cout << "Set struct VehParam_Tx variable and Publish:" << std::endl;
-    VehParam_Tx_.AxleDstReToVehFrnt = 1.10;
-    std::cout << "VehParam_Tx_.AxleDstReToVehFrnt(float32): " << VehParam_Tx_.AxleDstReToVehFrnt << std::endl;
-    VehParam_Tx_.SingleTrackAxleDistFrnt = 2.20;
-    std::cout << "VehParam_Tx_.SingleTrackAxleDistFrnt(float32): " << VehParam_Tx_.SingleTrackAxleDistFrnt << std::endl;
-    VehParam_Tx_.SteerWhlPosn = 1;
-    std::cout << "VehParam_Tx_.SteerWhlPosn(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.SteerWhlPosn) << std::dec  << std::endl;
-    VehParam_Tx_.Len = 3.30;
-    std::cout << "VehParam_Tx_.Len(float32): " << VehParam_Tx_.Len << std::endl;
-    VehParam_Tx_.Weight = 4.40;
-    std::cout << "VehParam_Tx_.Weight(float32): " << VehParam_Tx_.Weight << std::endl;
-    VehParam_Tx_.WhlBas = 5.50;
-    std::cout << "VehParam_Tx_.WhlBas(float32): " << VehParam_Tx_.WhlBas << std::endl;
-    VehParam_Tx_.Width = 6.60;
-    std::cout << "VehParam_Tx_.Width(float32): " << VehParam_Tx_.Width << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] = 7.70;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] = 8.80;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] = 9.90;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] = 11.00;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] = 12.10;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] = 13.20;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] = 14.30;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] = 15.40;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnFrnt = 16.50;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrnt(float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrnt << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] = 17.60;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] = 18.70;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] = 19.80;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] = 20.90;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] = 22.00;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] = 23.10;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] = 24.20;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] = 25.30;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnRe = 26.40;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnRe(float32): " << VehParam_Tx_.SingleTrackCornrgStfnRe << std::endl;
-    VehParam_Tx_.SteerWhlAgRat = 27.50;
-    std::cout << "VehParam_Tx_.SteerWhlAgRat(float32): " << VehParam_Tx_.SteerWhlAgRat << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] = 28.60;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] = 29.70;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] = 30.80;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] = 31.90;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] = 33.00;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] = 34.10;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] = 35.20;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] << std::endl;
-    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] = 36.30;
-    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] << std::endl;
-    VehParam_Tx_.BltFrntExist = 2;
-    std::cout << "VehParam_Tx_.BltFrntExist(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.BltFrntExist) << std::dec  << std::endl;
-    VehParam_Tx_.OncomingBrk = 3;
-    std::cout << "VehParam_Tx_.OncomingBrk(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.OncomingBrk) << std::dec  << std::endl;
-    VehParam_Tx_.SelfStrGrdt = 37.40;
-    std::cout << "VehParam_Tx_.SelfStrGrdt(float32): " << VehParam_Tx_.SelfStrGrdt << std::endl;
-    VehParam_Tx_.TrafficAssist = 4;
-    std::cout << "VehParam_Tx_.TrafficAssist(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.TrafficAssist) << std::dec  << std::endl;
-    VehParam_Tx_.LongCtrlBrkLim = 5;
-    std::cout << "VehParam_Tx_.LongCtrlBrkLim(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrlBrkLim) << std::dec  << std::endl;
-    VehParam_Tx_.LongCtrEco = 6;
-    std::cout << "VehParam_Tx_.LongCtrEco(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrEco) << std::dec  << std::endl;
-    VehParam_Tx_.LongCtrSpdLoLim = 38.50;
-    std::cout << "VehParam_Tx_.LongCtrSpdLoLim(float32): " << VehParam_Tx_.LongCtrSpdLoLim << std::endl;
-    VehParam_Tx_.LongCtrStopNGo = 7;
-    std::cout << "VehParam_Tx_.LongCtrStopNGo(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrStopNGo) << std::dec  << std::endl;
-    VehParam_Tx_.SingleTrackMomentOfInertia = 39.60;
-    std::cout << "VehParam_Tx_.SingleTrackMomentOfInertia(float32): " << VehParam_Tx_.SingleTrackMomentOfInertia << std::endl;
-    VehParam_Tx_.VehTyp = 8;
-    std::cout << "VehParam_Tx_.VehTyp(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.VehTyp) << std::dec  << std::endl;
-    VehParam_Tx_.WhlRadius = 40.70;
-    std::cout << "VehParam_Tx_.WhlRadius(float32): " << VehParam_Tx_.WhlRadius << std::endl;
+std::map<std::string, VariableVariant > VehParam_Tx_Map = {
+//[VehParam_Tx]
+{"VehParam_Tx_.AxleDstReToVehFrnt(float32)" , &VehParam_Tx_.AxleDstReToVehFrnt},
+{"VehParam_Tx_.SingleTrackAxleDistFrnt(float32)" , &VehParam_Tx_.SingleTrackAxleDistFrnt},
+{"VehParam_Tx_.SteerWhlPosn(uint8)" , &VehParam_Tx_.SteerWhlPosn},
+{"VehParam_Tx_.Len(float32)" , &VehParam_Tx_.Len},
+{"VehParam_Tx_.Weight(float32)" , &VehParam_Tx_.Weight},
+{"VehParam_Tx_.WhlBas(float32)" , &VehParam_Tx_.WhlBas},
+{"VehParam_Tx_.Width(float32)" , &VehParam_Tx_.Width},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7]},
+{"VehParam_Tx_.SingleTrackCornrgStfnFrnt(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnFrnt},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6]},
+{"VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7]},
+{"VehParam_Tx_.SingleTrackCornrgStfnRe(float32)" , &VehParam_Tx_.SingleTrackCornrgStfnRe},
+{"VehParam_Tx_.SteerWhlAgRat(float32)" , &VehParam_Tx_.SteerWhlAgRat},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6]},
+{"VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7](float32)" , &VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7]},
+{"VehParam_Tx_.BltFrntExist(uint8)" , &VehParam_Tx_.BltFrntExist},
+{"VehParam_Tx_.OncomingBrk(uint8)" , &VehParam_Tx_.OncomingBrk},
+{"VehParam_Tx_.SelfStrGrdt(float32)" , &VehParam_Tx_.SelfStrGrdt},
+{"VehParam_Tx_.TrafficAssist(uint8)" , &VehParam_Tx_.TrafficAssist},
+{"VehParam_Tx_.LongCtrlBrkLim(uint8)" , &VehParam_Tx_.LongCtrlBrkLim},
+{"VehParam_Tx_.LongCtrEco(uint8)" , &VehParam_Tx_.LongCtrEco},
+{"VehParam_Tx_.LongCtrSpdLoLim(float32)" , &VehParam_Tx_.LongCtrSpdLoLim},
+{"VehParam_Tx_.LongCtrStopNGo(uint8)" , &VehParam_Tx_.LongCtrStopNGo},
+{"VehParam_Tx_.SingleTrackMomentOfInertia(float32)" , &VehParam_Tx_.SingleTrackMomentOfInertia},
+{"VehParam_Tx_.VehTyp(uint8)" , &VehParam_Tx_.VehTyp},
+{"VehParam_Tx_.WhlRadius(float32)" , &VehParam_Tx_.WhlRadius}
 };
 #endif
 
 
 
 #ifdef IDT_FUNCTGTVISNID_H
-/* Set and Print struct IDT_FuncTgtVisnID initial value */
-void setIntialValue_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_){
-    std::cout << "Set struct IDT_FuncTgtVisnID variable and Publish:" << std::endl;
-    IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID = 1;
-    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID) << std::dec  << std::endl;
-    IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID = 2;
-    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID) << std::dec  << std::endl;
-    IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID = 3;
-    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID) << std::dec  << std::endl;
-    IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID = 4;
-    std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID) << std::dec  << std::endl;
-    IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID = 5;
-    std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID) << std::dec  << std::endl;
+std::map<std::string, VariableVariant > IDT_FuncTgtVisnID_Map = {
+//[IDT_FuncTgtVisnID]
+{"IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID(uint8)" , &IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID},
+{"IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID(uint8)" , &IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID},
+{"IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID(uint8)" , &IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID},
+{"IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID(uint8)" , &IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID},
+{"IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID(uint8)" , &IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID},
 };
 #endif
 
 
 
+#ifdef VEHBUSIN_H
+/* Print struct VehBusIn changed value */
+void print_VehBusIn(VehBusIn& VehBusIn_,VehBusIn& VehBusIn_old){
+// std::cout << "VehBusIn all variable:" << std::endl;
+    if(VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB != VehBusIn_old.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUS_ActualTorqueFB << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB != VehBusIn_old.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCGW_CB_APP.GW_MCUM_ActualTorqueFB << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_CB_APP.Message_QF != VehBusIn_old.SysSigGrp_HPCGW_CB_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_CB_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCGW_CB_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected != VehBusIn_old.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTemp_Corrected << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD != VehBusIn_old.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_OutsideTempVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts != VehBusIn_old.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.GW_TMS_FrontDefrostSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.Message_QF != VehBusIn_old.SysSigGrp_HPCGW_3B0_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_HPCGW_3B0_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCGW_3B0_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLeverValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_GearLevelPosSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalStsValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakePedalSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_BrakeSysFault) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_AccPedalValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_ThrottlePosition << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_FDrvRequestTorque << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCVCU_B6_APP.VCU_RDrvRequestTorque << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.Message_QF != VehBusIn_old.SysSigGrp_HPCVCU_B6_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B6_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B6_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap_VD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ADASPosTorqueCap << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB_VD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB(sint16): " << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_AllMotWhlTrqFB) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueTarget_Drag << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueActDrag << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_HydraTorqTgt << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_RecuBrakeTorqueAct << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_TheoAccePedalPercent << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_DriverAssistProhibitSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VlcHoldSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCActiveSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_ACCAvailable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_VehicleSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_Vehicle_Warning) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Active) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.VCU_MAI_Available) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.Message_QF != VehBusIn_old.SysSigGrp_HPCVCU_B7_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_HPCVCU_B7_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCVCU_B7_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BackDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_BackDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BackDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BackDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_BrakeFluidLevel) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_DriverDoorSts_VD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FLDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FLOC_PPD_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FRDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FRDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FRDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FRDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FROC_PPD_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontCoverSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_FrontWiperSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtOpenSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HazardSwtSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_HighBeamCtrl) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1A) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON1B) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2A) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON2B) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3 != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_KeyPosition_ON3) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_LowBeamCtrl) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2BRelaySts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_ON2CRelaySts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RearFogCtrl) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RLDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RLOC_PPD_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RMOC_PPD_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RRDoorSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RRDoorSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RRDoorSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RRDoorSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_RROC_PPD_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftCtrl) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnLeftSwtSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightCtrl) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts != VehBusIn_old.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.BCM_TurnRightSwtSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_290.MessageQf != VehBusIn_old.SysSigGrp_HPCBCM_290.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_290.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_290.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_24D.ICU_AccelerationMode != VehBusIn_old.SysSigGrp_ICU_24D.ICU_AccelerationMode){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_24D.ICU_AccelerationMode(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_24D.ICU_AccelerationMode) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_24D.ICU_TotalOdometerkm != VehBusIn_old.SysSigGrp_ICU_24D.ICU_TotalOdometerkm){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_24D.ICU_TotalOdometerkm(uint32): 0x" << std::hex << std::setw(8) << std::setfill('0') << VehBusIn_.SysSigGrp_ICU_24D.ICU_TotalOdometerkm << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_24D.MessageQf != VehBusIn_old.SysSigGrp_ICU_24D.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_24D.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_24D.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_shake_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_levelSet) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SPEEDCHANGEVOICE_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Offset_Unit) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Upper_Offset) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset(sint8): " << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IACC_Lower_Offset) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_Cloud_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_Cloud_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_SLWF_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLWF_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_SLIF_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_SLIF_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_controlSW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_ISA_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ISA_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ELK_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_ELK_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ELK_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_ELK_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LKA_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LKA_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LKA_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LKA_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LDW_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LDW_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LCC_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_LCC_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LCC_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_LCC_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_levelSet) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IHBC_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_IHBC_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IHBC_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_IHBC_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_FCW_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_FCW_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_AEB_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_AEB_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_AEB_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_AEB_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTB_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_RCTB_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTB_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTB_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCW_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_RCW_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCW_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCW_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTA_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_RCTA_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTA_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_RCTA_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_DOW_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_DOW_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_DOW_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_DOW_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_BSD_SW != VehBusIn_old.SysSigGrp_ICU_332_APP.ICU_BSD_SW){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.ICU_BSD_SW(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.ICU_BSD_SW) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ICU_332_APP.Message_QF != VehBusIn_old.SysSigGrp_ICU_332_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_ICU_332_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ICU_332_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Data != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Data){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Data(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Data) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Hour != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Hour){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Hour(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Hour) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Minute != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Minute){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Minute(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Minute) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Month != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Month){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Month(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Month) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Second != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Second){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Second(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Second) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_5CE.IVI_Year != VehBusIn_old.SysSigGrp_IVI_5CE.IVI_Year){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_5CE.IVI_Year(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IVI_5CE.IVI_Year << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_CrashOutputSts != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_CrashOutputSts){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_CrashOutputSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_CrashOutputSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_FLSeatBeltRSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_FRSeatBeltRSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RLSeatBeltRSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RMSeatBeltRSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt != VehBusIn_old.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.ACU_RRSeatBeltRSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_2A3.MessageQf != VehBusIn_old.SysSigGrp_ACU_2A3.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_2A3.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_2A3.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcce != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_LateralAcce){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcce(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcce << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcce != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_LongitAcce){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcce(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcce << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LateralAcceValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_LongitAcceValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRate != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_YawRate){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRate(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRate << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRateValid != VehBusIn_old.SysSigGrp_ACU_233_APP.ACU_YawRateValid){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRateValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_233_APP.ACU_YawRateValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_ACU_233_APP.Message_QF != VehBusIn_old.SysSigGrp_ACU_233_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_ACU_233_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_ACU_233_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_PulseActiveSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralCtrlHandTorq << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_MotorTorque != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_MotorTorque){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_MotorTorque(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_MotorTorque << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralNotAvailableReason) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralActive != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_LateralActive){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralActive(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralActive) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_LateralAvailable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringModeStsFB) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorque << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_ != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelRotSpd_ << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteerWheelAngle << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringTorqueValidData) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleSpeedValidData) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_SteeringAngleValidData) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_FailureSts != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_FailureSts){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_FailureSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_FailureSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_CalibrationSts) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_Fault != VehBusIn_old.SysSigGrp_EPS_18D_APP.EPS_Fault){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_Fault(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.EPS_Fault) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_EPS_18D_APP.Message_QF != VehBusIn_old.SysSigGrp_EPS_18D_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_EPS_18D_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_EPS_18D_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCFailed != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_VDCFailed){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCFailed(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCFailed) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCActive != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_VDCActive){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCActive(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VDCActive) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_EBDFailed != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_EBDFailed){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_EBDFailed(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_EBDFailed) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_Vehiclestandstill) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ESCFunctionStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSFailed != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_TCSFailed){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSFailed(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSFailed) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSActive != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_TCSActive){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSActive(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_TCSActive) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSFailed != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_ABSFailed){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSFailed(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSFailed) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSActive != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_ABSActive){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSActive(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_ABSActive) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeedVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed != VehBusIn_old.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_182_APP.IBC_VehicleSpeed << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_182_APP.Message_QF != VehBusIn_old.SysSigGrp_IBC_182_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_182_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_182_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied != VehBusIn_old.SysSigGrp_IBC_183.IBC_BrakePedalApplied){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q != VehBusIn_old.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_183.IBC_BrakePedalApplied_Q) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct != VehBusIn_old.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IBC_183.IBC_HydraTorqTgtAct << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer != VehBusIn_old.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q != VehBusIn_old.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_183.IBC_sOutputRodDriverPer_Q) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_183.MessageQf != VehBusIn_old.SysSigGrp_IBC_183.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_183.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_183.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedRC << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedRC << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedRC << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC(uint16): 0x" << std::hex << std::setw(4) << std::setfill('0') << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedRC << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedVD) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelDirection) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelDirection) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelDirection) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelDirection) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RRWheelSpeedKPH << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_RLWheelSpeedKPH << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FRWheelSpeedKPH << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH != VehBusIn_old.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_184_APP.IBC_FLWheelSpeedKPH << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_184_APP.Message_QF != VehBusIn_old.SysSigGrp_IBC_184_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_184_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_184_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VLC_Available_ACC) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_HDCStatus != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_HDCStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_HDCStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_HDCStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCACC != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_QDCACC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCACC(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCACC) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Active_ACC) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_CDD_Available_ACC) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCAEB != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_QDCAEB){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCAEB(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_QDCAEB) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHAvailable != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AVHAvailable){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHAvailable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHAvailable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHStatus != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AVHStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AVHStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEBdecAvailable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEB_active != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AEB_active){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEB_active(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AEB_active) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LdmBLC != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_LdmBLC){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LdmBLC(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LdmBLC) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABP_active != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ABP_active){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABP_active(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABP_active) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABPAviliable != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ABPAviliable){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABPAviliable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABPAviliable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWB_active != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AWB_active){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWB_active(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWB_active) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_AWBAvaliable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABA_active != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ABA_active){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABA_active(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABA_active) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABAAvaliable) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceActValid) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_185_APP.IBC_LongitAcceAct << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ABS_FailureLamp) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_ESP_FailureLamp) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure_Q) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_PlungerPressure){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure(float32): " << std::fixed << std::setprecision(2) << VehBusIn_.SysSigGrp_IBC_185_APP.IBC_PlungerPressure << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus != VehBusIn_old.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.IBC_VehicleHoldStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_185_APP.Message_QF != VehBusIn_old.SysSigGrp_IBC_185_APP.Message_QF){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_185_APP.Message_QF(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_185_APP.Message_QF) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available != VehBusIn_old.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_APAACCRequest_Available) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_FailStatus != VehBusIn_old.SysSigGrp_IBC_227.IBC_EPB_FailStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_FailStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_FailStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_Status != VehBusIn_old.SysSigGrp_IBC_227.IBC_EPB_Status){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_Status(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_227.IBC_EPB_Status) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_227.MessageQf != VehBusIn_old.SysSigGrp_IBC_227.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_227.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_227.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_3CE.iTPMS_SystemStatus != VehBusIn_old.SysSigGrp_IBC_3CE.iTPMS_SystemStatus){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_3CE.iTPMS_SystemStatus(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_3CE.iTPMS_SystemStatus) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_3CE.MessageQf != VehBusIn_old.SysSigGrp_IBC_3CE.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_3CE.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_3CE.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq != VehBusIn_old.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq){
+        std::cout << "VehBusIn_.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IVI_3E3.IVI_GetRidAlarmCancelReq) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A != VehBusIn_old.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_A) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B != VehBusIn_old.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_B) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C != VehBusIn_old.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_C) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D != VehBusIn_old.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B4.HPCBCM_challenge_D) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A != VehBusIn_old.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_A) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B != VehBusIn_old.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_B) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C != VehBusIn_old.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_C) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D != VehBusIn_old.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D){
+        std::cout << "VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_HPCBCM_1B7.HPCBCM_response_D) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW1 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW1){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW1(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW1) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW10 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW10){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW10(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW10) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW2 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW2){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW2(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW2) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW3 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW3){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW3(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW3) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW4 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW4){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW4(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW4) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW5 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW5){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW5(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW5) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW6 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW6){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW6(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW6) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW7 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW7){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW7(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW7) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW8 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW8){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW8(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW8) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW9 != VehBusIn_old.SysSigGrp_IBC_6F3.IBC_UDS_SW9){
+        std::cout << "VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW9(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_IBC_6F3.IBC_UDS_SW9) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_25A.LMC_LSFCActiveSt != VehBusIn_old.SysSigGrp_LMC_25A.LMC_LSFCActiveSt){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_25A.LMC_LSFCActiveSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_25A.LMC_LSFCActiveSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_25A.MessageQf != VehBusIn_old.SysSigGrp_LMC_25A.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_25A.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_25A.MessageQf) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt != VehBusIn_old.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_FD.LMC_FTSC_ActiveSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt != VehBusIn_old.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_FD.LMC_HSPC_ActiveSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt != VehBusIn_old.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_FD.LMC_WBDC_ActiveSt) << std::dec  << std::endl;
+        }
+    if(VehBusIn_.SysSigGrp_LMC_FD.MessageQf != VehBusIn_old.SysSigGrp_LMC_FD.MessageQf){
+        std::cout << "VehBusIn_.SysSigGrp_LMC_FD.MessageQf(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehBusIn_.SysSigGrp_LMC_FD.MessageQf) << std::dec  << std::endl;
+        }
+}
+#endif
 
 
+#ifdef VEHPARAM_TX_H
+/* Print struct VehParam_Tx changed value */
+void print_VehParam_Tx(VehParam_Tx& VehParam_Tx_,VehParam_Tx& VehParam_Tx_old){
+// std::cout << "VehParam_Tx all variable:" << std::endl;
+    if(VehParam_Tx_.AxleDstReToVehFrnt != VehParam_Tx_old.AxleDstReToVehFrnt){
+        std::cout << "VehParam_Tx_.AxleDstReToVehFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.AxleDstReToVehFrnt << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackAxleDistFrnt != VehParam_Tx_old.SingleTrackAxleDistFrnt){
+        std::cout << "VehParam_Tx_.SingleTrackAxleDistFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackAxleDistFrnt << std::endl;
+        }
+    if(VehParam_Tx_.SteerWhlPosn != VehParam_Tx_old.SteerWhlPosn){
+        std::cout << "VehParam_Tx_.SteerWhlPosn(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.SteerWhlPosn) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.Len != VehParam_Tx_old.Len){
+        std::cout << "VehParam_Tx_.Len(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.Len << std::endl;
+        }
+    if(VehParam_Tx_.Weight != VehParam_Tx_old.Weight){
+        std::cout << "VehParam_Tx_.Weight(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.Weight << std::endl;
+        }
+    if(VehParam_Tx_.WhlBas != VehParam_Tx_old.WhlBas){
+        std::cout << "VehParam_Tx_.WhlBas(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.WhlBas << std::endl;
+        }
+    if(VehParam_Tx_.Width != VehParam_Tx_old.Width){
+        std::cout << "VehParam_Tx_.Width(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.Width << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[0]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[1]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[2]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[3]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[4]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[5]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[6]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] != VehParam_Tx_old.SingleTrackCornrgStfnFrntByVehSpd[7]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnFrnt != VehParam_Tx_old.SingleTrackCornrgStfnFrnt){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrnt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnFrnt << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[0]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[1]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[2]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[3]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[4]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[5]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[6]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] != VehParam_Tx_old.SingleTrackCornrgStfnReByVehSpd[7]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnRe != VehParam_Tx_old.SingleTrackCornrgStfnRe){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnRe(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnRe << std::endl;
+        }
+    if(VehParam_Tx_.SteerWhlAgRat != VehParam_Tx_old.SteerWhlAgRat){
+        std::cout << "VehParam_Tx_.SteerWhlAgRat(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SteerWhlAgRat << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[0]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[1]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[2]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[3]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[4]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[5]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[6]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] != VehParam_Tx_old.SingleTrackCornrgStfnTable_Spd[7]){
+        std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7](float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] << std::endl;
+        }
+    if(VehParam_Tx_.BltFrntExist != VehParam_Tx_old.BltFrntExist){
+        std::cout << "VehParam_Tx_.BltFrntExist(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.BltFrntExist) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.OncomingBrk != VehParam_Tx_old.OncomingBrk){
+        std::cout << "VehParam_Tx_.OncomingBrk(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.OncomingBrk) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.SelfStrGrdt != VehParam_Tx_old.SelfStrGrdt){
+        std::cout << "VehParam_Tx_.SelfStrGrdt(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SelfStrGrdt << std::endl;
+        }
+    if(VehParam_Tx_.TrafficAssist != VehParam_Tx_old.TrafficAssist){
+        std::cout << "VehParam_Tx_.TrafficAssist(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.TrafficAssist) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.LongCtrlBrkLim != VehParam_Tx_old.LongCtrlBrkLim){
+        std::cout << "VehParam_Tx_.LongCtrlBrkLim(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrlBrkLim) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.LongCtrEco != VehParam_Tx_old.LongCtrEco){
+        std::cout << "VehParam_Tx_.LongCtrEco(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrEco) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.LongCtrSpdLoLim != VehParam_Tx_old.LongCtrSpdLoLim){
+        std::cout << "VehParam_Tx_.LongCtrSpdLoLim(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.LongCtrSpdLoLim << std::endl;
+        }
+    if(VehParam_Tx_.LongCtrStopNGo != VehParam_Tx_old.LongCtrStopNGo){
+        std::cout << "VehParam_Tx_.LongCtrStopNGo(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrStopNGo) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.SingleTrackMomentOfInertia != VehParam_Tx_old.SingleTrackMomentOfInertia){
+        std::cout << "VehParam_Tx_.SingleTrackMomentOfInertia(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.SingleTrackMomentOfInertia << std::endl;
+        }
+    if(VehParam_Tx_.VehTyp != VehParam_Tx_old.VehTyp){
+        std::cout << "VehParam_Tx_.VehTyp(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.VehTyp) << std::dec  << std::endl;
+        }
+    if(VehParam_Tx_.WhlRadius != VehParam_Tx_old.WhlRadius){
+        std::cout << "VehParam_Tx_.WhlRadius(float32): " << std::fixed << std::setprecision(2) << VehParam_Tx_.WhlRadius << std::endl;
+        }
+}
+#endif
 
 
-
+#ifdef IDT_FUNCTGTVISNID_H
+/* Print struct IDT_FuncTgtVisnID changed value */
+void print_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_,IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_old){
+// std::cout << "IDT_FuncTgtVisnID all variable:" << std::endl;
+    if(IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID != IDT_FuncTgtVisnID_old.LongTgtVisnID.ACCTgtVisnID){
+        std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID) << std::dec  << std::endl;
+        }
+    if(IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID != IDT_FuncTgtVisnID_old.LongTgtVisnID.CutInTgtVisnID){
+        std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID) << std::dec  << std::endl;
+        }
+    if(IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID != IDT_FuncTgtVisnID_old.LongTgtVisnID.FDWTgtVisnID){
+        std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID) << std::dec  << std::endl;
+        }
+    if(IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID != IDT_FuncTgtVisnID_old.CATgtVisnID.AEBTgtVisnID){
+        std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID) << std::dec  << std::endl;
+        }
+    if(IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID != IDT_FuncTgtVisnID_old.CATgtVisnID.FCWTgtVisnID){
+        std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID(uint8): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID) << std::dec  << std::endl;
+        }
+}
+#endif
 
 
