@@ -30,7 +30,9 @@ void setIntialValue_CrossingObject(CrossingObject& CrossingObject_);
 #endif
 
 
-
+#ifdef EGOVEHICLESTATE_H
+void setIntialValue_EgoVehicleState(EgoVehicleState& EgoVehicleState_);
+#endif
 
 
 #endif

@@ -1,13 +1,6 @@
 #include"AdApter_EgoVehicleState_PUB.h"
 
-void print_memory(const void* ptr, size_t size) {
-    const unsigned char* bytes = static_cast<const unsigned char*>(ptr);
-    for (size_t i = 0; i < size; ++i) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') 
-                  << static_cast<int>(bytes[i]) << " ";
-    }
-    std::cout << std::dec << std::endl;
-}
+
 
 
 
@@ -79,30 +72,6 @@ return 0;
 
 
 
-
-
-
-
-/* Set and Print struct EgoVehicleState initial value */
-void setIntialValue_EgoVehicleState(EgoVehicleState& EgoVehicleState_){
-    std::cout << "Set struct EgoVehicleState variable and Publish:" << std::endl;
-    EgoVehicleState_.VLgt = 1.10;
-    std::cout << "EgoVehicleState_.VLgt(float32): " << EgoVehicleState_.VLgt << std::endl;
-    EgoVehicleState_.ALgt = 2.20;
-    std::cout << "EgoVehicleState_.ALgt(float32): " << EgoVehicleState_.ALgt << std::endl;
-    EgoVehicleState_.ALgtRaw = 3.30;
-    std::cout << "EgoVehicleState_.ALgtRaw(float32): " << EgoVehicleState_.ALgtRaw << std::endl;
-    EgoVehicleState_.ALatRaw = 4.40;
-    std::cout << "EgoVehicleState_.ALatRaw(float32): " << EgoVehicleState_.ALatRaw << std::endl;
-    EgoVehicleState_.YawRate = 5.50;
-    std::cout << "EgoVehicleState_.YawRate(float32): " << EgoVehicleState_.YawRate << std::endl;
-    EgoVehicleState_.YawRateRaw = 6.60;
-    std::cout << "EgoVehicleState_.YawRateRaw(float32): " << EgoVehicleState_.YawRateRaw << std::endl;
-    EgoVehicleState_.SequenceID = 1;
-    std::cout << "EgoVehicleState_.SequenceID(uint32): " << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(EgoVehicleState_.SequenceID) << std::dec  << std::endl;
-    EgoVehicleState_.valid = 1;
-    std::cout << "EgoVehicleState_.valid(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EgoVehicleState_.valid) << std::dec  << std::endl;
-}
 
 
 
