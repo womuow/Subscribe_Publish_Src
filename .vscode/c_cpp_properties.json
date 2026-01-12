@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/c/MAXEYE/ADCU/dds_mos_V3.0/Src/Feature_Acore_Release/requirements/headerfile",
+                "${workspaceFolder}/../",
+                "/home/c/MAXEYE/ADCU/dds_mos_V3.0/linux-ax750/include",
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

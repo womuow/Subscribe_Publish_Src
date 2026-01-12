@@ -26,7 +26,13 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DCROSSINGOBJECT_H=1)
+
+
+
 add_executable(${libCrossingObjectPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/CrossingObject_PUB/AdApter_CrossingObject_PUB.cpp 
 ) #add_library
 

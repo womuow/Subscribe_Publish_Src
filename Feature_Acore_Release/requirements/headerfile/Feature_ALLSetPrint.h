@@ -21,10 +21,14 @@
 
 
 #ifdef CAH_ACTIVESAFETY_H
-
 void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_);
-
 #endif
+
+
+#ifdef CROSSINGOBJECT_H
+void setIntialValue_CrossingObject(CrossingObject& CrossingObject_);
+#endif
+
 
 
 
