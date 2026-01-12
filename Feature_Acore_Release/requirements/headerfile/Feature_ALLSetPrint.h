@@ -86,6 +86,27 @@ void asyncInputThreadTTY() ;
 
 
 
+#ifdef IDT_FUNCTGTVISNID_H
+using VariableVariant = std::variant<uint8*, uint16* ,uint32*,float32*,sint8*,sint16*,sint32*>;
+#include "AdApter_FuncTgtVisnID_sub.h"
+
+void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input);
+void printVariableVariant(const std::string& name, VariableVariant var) ;
+void asyncInputThreadTTY() ;
+
+#endif
+
+
+
+
+#ifdef VEHBUSIN_H
+using VariableVariant = std::variant<uint8*, uint16* ,uint32*,float32*,sint8*,sint16*,sint32*>;
+#include "AdApter_VehBusIn_sub.h"
+
+
+#endif
+
+
 
 void print_memory(const void* ptr, size_t size);
 #endif // FEATURE_ALL

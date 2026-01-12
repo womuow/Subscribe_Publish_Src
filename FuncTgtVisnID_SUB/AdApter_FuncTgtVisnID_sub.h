@@ -44,6 +44,12 @@
 #include <variant>
 #include <iomanip>
 #include <map>
+#include <termios.h>
+
+#include "Feature_ALLSetPrint.h"
+#include "IPC_Pub.h"
+#ifndef ADAPTER_FUNCTGTVISNID_H
+#define ADAPTER_FUNCTGTVISNID_H
 
 using namespace std::chrono_literals;
 
@@ -73,11 +79,16 @@ private:
 };
 
 // 全局变量
-std::atomic<bool> keepRunning(true);
-std::mutex inputMutex;
-std::queue<std::string> inputQueue;
-std::string currentInput;
-
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in;
+extern std::atomic_bool stop;
+extern IDT_FuncTgtVisnID IDT_FuncTgtVisnID_;
+extern IDT_FuncTgtVisnID IDT_FuncTgtVisnID_old;
+extern std::map<std::string, VariableVariant > IDT_FuncTgtVisnID_Map;
 
 /* Print struct FuncTgtVisnID changed value */
 void print_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_,IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_old);
+
+
+#endif // ADAPTER_FUNCTGTVISNID_H

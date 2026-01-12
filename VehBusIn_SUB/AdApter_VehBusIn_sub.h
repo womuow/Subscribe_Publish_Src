@@ -41,6 +41,13 @@
 #include "mos-com/interface/subscriber.hpp"
 #include "mos-com/message/message.h"
 #include "mos-com/utils/debug_log.h"
+
+#include "Feature_ALLSetPrint.h"
+#include "IPC_Pub.h"
+#ifndef ADAPTER_VEHBUSIN_H
+#define ADAPTER_VEHBUSIN_H
+
+
 using namespace std::chrono_literals;
 // using namespace org::eclipse::cyclonedds;
 class AdApter_VehBusIn
@@ -67,8 +74,16 @@ public:
 private:
 };
 
-
-void print_memory(const void* ptr, size_t size);
+// 全局变量
+extern std::queue<std::string> inputQueue;
+extern int flag;
+extern std::string data_in;
+extern std::atomic_bool stop;
+extern VehBusIn VehBusIn_;
+extern VehBusIn VehBusIn_old;  
+extern std::map<std::string, VariableVariant > VehBusIn_Map;
 
 /* Print struct VehBusIn changed value */
 void print_VehBusIn(VehBusIn& VehBusIn_,VehBusIn& VehBusIn_old);
+
+#endif

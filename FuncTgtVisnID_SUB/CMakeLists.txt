@@ -16,7 +16,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(libFuncTgtVisnID libFuncTgtVisnID_SUB)
 
 # 设置可执行文件的输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/MOS_SUB)
 
 
 find_package(met_pack REQUIRED)
@@ -25,7 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+
+add_definitions(-DIDT_FUNCTGTVISNID_H=1)
+
 add_executable(${libFuncTgtVisnID}
+  ${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp  
 	${CMAKE_SOURCE_DIR}/Src/FuncTgtVisnID_SUB/AdApter_FuncTgtVisnID_sub.cpp )
   #${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
 
