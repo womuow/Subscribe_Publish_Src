@@ -63,7 +63,9 @@ void setIntialValue_LongCtrlObjInfo(LongCtrlObjInfo& LongCtrlObjInfo_);
 void setIntialValue_RearObject(RearObject& RearObject_);
 #endif
 
-
+#ifdef ROADEDGE_H
+void setIntialValue_RoadEdge(RoadEdge& RoadEdge_);
+#endif
 
 
 #endif // FEATURE_ALL

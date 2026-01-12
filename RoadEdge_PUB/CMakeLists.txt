@@ -25,7 +25,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+add_definitions(-DROADEDGE_H=1)
+
+
+
 add_executable(${libRoadEdgePUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/RoadEdge_PUB/AdApter_RoadEdge_PUB.cpp ) #add_library
 
 
