@@ -55,7 +55,9 @@ void setIntialValue_LDP_Obj(LDP_Obj& LDP_Obj_);
 void setIntialValue_LDPPath(LDPPath& LDPPath_);
 #endif
 
-
+#ifdef LONGCTRLOBJINFO_H
+void setIntialValue_LongCtrlObjInfo(LongCtrlObjInfo& LongCtrlObjInfo_);
+#endif
 
 
 
