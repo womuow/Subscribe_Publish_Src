@@ -24,7 +24,12 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DFUSEDFRONTOBJECT_H=1)
+
+
 add_executable(${libFrontObjectPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/FrontObject_PUB/AdApter_FrontObject_PUB.cpp ) #add_library
 
 

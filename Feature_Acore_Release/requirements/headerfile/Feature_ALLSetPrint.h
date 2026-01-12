@@ -38,6 +38,9 @@ void setIntialValue_EgoVehicleState(EgoVehicleState& EgoVehicleState_);
 void setIntialValue_FlcRoadCover(FlcRoadCover& FlcRoadCover_);    
 #endif
 
+#ifdef FUSEDFRONTOBJECT_H
+void setIntialValue_FusedFrontObject(FusedFrontObject& FusedFrontObject_);
+#endif
 
 
 
