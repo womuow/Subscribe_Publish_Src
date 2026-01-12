@@ -71,6 +71,12 @@ void setIntialValue_RoadEdge(RoadEdge& RoadEdge_);
 void setIntialValue_RoadPath(RoadPath& RoadPath_);
 #endif
 
+#ifdef TRAFFICFLOW_H
+void setIntialValue_TrafficFlow(TrafficFlow& TrafficFlow_);
+#endif
+
+
+
 #endif // FEATURE_ALL
 void print_memory(const void* ptr, size_t size);
 // void printVariableVariant(const std::string& name, VariableVariant var) ;

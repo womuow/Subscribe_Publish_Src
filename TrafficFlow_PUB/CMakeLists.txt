@@ -25,7 +25,13 @@ if(NOT TARGET communication)
   find_package(communication QUIET)
 endif()
 
+
+add_definitions(-DTRAFFICFLOW_H=1)
+
+
+
 add_executable(${libTrafficFlowPUB}
+${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/Feature_ALLSetPrint.cpp 
 ${CMAKE_SOURCE_DIR}/Src/TrafficFlow_PUB/AdApter_TrafficFlow_PUB.cpp ) #add_library
 
 
