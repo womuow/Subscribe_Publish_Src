@@ -5,7 +5,16 @@
 
 
 /* AUTOSAR Implementation data types, specific to software component */
-typedef uint8 boolean;
+typedef uint8 AEBMon_State;
+typedef uint8 AdpPath_ValidSamples;
+typedef float32 AdpPath_EndDst;
+typedef float32 AdpPath_Y;
+typedef float32 AdpPath_Curvature;
+typedef float32 AdpPath_DstAlongPah;
+typedef float32 AdpPath_LocalOffsetCoGx;
+typedef float32 AdpPath_LocalHeadingCoGx;
+typedef float32 AdpPath_YawratePathCoGx;
+typedef float32 AdpPath_YawratederivativePathCoGx;
 typedef uint8 DynCalPrmForAccBrkLim;
 typedef float32 DynCalPrmForAccSpdLoLim;
 typedef float32 DynCalPrmForBicycleMdlAxleDistFrnt;
@@ -96,34 +105,8 @@ typedef uint32 HmiConfig_ldp_sw_T;
 typedef uint32 HmiConfig_acc_target_speed_source_T;
 typedef uint32 HmiConfig_swbl_roller_up_sts_T;
 typedef uint32 HmiConfig_swbl_roller_dsts_T;
-typedef uint8 CritLatCdn_PathData_ITC_nrOfSegments;
-typedef float32 CritLatCdn_PathData_ITC_coefficientVector;
-typedef float32 CritLatCdn_PathData_ITC_timeVector;
-typedef float32 CritLatCdn_PathData_coefficientVector;
-typedef float32 CritLatCdn_PathData_initialLatAcceleration;
-typedef float32 CritLatCdn_PathData_initialLatPosition;
-typedef float32 CritLatCdn_PathData_initialLatVelocity;
-typedef float32 CritLatCdn_PathData_initialLongAcceleration;
-typedef float32 CritLatCdn_PathData_initialLongVelocity;
-typedef float32 CritLatCdn_PathData_latAccRequiredForAlignment;
-typedef float32 CritLatCdn_PathData_latAccRequiredForAvoidance;
-typedef uint8 CritLatCdn_PathData_nrOfSegments;
-typedef uint16 CritLatCdn_PathData_pathInfo;
-typedef float32 CritLatCdn_PathData_timeVector;
-typedef float32 CritLatCdn_PrimaryTarget_length;
-typedef float32 CritLatCdn_PrimaryTarget_width;
-typedef float32 CritLatCdn_PrimaryTarget_heading;
-typedef float32 CritLatCdn_PrimaryTarget_timeToCollision;
-typedef float32 CritLatCdn_PrimaryTarget_timeToReach;
-typedef float32 CritLatCdn_PrimaryTarget_timeOutsideEgoLane;
-typedef float32 CritLatCdn_PrimaryTarget_latPositionAtTimeToCollision;
-typedef float32 CritLatCdn_PrimaryTarget_lgtPosition;
-typedef float32 CritLatCdn_PrimaryTarget_latPosition;
-typedef float32 CritLatCdn_PrimaryTarget_lgtVelocity;
-typedef float32 CritLatCdn_PrimaryTarget_latVelocity;
-typedef float32 CritLatCdn_PrimaryTarget_lgtAccRqrdForPrimTarToAvdSelf;
-typedef float32 CritLatCdn_PrimaryTarget_egoLatAccRequiredForAvoidance;
-typedef sint8 DifOfObjNrLeRi;
+typedef float32 point_info_x_T;
+typedef float32 point_info_y_T;
 typedef float32 DynCalPrmForBicycleMdlCornrgStfnFrnt;
 typedef float32 DynCalPrmForBicycleMdlCornrgStfnFrntByVehSpd;
 typedef float32 DynCalPrmForBicycleMdlCornrgStfnRe;
@@ -140,13 +123,6 @@ typedef uint32 EgoVehicleState_SequenceID;
 typedef float32 FlcRoadCover_Snow_confidence;
 typedef float32 FlcRoadCover_Gravel_confidence;
 typedef float32 FlcRoadCover_Wet_confidence;
-typedef uint8 ObjFrntCdnForSupp_ObjIdx;
-typedef float32 ObjFrntCdnForSupp_ObjPosnLat;
-typedef float32 ObjFrntCdnForSupp_ObjPosnLgt;
-typedef float32 ObjFrntCdnForSupp_ObjSpdLgt;
-typedef float32 ObjFrntCdnForSupp_ObjWidth;
-typedef float32 ObjFrntCdnForSupp_TiToCllsn;
-typedef uint8 ObjFrntCdnForSupp_VisnIdx;
 typedef float32 AdditionalTarSelnSignals_Signal1;
 typedef float32 AdditionalTarSelnSignals_Signal10;
 typedef float32 AdditionalTarSelnSignals_Signal2;
@@ -203,6 +179,15 @@ typedef float32 FusedFrontObject_States_longAcceleration;
 typedef float32 FusedFrontObject_States_longPosition;
 typedef float32 FusedFrontObject_States_longVelocity;
 typedef float32 FusedFrontObject_States_speed;
+typedef uint8 LaneAssignedFrontObjects_Properties_id;
+typedef uint32 LaneAssignedFrontObjects_SequenceID;
+typedef float32 LaneAssignedFrontObjects_States_latAccelerationRoad;
+typedef float32 LaneAssignedFrontObjects_States_latPositionRoad;
+typedef float32 LaneAssignedFrontObjects_States_headingRoad;
+typedef float32 LaneAssignedFrontObjects_States_latVelocityRoad;
+typedef float32 LaneAssignedFrontObjects_States_longAccelerationRoad;
+typedef float32 LaneAssignedFrontObjects_States_longPositionRoad;
+typedef float32 LaneAssignedFrontObjects_States_longVelocityRoad;
 typedef float32 LaneMarker_EgoLane_Left_Lane_DblClothoid_a;
 typedef float32 LaneMarker_EgoLane_Left_Lane_DblClothoid_b;
 typedef float32 LaneMarker_EgoLane_Left_Lane_DblClothoid_c;
@@ -416,73 +401,83 @@ typedef uint16 EPS_SteerWheelRotSpd;
 typedef uint8 IDT_Message_QF;
 
 #ifndef StatusOK
-#define StatusOK        (0)
+#define StatusOK                       (0)
 #endif
 
 #ifndef StatusNoNewData
-#define StatusNoNewData    (1)
+#define StatusNoNewData                (1)
 #endif
 
 #ifndef StatusWrongCRC
-#define StatusWrongCRC     (2)
+#define StatusWrongCRC                 (2)
 #endif
 
 #ifndef StatusInit
-#define StatusInit      (4)
+#define StatusInit                     (4)
 #endif
 
 #ifndef StatusRepeat
-#define StatusRepeat       (8)
+#define StatusRepeat                   (8)
 #endif
 
 #ifndef StatusSync
-#define StatusSync      (16)
+#define StatusSync                     (16)
 #endif
 
 #ifndef StatusOKsomeLost
-#define StatusOKsomeLost      (32)
+#define StatusOKsomeLost               (32)
 #endif
 
 #ifndef StatusWrongSeq
-#define StatusWrongSeq     (64)
+#define StatusWrongSeq                 (64)
 #endif
 
 #ifndef StatusLostComm
-#define StatusLostComm     (128)
+#define StatusLostComm                 (128)
+#endif
+
+typedef uint8 TrueFalse;
+
+#ifndef TrueFalse_False
+#define TrueFalse_False                (0)
+#endif
+
+#ifndef TrueFalse_True
+#define TrueFalse_True                 (1)
 #endif
 
 typedef uint8 NoYes;
 
 #ifndef NoYes_No
-#define NoYes_No        (0)
+#define NoYes_No                       (0)
 #endif
 
 #ifndef NoYes_Yes
-#define NoYes_Yes       (1)
+#define NoYes_Yes                      (1)
 #endif
 
 typedef uint8 TrfcAssiConf;
 
 #ifndef TrfcAssiConf_NoConfidence
-#define TrfcAssiConf_NoConfidence   (0)
+#define TrfcAssiConf_NoConfidence      (0)
 #endif
 
 #ifndef TrfcAssiConf_Reserved
-#define TrfcAssiConf_Reserved    (1)
+#define TrfcAssiConf_Reserved          (1)
 #endif
 
 #ifndef TrfcAssiConf_LowConfidence
-#define TrfcAssiConf_LowConfidence  (2)
+#define TrfcAssiConf_LowConfidence     (2)
 #endif
 
 #ifndef TrfcAssiConf_HighConfidence
-#define TrfcAssiConf_HighConfidence (3)
+#define TrfcAssiConf_HighConfidence    (3)
 #endif
 
 typedef uint8 LaneChangeType;
 
 #ifndef LaneChangeType_Unchanged
-#define LaneChangeType_Unchanged    (0)
+#define LaneChangeType_Unchanged       (0)
 #endif
 
 #ifndef LaneChangeType_ChangedToLeft
@@ -496,65 +491,65 @@ typedef uint8 LaneChangeType;
 typedef uint8 TrueFalse32;
 
 #ifndef TrueFalse32_False
-#define TrueFalse32_False     (0)
+#define TrueFalse32_False              (0)
 #endif
 
 #ifndef TrueFalse32_True
-#define TrueFalse32_True      (1)
+#define TrueFalse32_True               (1)
 #endif
 
 typedef uint8 Reliable5;
 
 #ifndef Reliable5_NotRelbl
-#define Reliable5_NotRelbl    (0)
+#define Reliable5_NotRelbl             (0)
 #endif
 
 #ifndef Reliable5_Relbl1
-#define Reliable5_Relbl1      (1)
+#define Reliable5_Relbl1               (1)
 #endif
 
 #ifndef Reliable5_Relbl2
-#define Reliable5_Relbl2      (2)
+#define Reliable5_Relbl2               (2)
 #endif
 
 #ifndef Reliable5_Relbl3
-#define Reliable5_Relbl3      (3)
+#define Reliable5_Relbl3               (3)
 #endif
 
 typedef uint8 MarkerType;
 
 #ifndef MarkerType_None
-#define MarkerType_None    (0)
+#define MarkerType_None                (0)
 #endif
 
 #ifndef MarkerType_Solid
-#define MarkerType_Solid      (1)
+#define MarkerType_Solid               (1)
 #endif
 
 #ifndef MarkerType_Dashed
-#define MarkerType_Dashed     (2)
+#define MarkerType_Dashed              (2)
 #endif
 
 #ifndef MarkerType_Separation
-#define MarkerType_Separation    (3)
+#define MarkerType_Separation          (3)
 #endif
 
 #ifndef MarkerType_SolidDashed
-#define MarkerType_SolidDashed   (4)
+#define MarkerType_SolidDashed         (4)
 #endif
 
 #ifndef MarkerType_DashedSolid
-#define MarkerType_DashedSolid   (5)
+#define MarkerType_DashedSolid         (5)
 #endif
 
 #ifndef MarkerType_Reserved1
-#define MarkerType_Reserved1     (6)
+#define MarkerType_Reserved1           (6)
 #endif
 
 typedef uint8 DataConfidenceLvl3;
 
 #ifndef DataConfidenceLvl3_NotRelbl
-#define DataConfidenceLvl3_NotRelbl (0)
+#define DataConfidenceLvl3_NotRelbl    (0)
 #endif
 
 #ifndef DataConfidenceLvl3_SoonNotRelbl
@@ -562,7 +557,7 @@ typedef uint8 DataConfidenceLvl3;
 #endif
 
 #ifndef DataConfidenceLvl3_LowRelbl
-#define DataConfidenceLvl3_LowRelbl (2)
+#define DataConfidenceLvl3_LowRelbl    (2)
 #endif
 
 #ifndef DataConfidenceLvl3_HigherRelbl
@@ -576,45 +571,45 @@ typedef uint8 DataConfidenceLvl3;
 typedef uint8 MotionHistory;
 
 #ifndef MotionHistory_NotSeenMoving
-#define MotionHistory_NotSeenMoving (0)
+#define MotionHistory_NotSeenMoving    (0)
 #endif
 
 #ifndef MotionHistory_SeenReceding
-#define MotionHistory_SeenReceding  (1)
+#define MotionHistory_SeenReceding     (1)
 #endif
 
 #ifndef MotionHistory_SeenOncoming
-#define MotionHistory_SeenOncoming  (2)
+#define MotionHistory_SeenOncoming     (2)
 #endif
 
 #ifndef MotionHistory_SeenCrossing
-#define MotionHistory_SeenCrossing  (3)
+#define MotionHistory_SeenCrossing     (3)
 #endif
 
 typedef uint8 MotionPattern2;
 
 #ifndef MotionPattern2_Unknown
-#define MotionPattern2_Unknown   (0)
+#define MotionPattern2_Unknown         (0)
 #endif
 
 #ifndef MotionPattern2_Stationary
-#define MotionPattern2_Stationary   (1)
+#define MotionPattern2_Stationary      (1)
 #endif
 
 #ifndef MotionPattern2_Receding
-#define MotionPattern2_Receding  (2)
+#define MotionPattern2_Receding        (2)
 #endif
 
 #ifndef MotionPattern2_Oncoming
-#define MotionPattern2_Oncoming  (3)
+#define MotionPattern2_Oncoming        (3)
 #endif
 
 #ifndef MotionPattern2_Movable
-#define MotionPattern2_Movable   (4)
+#define MotionPattern2_Movable         (4)
 #endif
 
 #ifndef MotionPattern2_Crossing
-#define MotionPattern2_Crossing  (5)
+#define MotionPattern2_Crossing        (5)
 #endif
 
 typedef uint8 TargetLaneStatus;
@@ -634,67 +629,67 @@ typedef uint8 TargetLaneStatus;
 typedef uint8 IndicatorStatus;
 
 #ifndef IndicatorStatus_NoIndcn
-#define IndicatorStatus_NoIndcn  (0)
+#define IndicatorStatus_NoIndcn        (0)
 #endif
 
 #ifndef IndicatorStatus_Le
-#define IndicatorStatus_Le    (1)
+#define IndicatorStatus_Le             (1)
 #endif
 
 #ifndef IndicatorStatus_Ri
-#define IndicatorStatus_Ri    (2)
+#define IndicatorStatus_Ri             (2)
 #endif
 
 #ifndef IndicatorStatus_Ukwn
-#define IndicatorStatus_Ukwn     (3)
+#define IndicatorStatus_Ukwn           (3)
 #endif
 
 typedef uint8 ObjectClass7;
 
 #ifndef ObjectClass7_UkwnClass
-#define ObjectClass7_UkwnClass   (0)
+#define ObjectClass7_UkwnClass         (0)
 #endif
 
 #ifndef ObjectClass7_Car
-#define ObjectClass7_Car      (1)
+#define ObjectClass7_Car               (1)
 #endif
 
 #ifndef ObjectClass7_Motorcycle
-#define ObjectClass7_Motorcycle  (2)
+#define ObjectClass7_Motorcycle        (2)
 #endif
 
 #ifndef ObjectClass7_Truck
-#define ObjectClass7_Truck    (3)
+#define ObjectClass7_Truck             (3)
 #endif
 
 #ifndef ObjectClass7_Ped
-#define ObjectClass7_Ped      (4)
+#define ObjectClass7_Ped               (4)
 #endif
 
 #ifndef ObjectClass7_Anim
-#define ObjectClass7_Anim     (7)
+#define ObjectClass7_Anim              (7)
 #endif
 
 #ifndef ObjectClass7_ObjGen
-#define ObjectClass7_ObjGen   (8)
+#define ObjectClass7_ObjGen            (8)
 #endif
 
 #ifndef ObjectClass7_Bicycle
-#define ObjectClass7_Bicycle     (9)
+#define ObjectClass7_Bicycle           (9)
 #endif
 
 #ifndef ObjectClass7_VehOfUkwnClass
-#define ObjectClass7_VehOfUkwnClass (10)
+#define ObjectClass7_VehOfUkwnClass    (10)
 #endif
 
 typedef uint8 DataConfidenceLvl4;
 
 #ifndef DataConfidenceLvl4_NotRelbl
-#define DataConfidenceLvl4_NotRelbl (0)
+#define DataConfidenceLvl4_NotRelbl    (0)
 #endif
 
 #ifndef DataConfidenceLvl4_Relbl
-#define DataConfidenceLvl4_Relbl    (1)
+#define DataConfidenceLvl4_Relbl       (1)
 #endif
 
 #ifndef DataConfidenceLvl4_HighRelbl
@@ -704,7 +699,7 @@ typedef uint8 DataConfidenceLvl4;
 typedef uint8 TrafficFlowDir;
 
 #ifndef TrafficFlowDir_Ukwn
-#define TrafficFlowDir_Ukwn   (0)
+#define TrafficFlowDir_Ukwn            (0)
 #endif
 
 #ifndef TrafficFlowDir_EquToSelfMovmt
@@ -718,21 +713,21 @@ typedef uint8 TrafficFlowDir;
 typedef uint8 DrivingSide5;
 
 #ifndef DrivingSide5_Unknown
-#define DrivingSide5_Unknown     (0)
+#define DrivingSide5_Unknown           (0)
 #endif
 
 #ifndef DrivingSide5_Left
-#define DrivingSide5_Left     (1)
+#define DrivingSide5_Left              (1)
 #endif
 
 #ifndef DrivingSide5_Right
-#define DrivingSide5_Right    (2)
+#define DrivingSide5_Right             (2)
 #endif
 
 typedef uint8 CmbbObjConfidence;
 
 #ifndef CmbbObjConfidence_NotRelbl
-#define CmbbObjConfidence_NotRelbl  (0)
+#define CmbbObjConfidence_NotRelbl     (0)
 #endif
 
 #ifndef CmbbObjConfidence_CoastRelbl
@@ -744,69 +739,69 @@ typedef uint8 CmbbObjConfidence;
 #endif
 
 #ifndef CmbbObjConfidence_BrkgRelbl
-#define CmbbObjConfidence_BrkgRelbl (3)
+#define CmbbObjConfidence_BrkgRelbl    (3)
 #endif
 
-typedef uint8 DetectedBySensor;
+typedef uint8 DataConfidenceLvl2;
 
-#ifndef DetectedBySensor_NoCritEve
-#define DetectedBySensor_NoCritEve  (0)
+#ifndef DataConfidenceLvl2_NotRelbl
+#define DataConfidenceLvl2_NotRelbl    (0)
 #endif
 
-#ifndef DetectedBySensor_ObjFrntCritEve
-#define DetectedBySensor_ObjFrntCritEve (1)
+#ifndef DataConfidenceLvl2_LowRelbl
+#define DataConfidenceLvl2_LowRelbl    (1)
 #endif
 
-#ifndef DetectedBySensor_ObjReCritEve
-#define DetectedBySensor_ObjReCritEve  (2)
+#ifndef DataConfidenceLvl2_HighRelbl
+#define DataConfidenceLvl2_HighRelbl   (2)
 #endif
 
-#ifndef DetectedBySensor_PedFrntCritEve
-#define DetectedBySensor_PedFrntCritEve (3)
+#ifndef DataConfidenceLvl2_HighestRelbl
+#define DataConfidenceLvl2_HighestRelbl (3)
 #endif
 
 typedef uint8 EventTypeDef;
 
 #ifndef EventTypeDef_NoEvent
-#define EventTypeDef_NoEvent     (0)
+#define EventTypeDef_NoEvent           (0)
 #endif
 
 #ifndef EventTypeDef_Opening
-#define EventTypeDef_Opening     (1)
+#define EventTypeDef_Opening           (1)
 #endif
 
 #ifndef EventTypeDef_Closing
-#define EventTypeDef_Closing     (2)
+#define EventTypeDef_Closing           (2)
 #endif
 
 #ifndef EventTypeDef_DashedToSolid
-#define EventTypeDef_DashedToSolid  (3)
+#define EventTypeDef_DashedToSolid     (3)
 #endif
 
 #ifndef EventTypeDef_SolidToDashed
-#define EventTypeDef_SolidToDashed  (4)
+#define EventTypeDef_SolidToDashed     (4)
 #endif
 
 #ifndef EventTypeDef_StartOfDashed
-#define EventTypeDef_StartOfDashed  (5)
+#define EventTypeDef_StartOfDashed     (5)
 #endif
 
 #ifndef EventTypeDef_StartOfSolid
-#define EventTypeDef_StartOfSolid   (6)
+#define EventTypeDef_StartOfSolid      (6)
 #endif
 
 typedef uint8 FusionSource;
 
 #ifndef FusionSource_None
-#define FusionSource_None     (0)
+#define FusionSource_None              (0)
 #endif
 
 #ifndef FusionSource_VisionOnly
-#define FusionSource_VisionOnly  (1)
+#define FusionSource_VisionOnly        (1)
 #endif
 
 #ifndef FusionSource_RadarOnly
-#define FusionSource_RadarOnly   (2)
+#define FusionSource_RadarOnly         (2)
 #endif
 
 #ifndef FusionSource_FusedRadarVision
@@ -830,41 +825,41 @@ typedef uint8 LaneChangeDirection2;
 typedef uint8 LaneColor;
 
 #ifndef LaneColor_White
-#define LaneColor_White    (0)
+#define LaneColor_White                (0)
 #endif
 
 #ifndef LaneColor_Yellow
-#define LaneColor_Yellow      (1)
+#define LaneColor_Yellow               (1)
 #endif
 
 #ifndef LaneColor_Red
-#define LaneColor_Red      (2)
+#define LaneColor_Red                  (2)
 #endif
 
 #ifndef LaneColor_Blue
-#define LaneColor_Blue     (3)
+#define LaneColor_Blue                 (3)
 #endif
 
 #ifndef LaneColor_Orange
-#define LaneColor_Orange      (4)
+#define LaneColor_Orange               (4)
 #endif
 
 #ifndef LaneColor_Green
-#define LaneColor_Green    (5)
+#define LaneColor_Green                (5)
 #endif
 
 #ifndef LaneColor_Other
-#define LaneColor_Other    (6)
+#define LaneColor_Other                (6)
 #endif
 
 typedef uint8 LaneMarkerStructure;
 
 #ifndef LaneMarkerStructure_None
-#define LaneMarkerStructure_None    (0)
+#define LaneMarkerStructure_None       (0)
 #endif
 
 #ifndef LaneMarkerStructure_Painted
-#define LaneMarkerStructure_Painted (1)
+#define LaneMarkerStructure_Painted    (1)
 #endif
 
 #ifndef LaneMarkerStructure_Reflector
@@ -874,15 +869,15 @@ typedef uint8 LaneMarkerStructure;
 typedef uint8 LaneTrackId;
 
 #ifndef LaneTrackId_None
-#define LaneTrackId_None      (0)
+#define LaneTrackId_None               (0)
 #endif
 
 #ifndef LaneTrackId_ClosestLeft
-#define LaneTrackId_ClosestLeft  (1)
+#define LaneTrackId_ClosestLeft        (1)
 #endif
 
 #ifndef LaneTrackId_ClosestRight
-#define LaneTrackId_ClosestRight    (2)
+#define LaneTrackId_ClosestRight       (2)
 #endif
 
 #ifndef LaneTrackId_SecondClosestLeft
@@ -893,36 +888,18 @@ typedef uint8 LaneTrackId;
 #define LaneTrackId_SecondClosestRight (4)
 #endif
 
-typedef uint8 LateralDirection;
-
-#ifndef LateralDirection_None
-#define LateralDirection_None    (0)
-#endif
-
-#ifndef LateralDirection_Left
-#define LateralDirection_Left    (1)
-#endif
-
-#ifndef LateralDirection_Right
-#define LateralDirection_Right   (2)
-#endif
-
-#ifndef LateralDirection_LeftAndRight
-#define LateralDirection_LeftAndRight  (3)
-#endif
-
 typedef uint8 MarkingType;
 
 #ifndef MarkingType_None
-#define MarkingType_None      (0)
+#define MarkingType_None               (0)
 #endif
 
 #ifndef MarkingType_Solid
-#define MarkingType_Solid     (1)
+#define MarkingType_Solid              (1)
 #endif
 
 #ifndef MarkingType_Dashed
-#define MarkingType_Dashed    (2)
+#define MarkingType_Dashed             (2)
 #endif
 
 #ifndef MarkingType_SeparationMarking
@@ -942,69 +919,69 @@ typedef uint8 MotionModel3;
 typedef uint8 MotionPattern;
 
 #ifndef MotionPattern_Ukwn
-#define MotionPattern_Ukwn    (0)
+#define MotionPattern_Ukwn             (0)
 #endif
 
 #ifndef MotionPattern_Staty
-#define MotionPattern_Staty   (1)
+#define MotionPattern_Staty            (1)
 #endif
 
 #ifndef MotionPattern_MovgFromSelf
-#define MotionPattern_MovgFromSelf  (2)
+#define MotionPattern_MovgFromSelf     (2)
 #endif
 
 #ifndef MotionPattern_MovgToSelf
-#define MotionPattern_MovgToSelf    (3)
+#define MotionPattern_MovgToSelf       (3)
 #endif
 
 typedef uint8 ObjClassnTyp;
 
 #ifndef ObjClassnTyp_Veh
-#define ObjClassnTyp_Veh      (0)
+#define ObjClassnTyp_Veh               (0)
 #endif
 
 #ifndef ObjClassnTyp_TwoWhl
-#define ObjClassnTyp_TwoWhl   (1)
+#define ObjClassnTyp_TwoWhl            (1)
 #endif
 
 #ifndef ObjClassnTyp_Ped
-#define ObjClassnTyp_Ped      (2)
+#define ObjClassnTyp_Ped               (2)
 #endif
 
 #ifndef ObjClassnTyp_Ukwn
-#define ObjClassnTyp_Ukwn     (3)
+#define ObjClassnTyp_Ukwn              (3)
 #endif
 
 typedef uint8 ObjectSize2;
 
 #ifndef ObjectSize2_Ukwn
-#define ObjectSize2_Ukwn      (0)
+#define ObjectSize2_Ukwn               (0)
 #endif
 
 #ifndef ObjectSize2_Sml
-#define ObjectSize2_Sml    (1)
+#define ObjectSize2_Sml                (1)
 #endif
 
 #ifndef ObjectSize2_Med
-#define ObjectSize2_Med    (2)
+#define ObjectSize2_Med                (2)
 #endif
 
 #ifndef ObjectSize2_Lrg
-#define ObjectSize2_Lrg    (3)
+#define ObjectSize2_Lrg                (3)
 #endif
 
 typedef uint8 OnOff2;
 
 #ifndef OnOff2_Ukwn
-#define OnOff2_Ukwn     (0)
+#define OnOff2_Ukwn                    (0)
 #endif
 
 #ifndef OnOff2_Off
-#define OnOff2_Off      (1)
+#define OnOff2_Off                     (1)
 #endif
 
 #ifndef OnOff2_On
-#define OnOff2_On       (2)
+#define OnOff2_On                      (2)
 #endif
 
 typedef uint8 ReferencePoint;
@@ -1036,35 +1013,35 @@ typedef uint8 ReferencePoint;
 typedef uint8 Reliable3;
 
 #ifndef Reliable3_NotRelbl
-#define Reliable3_NotRelbl    (0)
+#define Reliable3_NotRelbl             (0)
 #endif
 
 #ifndef Reliable3_Relbl
-#define Reliable3_Relbl    (1)
+#define Reliable3_Relbl                (1)
 #endif
 
 typedef uint8 Reliable6;
 
 #ifndef Reliable6_NotReliable
-#define Reliable6_NotReliable    (0)
+#define Reliable6_NotReliable          (0)
 #endif
 
 #ifndef Reliable6_Reliable
-#define Reliable6_Reliable    (1)
+#define Reliable6_Reliable             (1)
 #endif
 
 typedef uint8 SecondMarkingType;
 
 #ifndef SecondMarkingType_None
-#define SecondMarkingType_None   (0)
+#define SecondMarkingType_None         (0)
 #endif
 
 #ifndef SecondMarkingType_Solid
-#define SecondMarkingType_Solid  (1)
+#define SecondMarkingType_Solid        (1)
 #endif
 
 #ifndef SecondMarkingType_Dashed
-#define SecondMarkingType_Dashed    (2)
+#define SecondMarkingType_Dashed       (2)
 #endif
 
 #ifndef SecondMarkingType_SeperationMarking
@@ -1078,11 +1055,11 @@ typedef uint8 SecondMarkingType;
 typedef uint8 SensorUpdateStatus1;
 
 #ifndef SensorUpdateStatus1_Invalid
-#define SensorUpdateStatus1_Invalid (0)
+#define SensorUpdateStatus1_Invalid    (0)
 #endif
 
 #ifndef SensorUpdateStatus1_New
-#define SensorUpdateStatus1_New  (1)
+#define SensorUpdateStatus1_New        (1)
 #endif
 
 #ifndef SensorUpdateStatus1_FlcUpdated
@@ -1104,7 +1081,7 @@ typedef uint8 SensorUpdateStatus1;
 typedef uint8 SideSuggestion;
 
 #ifndef SideSuggestion_None
-#define SideSuggestion_None   (0)
+#define SideSuggestion_None            (0)
 #endif
 
 #ifndef SideSuggestion_UncoupledLeft
@@ -1120,11 +1097,11 @@ typedef uint8 SideSuggestion;
 #endif
 
 #ifndef SideSuggestion_BothParallel
-#define SideSuggestion_BothParallel (4)
+#define SideSuggestion_BothParallel    (4)
 #endif
 
 #ifndef SideSuggestion_BothCoupled
-#define SideSuggestion_BothCoupled  (5)
+#define SideSuggestion_BothCoupled     (5)
 #endif
 
 typedef uint8 TemporaryMarkingType;
@@ -1144,103 +1121,93 @@ typedef uint8 TemporaryMarkingType;
 typedef uint8 TrackStatus4;
 
 #ifndef TrackStatus4_Invld
-#define TrackStatus4_Invld    (0)
+#define TrackStatus4_Invld             (0)
 #endif
 
 #ifndef TrackStatus4_Fusn
-#define TrackStatus4_Fusn     (1)
+#define TrackStatus4_Fusn              (1)
 #endif
 
 #ifndef TrackStatus4_New
-#define TrackStatus4_New      (2)
+#define TrackStatus4_New               (2)
 #endif
 
 #ifndef TrackStatus4_PredNew
-#define TrackStatus4_PredNew     (3)
+#define TrackStatus4_PredNew           (3)
 #endif
 
 #ifndef TrackStatus4_UpdNew
-#define TrackStatus4_UpdNew   (4)
+#define TrackStatus4_UpdNew            (4)
 #endif
 
 #ifndef TrackStatus4_Upd
-#define TrackStatus4_Upd      (5)
+#define TrackStatus4_Upd               (5)
 #endif
 
 #ifndef TrackStatus4_Pred
-#define TrackStatus4_Pred     (6)
+#define TrackStatus4_Pred              (6)
 #endif
 
 #ifndef TrackStatus4_Resd
-#define TrackStatus4_Resd     (7)
+#define TrackStatus4_Resd              (7)
 #endif
 
 typedef uint8 TrackStatus6;
 
 #ifndef TrackStatus6_Invld
-#define TrackStatus6_Invld    (0)
+#define TrackStatus6_Invld             (0)
 #endif
 
 #ifndef TrackStatus6_New
-#define TrackStatus6_New      (1)
+#define TrackStatus6_New               (1)
 #endif
 
 #ifndef TrackStatus6_Upd
-#define TrackStatus6_Upd      (2)
+#define TrackStatus6_Upd               (2)
 #endif
 
 #ifndef TrackStatus6_Coast
-#define TrackStatus6_Coast    (3)
+#define TrackStatus6_Coast             (3)
 #endif
 
 #ifndef TrackStatus6_CoastFusn
-#define TrackStatus6_CoastFusn   (4)
+#define TrackStatus6_CoastFusn         (4)
 #endif
 
 #ifndef TrackStatus6_Fusn
-#define TrackStatus6_Fusn     (5)
+#define TrackStatus6_Fusn              (5)
 #endif
 
 typedef uint8 TrackingStatus;
 
 #ifndef TrackingStatus_Invalid
-#define TrackingStatus_Invalid   (0)
+#define TrackingStatus_Invalid         (0)
 #endif
 
 #ifndef TrackingStatus_Tracked
-#define TrackingStatus_Tracked   (1)
+#define TrackingStatus_Tracked         (1)
 #endif
 
 #ifndef TrackingStatus_Close
-#define TrackingStatus_Close     (2)
+#define TrackingStatus_Close           (2)
 #endif
 
 #ifndef TrackingStatus_Far
-#define TrackingStatus_Far    (3)
+#define TrackingStatus_Far             (3)
 #endif
 
 #ifndef TrackingStatus_Predicted
-#define TrackingStatus_Predicted    (4)
+#define TrackingStatus_Predicted       (4)
 #endif
 
 typedef uint8 TrafficScenarioTyp;
 
 #ifndef TrafficScenarioTyp_None
-#define TrafficScenarioTyp_None  (0)
+#define TrafficScenarioTyp_None        (0)
 #endif
 
 #ifndef TrafficScenarioTyp_TurnAcrssPah
 #define TrafficScenarioTyp_TurnAcrssPah (1)
-#endif
-
-typedef uint8 TrueFalse;
-
-#ifndef TrueFalse_False
-#define TrueFalse_False    (0)
-#endif
-
-#ifndef TrueFalse_True
-#define TrueFalse_True     (1)
 #endif
 
 typedef uint8 VersionTrafficAssist;
@@ -1515,6 +1482,11 @@ typedef struct {
   AEB_Flag aeb_flag;
   DRT drt;
   FCW_DEV fcw_dev;
+  AEBMon_State aebmon_state;
+  float32 LgSf_AEBDecelReq;
+  uint8 LgSf_AEBType;
+  uint8 LgSf_AEBDecelReqFlag;
+  uint8 LgSf_AEBBrkReqFlag;
 } CAH_ActiveSafety;
 
 #endif
@@ -1526,6 +1498,26 @@ typedef struct {
   uint8 AEBTgtVisnID;
   uint8 FCWTgtVisnID;
 } IDT_CATgtVisnID;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_AdpPath_
+#define DEFINED_TYPEDEF_FOR_AdpPath_
+
+typedef struct {
+  AdpPath_ValidSamples ValidSamples;
+  AdpPath_EndDst EndDst;
+  AdpPath_Y X[50];
+  AdpPath_Y Y[50];
+  AdpPath_Curvature Curvature[50];
+  AdpPath_DstAlongPah DstAlongPah[50];
+  AdpPath_LocalOffsetCoGx LocalOffsetCoGx;
+  AdpPath_LocalHeadingCoGx LocalHeadingCoGx;
+  AdpPath_YawratePathCoGx YawratePathCoGx;
+  AdpPath_YawratederivativePathCoGx YawratederivativePathCoGx;
+  TrueFalse Reset;
+  TrueFalse LnChgInProgress;
+} AdpPath;
 
 #endif
 
@@ -1868,40 +1860,95 @@ typedef struct {
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_CritLatCdn_PathData_ITC_
-#define DEFINED_TYPEDEF_FOR_CritLatCdn_PathData_ITC_
+#ifndef DEFINED_TYPEDEF_FOR_Intersection_info_T_
+#define DEFINED_TYPEDEF_FOR_Intersection_info_T_
 
 typedef struct {
-  CritLatCdn_PathData_ITC_nrOfSegments nrOfSegments;
-  CritLatCdn_PathData_ITC_coefficientVector coefficientVector[24];
-  CritLatCdn_PathData_ITC_timeVector timeVector[6];
-} CritLatCdn_PathData_ITC;
+  boolean is_cross_road;
+  float32 cross_road_link_range_a[2];
+  boolean is_stop_line;
+  float32 stop_line_distance;
+} Intersection_info_T;
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_CritLatCdn_PrimaryTarget_T_
-#define DEFINED_TYPEDEF_FOR_CritLatCdn_PrimaryTarget_T_
+#ifndef DEFINED_TYPEDEF_FOR_Lane_property_T_
+#define DEFINED_TYPEDEF_FOR_Lane_property_T_
 
 typedef struct {
-  DetectedBySensor interventionType;
-  ObjectClass7 objectType;
-  ReferencePoint referencePoint;
-  CritLatCdn_PrimaryTarget_length length;
-  CritLatCdn_PrimaryTarget_width width;
-  CritLatCdn_PrimaryTarget_heading heading;
-  CritLatCdn_PrimaryTarget_timeToCollision timeToCollision;
-  CritLatCdn_PrimaryTarget_timeToReach timeToReach;
-  CritLatCdn_PrimaryTarget_timeOutsideEgoLane timeOutsideEgoLane;
-  CritLatCdn_PrimaryTarget_latPositionAtTimeToCollision latPositionAtTimeToCollision;
-  CritLatCdn_PrimaryTarget_lgtPosition lgtPosition;
-  CritLatCdn_PrimaryTarget_latPosition latPosition;
-  CritLatCdn_PrimaryTarget_lgtVelocity lgtVelocity;
-  CritLatCdn_PrimaryTarget_latVelocity latVelocity;
-  TrueFalse targetInEgoLane;
-  CritLatCdn_PrimaryTarget_lgtAccRqrdForPrimTarToAvdSelf lgtAccRqrdForPrimTarToAvdSelf;
-  CritLatCdn_PrimaryTarget_egoLatAccRequiredForAvoidance egoLatAccRequiredForAvoidance;
-  TrueFalse exists;
-} CritLatCdn_PrimaryTarget_T;
+  boolean is_opening_lane;
+  boolean is_merge_lane;
+  uint8 merge_direction;
+  sint8 num_lane_turn_type;
+  uint8 lane_turn_type_a[5];
+} Lane_property_T;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_point_info_T_
+#define DEFINED_TYPEDEF_FOR_point_info_T_
+
+typedef struct {
+  point_info_x_T point_info_x;
+  point_info_y_T point_info_y;
+} point_info_T;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_Poly_info_clothoid_T_
+#define DEFINED_TYPEDEF_FOR_Poly_info_clothoid_T_
+
+typedef struct {
+  float32 Poly_info_clothoid_a;
+  float32 Poly_info_clothoid_b;
+  float32 Poly_info_clothoid_c;
+  float32 Poly_info_clothoid_d1;
+  float32 Poly_info_clothoid_d2;
+  float32 Poly_info_clothoid_detection_distance;
+  float32 Poly_info_clothoid_transition_distance;
+  float32 Poly_info_clothoid_use_second_poly;
+} Poly_info_clothoid_T;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_poly_info_
+#define DEFINED_TYPEDEF_FOR_poly_info_
+
+typedef struct {
+  boolean poly_info_valid;
+  Poly_info_clothoid_T poly_info_clothoid;
+} poly_info;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_Refline_T_
+#define DEFINED_TYPEDEF_FOR_Refline_T_
+
+typedef struct {
+  uint32 line_id;
+  uint8 confidence;
+  uint8 trk_state;
+  uint8 smooth_status;
+  uint8 point_num;
+  point_info_T point_info_a[100];
+  poly_info poly_info_;
+  float32 start_distance;
+  float32 end_distance;
+  uint8 lane_change;
+} Refline_T;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_RoadInfo_T_
+#define DEFINED_TYPEDEF_FOR_RoadInfo_T_
+
+typedef struct {
+  uint32 frame_id;
+  uint64 timestamp;
+  Intersection_info_T intersection_info;
+  Lane_property_T lane_property;
+  Refline_T refline;
+} RoadInfo_T;
 
 #endif
 
@@ -1959,24 +2006,6 @@ typedef struct {
   FlcRoadCover_Gravel Gravel;
   FlcRoadCover_Wet Wet;
 } FlcRoadCover;
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_ObjFrntCdnForSupp_
-#define DEFINED_TYPEDEF_FOR_ObjFrntCdnForSupp_
-
-typedef struct {
-  ObjFrntCdnForSupp_ObjIdx ObjIdx;
-  ObjFrntCdnForSupp_ObjPosnLat ObjPosnLat;
-  ObjFrntCdnForSupp_ObjPosnLgt ObjPosnLgt;
-  ObjFrntCdnForSupp_ObjSpdLgt ObjSpdLgt;
-  ObjectClass7 ObjTyp;
-  ObjFrntCdnForSupp_ObjWidth ObjWidth;
-  ObjFrntCdnForSupp_TiToCllsn TiToCllsn;
-  ObjFrntCdnForSupp_VisnIdx VisnIdx;
-  LateralDirection SuppressSideRoadEdge;
-  LateralDirection SuppressSideSolidLKA;
-} ObjFrntCdnForSupp;
 
 #endif
 
@@ -2109,35 +2138,29 @@ typedef struct {
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_LDPPath_
-#define DEFINED_TYPEDEF_FOR_LDPPath_
+#ifndef DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_Properties_
+#define DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_Properties_
 
 typedef struct {
-  CritLatCdn_PathData_ITC ITC;
-  CritLatCdn_PathData_initialLatPosition initialLatPosition;
-  CritLatCdn_PathData_initialLatVelocity initialLatVelocity;
-  CritLatCdn_PathData_initialLatAcceleration initialLatAcceleration;
-  CritLatCdn_PathData_initialLongVelocity initialLongVelocity;
-  CritLatCdn_PathData_initialLongAcceleration initialLongAcceleration;
-  CritLatCdn_PathData_latAccRequiredForAvoidance latAccRequiredForAvoidance;
-  CritLatCdn_PathData_latAccRequiredForAlignment latAccRequiredForAlignment;
-  CritLatCdn_PathData_pathInfo pathInfo;
-  CritLatCdn_PathData_nrOfSegments nrOfSegments;
-  CritLatCdn_PathData_timeVector timeVector[8];
-  CritLatCdn_PathData_coefficientVector coefficientVector[42];
-} LDPPath;
+  LaneAssignedFrontObjects_Properties_id id;
+  DataConfidenceLvl2 latPositionOncomingConfidence;
+  DataConfidenceLvl3 latPositionRoadConfidence;
+} LaneAssignedFrontObjects_Properties;
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_LDP_Obj_
-#define DEFINED_TYPEDEF_FOR_LDP_Obj_
+#ifndef DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_States_
+#define DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_States_
 
 typedef struct {
-  CritLatCdn_PrimaryTarget_T CritLatCdn_PrimaryTarget;
-  TrueFalse secondaryObstacleInEgoLane;
-  TrueFalse secondaryObstacleInLeftLane;
-  TrueFalse secondaryObstacleInRightLane;
-} LDP_Obj;
+  LaneAssignedFrontObjects_States_latAccelerationRoad latAccelerationRoad;
+  LaneAssignedFrontObjects_States_latPositionRoad latPositionRoad;
+  LaneAssignedFrontObjects_States_headingRoad headingRoad;
+  LaneAssignedFrontObjects_States_latVelocityRoad latVelocityRoad;
+  LaneAssignedFrontObjects_States_longAccelerationRoad longAccelerationRoad;
+  LaneAssignedFrontObjects_States_longPositionRoad longPositionRoad;
+  LaneAssignedFrontObjects_States_longVelocityRoad longVelocityRoad;
+} LaneAssignedFrontObjects_States;
 
 #endif
 
@@ -2745,6 +2768,17 @@ typedef struct {
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_
+#define DEFINED_TYPEDEF_FOR_LaneAssignedFrontObjects_
+
+typedef struct {
+  LaneAssignedFrontObjects_Properties Properties[32];
+  LaneAssignedFrontObjects_SequenceID SequenceID;
+  LaneAssignedFrontObjects_States States[32];
+} LaneAssignedFrontObjects;
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_LaneMarker_
 #define DEFINED_TYPEDEF_FOR_LaneMarker_
 
@@ -3037,7 +3071,6 @@ typedef struct {
 #endif
 
 /* AUTOSAR Array Types */
-typedef sint16 sint16 ;
 typedef RoadPath_CrvtRate RoadPath_CrvtRate_a[3];
 typedef TrueFalse32 RoadPath_ObjectInfo_ObjUseForUpdAgDir_a[32];
 typedef TrueFalse32 RoadPath_ObjectInfo_ObjUseForUpdPosn_a[32];
@@ -3047,15 +3080,16 @@ typedef RoadPath_SegLen RoadPath_SegLen_a[3];
 typedef TrafficFlow_LaneProperties TrafficFlow_LaneProperties_a[3];
 typedef CrossingObject_EgoStates CrossingObject_EgoStates_a[30];
 typedef CrossingObject_Properties CrossingObject_Properties_a[30];
-typedef CritLatCdn_PathData_ITC_coefficientVector  rt_Array_CritLatCdn_PathData_ITC_coefficientVector_24[24];
-typedef CritLatCdn_PathData_ITC_timeVector  rt_Array_CritLatCdn_PathData_ITC_timeVector_6[6];
-typedef CritLatCdn_PathData_coefficientVector  rt_Array_CritLatCdn_PathData_coefficientVector_42[42];
-typedef CritLatCdn_PathData_timeVector  rt_Array_CritLatCdn_PathData_timeVector_8[8];
-typedef DynCalPrmForBicycleMdlCornrgStfnFrntByVehSpd  rt_Array_DynCalPrmForBicycleMdlCornrgStfnFrntByVehSpd_8[8];
-typedef DynCalPrmForBicycleMdlCornrgStfnReByVehSpd  rt_Array_DynCalPrmForBicycleMdlCornrgStfnReByVehSpd_8[8];
-typedef DynCalPrmForVehicleSpdForBicycleMdlCornrgStfn  rt_Array_DynCalPrmForVehicleSpdForBicycleMdlCornrgStfn_8[8];
+typedef AdpPath_Curvature rt_Array_AdpPath_Curvature_50[50];
+typedef AdpPath_DstAlongPah rt_Array_AdpPath_DstAlongPah_50[50];
+typedef AdpPath_Y rt_Array_AdpPath_Y_50[50];
+typedef DynCalPrmForBicycleMdlCornrgStfnFrntByVehSpd rt_Array_DynCalPrmForBicycleMdlCornrgStfnFrntByVehSpd_8[8];
+typedef DynCalPrmForBicycleMdlCornrgStfnReByVehSpd rt_Array_DynCalPrmForBicycleMdlCornrgStfnReByVehSpd_8[8];
+typedef DynCalPrmForVehicleSpdForBicycleMdlCornrgStfn rt_Array_DynCalPrmForVehicleSpdForBicycleMdlCornrgStfn_8[8];
 typedef FusedFrontObject_Properties rt_Array_FusedFrontObject_Properties_32[32];
 typedef FusedFrontObject_States rt_Array_FusedFrontObject_States_32[32];
+typedef LaneAssignedFrontObjects_Properties rt_Array_LaneAssignedFrontObjects_Properties_32[32];
+typedef LaneAssignedFrontObjects_States rt_Array_LaneAssignedFrontObjects_States_32[32];
 typedef LaneMarker_LaneEvent rt_Array_LaneMarker_LaneEvent_4[4];
 typedef RearObject_EgoStates rt_Array_RearObject_EgoStates_10[10];
 typedef RearObject_Properties rt_Array_RearObject_Properties_10[10];

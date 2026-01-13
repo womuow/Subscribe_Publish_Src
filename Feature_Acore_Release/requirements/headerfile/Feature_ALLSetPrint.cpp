@@ -324,16 +324,6 @@ void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string 
 
 
 
-
-
-
-
-
-
-
-
-
-
 #ifdef EGOVEHICLESTATE_H
 /* Set and Print struct EgoVehicleState initial value */
 void setIntialValue_EgoVehicleState(EgoVehicleState& EgoVehicleState_){
@@ -5524,275 +5514,6 @@ void setIntialValue_LongCtrlObjInfo(LongCtrlObjInfo& LongCtrlObjInfo_){
 
 
 
-#ifdef LDP_OBJ_H
-/* Set and Print struct LDP_Obj initial value */
-void setIntialValue_LDP_Obj(LDP_Obj& LDP_Obj_){
-    std::cout << "Set struct LDP_Obj variable and Publish:" << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.interventionType = 1;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.interventionType(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.CritLatCdn_PrimaryTarget.interventionType) << std::dec  << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.objectType = 2;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.objectType(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.CritLatCdn_PrimaryTarget.objectType) << std::dec  << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.referencePoint = 3;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.referencePoint(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.CritLatCdn_PrimaryTarget.referencePoint) << std::dec  << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.length = 1.10;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.length(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.length << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.width = 2.20;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.width(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.width << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.heading = 3.30;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.heading(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.heading << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.timeToCollision = 4.40;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.timeToCollision(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.timeToCollision << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.timeToReach = 5.50;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.timeToReach(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.timeToReach << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.timeOutsideEgoLane = 6.60;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.timeOutsideEgoLane(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.timeOutsideEgoLane << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.latPositionAtTimeToCollision = 7.70;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.latPositionAtTimeToCollision(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.latPositionAtTimeToCollision << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.lgtPosition = 8.80;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.lgtPosition(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.lgtPosition << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.latPosition = 9.90;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.latPosition(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.latPosition << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.lgtVelocity = 11.00;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.lgtVelocity(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.lgtVelocity << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.latVelocity = 12.10;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.latVelocity(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.latVelocity << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.targetInEgoLane = 4;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.targetInEgoLane(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.CritLatCdn_PrimaryTarget.targetInEgoLane) << std::dec  << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.lgtAccRqrdForPrimTarToAvdSelf = 13.20;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.lgtAccRqrdForPrimTarToAvdSelf(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.lgtAccRqrdForPrimTarToAvdSelf << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.egoLatAccRequiredForAvoidance = 14.30;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.egoLatAccRequiredForAvoidance(float32): " << LDP_Obj_.CritLatCdn_PrimaryTarget.egoLatAccRequiredForAvoidance << std::endl;
-    LDP_Obj_.CritLatCdn_PrimaryTarget.exists = 5;
-    std::cout << "LDP_Obj_.CritLatCdn_PrimaryTarget.exists(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.CritLatCdn_PrimaryTarget.exists) << std::dec  << std::endl;
-    LDP_Obj_.secondaryObstacleInEgoLane = 6;
-    std::cout << "LDP_Obj_.secondaryObstacleInEgoLane(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.secondaryObstacleInEgoLane) << std::dec  << std::endl;
-    LDP_Obj_.secondaryObstacleInLeftLane = 7;
-    std::cout << "LDP_Obj_.secondaryObstacleInLeftLane(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.secondaryObstacleInLeftLane) << std::dec  << std::endl;
-    LDP_Obj_.secondaryObstacleInRightLane = 8;
-    std::cout << "LDP_Obj_.secondaryObstacleInRightLane(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDP_Obj_.secondaryObstacleInRightLane) << std::dec  << std::endl;
-};
-#endif
-
-
-
-#ifdef OBJFRNTCDNFORSUPP_H
-/* Set and Print struct ObjFrntCdnForSupp initial value */
-void setIntialValue_ObjFrntCdnForSupp(ObjFrntCdnForSupp& ObjFrntCdnForSupp_){
-    std::cout << "Set struct ObjFrntCdnForSupp variable and Publish:" << std::endl;
-    ObjFrntCdnForSupp_.ObjIdx = 1;
-    std::cout << "ObjFrntCdnForSupp_.ObjIdx(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ObjFrntCdnForSupp_.ObjIdx) << std::dec  << std::endl;
-    ObjFrntCdnForSupp_.ObjPosnLat = 1.10;
-    std::cout << "ObjFrntCdnForSupp_.ObjPosnLat(float32): " << ObjFrntCdnForSupp_.ObjPosnLat << std::endl;
-    ObjFrntCdnForSupp_.ObjPosnLgt = 2.20;
-    std::cout << "ObjFrntCdnForSupp_.ObjPosnLgt(float32): " << ObjFrntCdnForSupp_.ObjPosnLgt << std::endl;
-    ObjFrntCdnForSupp_.ObjSpdLgt = 3.30;
-    std::cout << "ObjFrntCdnForSupp_.ObjSpdLgt(float32): " << ObjFrntCdnForSupp_.ObjSpdLgt << std::endl;
-    ObjFrntCdnForSupp_.ObjTyp = 2;
-    std::cout << "ObjFrntCdnForSupp_.ObjTyp(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ObjFrntCdnForSupp_.ObjTyp) << std::dec  << std::endl;
-    ObjFrntCdnForSupp_.ObjWidth = 4.40;
-    std::cout << "ObjFrntCdnForSupp_.ObjWidth(float32): " << ObjFrntCdnForSupp_.ObjWidth << std::endl;
-    ObjFrntCdnForSupp_.TiToCllsn = 5.50;
-    std::cout << "ObjFrntCdnForSupp_.TiToCllsn(float32): " << ObjFrntCdnForSupp_.TiToCllsn << std::endl;
-    ObjFrntCdnForSupp_.VisnIdx = 3;
-    std::cout << "ObjFrntCdnForSupp_.VisnIdx(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ObjFrntCdnForSupp_.VisnIdx) << std::dec  << std::endl;
-    ObjFrntCdnForSupp_.SuppressSideRoadEdge = 4;
-    std::cout << "ObjFrntCdnForSupp_.SuppressSideRoadEdge(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ObjFrntCdnForSupp_.SuppressSideRoadEdge) << std::dec  << std::endl;
-    ObjFrntCdnForSupp_.SuppressSideSolidLKA = 5;
-    std::cout << "ObjFrntCdnForSupp_.SuppressSideSolidLKA(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ObjFrntCdnForSupp_.SuppressSideSolidLKA) << std::dec  << std::endl;
-};
-#endif
-
-
-
-#ifdef LDPPATH_H
-/* Set and Print struct LDPPath initial value */
-void setIntialValue_LDPPath(LDPPath& LDPPath_){
-    std::cout << "Set struct LDPPath variable and Publish:" << std::endl;
-    LDPPath_.ITC.nrOfSegments = 1;
-    std::cout << "LDPPath_.ITC.nrOfSegments(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDPPath_.ITC.nrOfSegments) << std::dec  << std::endl;
-    LDPPath_.ITC.coefficientVector[0] = 1.10;
-    std::cout << "LDPPath_.ITC.coefficientVector[0](float32): " << LDPPath_.ITC.coefficientVector[0] << std::endl;
-    LDPPath_.ITC.coefficientVector[1] = 2.20;
-    std::cout << "LDPPath_.ITC.coefficientVector[1](float32): " << LDPPath_.ITC.coefficientVector[1] << std::endl;
-    LDPPath_.ITC.coefficientVector[2] = 3.30;
-    std::cout << "LDPPath_.ITC.coefficientVector[2](float32): " << LDPPath_.ITC.coefficientVector[2] << std::endl;
-    LDPPath_.ITC.coefficientVector[3] = 4.40;
-    std::cout << "LDPPath_.ITC.coefficientVector[3](float32): " << LDPPath_.ITC.coefficientVector[3] << std::endl;
-    LDPPath_.ITC.coefficientVector[4] = 5.50;
-    std::cout << "LDPPath_.ITC.coefficientVector[4](float32): " << LDPPath_.ITC.coefficientVector[4] << std::endl;
-    LDPPath_.ITC.coefficientVector[5] = 6.60;
-    std::cout << "LDPPath_.ITC.coefficientVector[5](float32): " << LDPPath_.ITC.coefficientVector[5] << std::endl;
-    LDPPath_.ITC.coefficientVector[6] = 7.70;
-    std::cout << "LDPPath_.ITC.coefficientVector[6](float32): " << LDPPath_.ITC.coefficientVector[6] << std::endl;
-    LDPPath_.ITC.coefficientVector[7] = 8.80;
-    std::cout << "LDPPath_.ITC.coefficientVector[7](float32): " << LDPPath_.ITC.coefficientVector[7] << std::endl;
-    LDPPath_.ITC.coefficientVector[8] = 9.90;
-    std::cout << "LDPPath_.ITC.coefficientVector[8](float32): " << LDPPath_.ITC.coefficientVector[8] << std::endl;
-    LDPPath_.ITC.coefficientVector[9] = 11.00;
-    std::cout << "LDPPath_.ITC.coefficientVector[9](float32): " << LDPPath_.ITC.coefficientVector[9] << std::endl;
-    LDPPath_.ITC.coefficientVector[10] = 12.10;
-    std::cout << "LDPPath_.ITC.coefficientVector[10](float32): " << LDPPath_.ITC.coefficientVector[10] << std::endl;
-    LDPPath_.ITC.coefficientVector[11] = 13.20;
-    std::cout << "LDPPath_.ITC.coefficientVector[11](float32): " << LDPPath_.ITC.coefficientVector[11] << std::endl;
-    LDPPath_.ITC.coefficientVector[12] = 14.30;
-    std::cout << "LDPPath_.ITC.coefficientVector[12](float32): " << LDPPath_.ITC.coefficientVector[12] << std::endl;
-    LDPPath_.ITC.coefficientVector[13] = 15.40;
-    std::cout << "LDPPath_.ITC.coefficientVector[13](float32): " << LDPPath_.ITC.coefficientVector[13] << std::endl;
-    LDPPath_.ITC.coefficientVector[14] = 16.50;
-    std::cout << "LDPPath_.ITC.coefficientVector[14](float32): " << LDPPath_.ITC.coefficientVector[14] << std::endl;
-    LDPPath_.ITC.coefficientVector[15] = 17.60;
-    std::cout << "LDPPath_.ITC.coefficientVector[15](float32): " << LDPPath_.ITC.coefficientVector[15] << std::endl;
-    LDPPath_.ITC.coefficientVector[16] = 18.70;
-    std::cout << "LDPPath_.ITC.coefficientVector[16](float32): " << LDPPath_.ITC.coefficientVector[16] << std::endl;
-    LDPPath_.ITC.coefficientVector[17] = 19.80;
-    std::cout << "LDPPath_.ITC.coefficientVector[17](float32): " << LDPPath_.ITC.coefficientVector[17] << std::endl;
-    LDPPath_.ITC.coefficientVector[18] = 20.90;
-    std::cout << "LDPPath_.ITC.coefficientVector[18](float32): " << LDPPath_.ITC.coefficientVector[18] << std::endl;
-    LDPPath_.ITC.coefficientVector[19] = 22.00;
-    std::cout << "LDPPath_.ITC.coefficientVector[19](float32): " << LDPPath_.ITC.coefficientVector[19] << std::endl;
-    LDPPath_.ITC.coefficientVector[20] = 23.10;
-    std::cout << "LDPPath_.ITC.coefficientVector[20](float32): " << LDPPath_.ITC.coefficientVector[20] << std::endl;
-    LDPPath_.ITC.coefficientVector[21] = 24.20;
-    std::cout << "LDPPath_.ITC.coefficientVector[21](float32): " << LDPPath_.ITC.coefficientVector[21] << std::endl;
-    LDPPath_.ITC.coefficientVector[22] = 25.30;
-    std::cout << "LDPPath_.ITC.coefficientVector[22](float32): " << LDPPath_.ITC.coefficientVector[22] << std::endl;
-    LDPPath_.ITC.coefficientVector[23] = 26.40;
-    std::cout << "LDPPath_.ITC.coefficientVector[23](float32): " << LDPPath_.ITC.coefficientVector[23] << std::endl;
-    LDPPath_.ITC.timeVector[0] = 27.50;
-    std::cout << "LDPPath_.ITC.timeVector[0](float32): " << LDPPath_.ITC.timeVector[0] << std::endl;
-    LDPPath_.ITC.timeVector[1] = 28.60;
-    std::cout << "LDPPath_.ITC.timeVector[1](float32): " << LDPPath_.ITC.timeVector[1] << std::endl;
-    LDPPath_.ITC.timeVector[2] = 29.70;
-    std::cout << "LDPPath_.ITC.timeVector[2](float32): " << LDPPath_.ITC.timeVector[2] << std::endl;
-    LDPPath_.ITC.timeVector[3] = 30.80;
-    std::cout << "LDPPath_.ITC.timeVector[3](float32): " << LDPPath_.ITC.timeVector[3] << std::endl;
-    LDPPath_.ITC.timeVector[4] = 31.90;
-    std::cout << "LDPPath_.ITC.timeVector[4](float32): " << LDPPath_.ITC.timeVector[4] << std::endl;
-    LDPPath_.ITC.timeVector[5] = 33.00;
-    std::cout << "LDPPath_.ITC.timeVector[5](float32): " << LDPPath_.ITC.timeVector[5] << std::endl;
-    LDPPath_.initialLatPosition = 34.10;
-    std::cout << "LDPPath_.initialLatPosition(float32): " << LDPPath_.initialLatPosition << std::endl;
-    LDPPath_.initialLatVelocity = 35.20;
-    std::cout << "LDPPath_.initialLatVelocity(float32): " << LDPPath_.initialLatVelocity << std::endl;
-    LDPPath_.initialLatAcceleration = 36.30;
-    std::cout << "LDPPath_.initialLatAcceleration(float32): " << LDPPath_.initialLatAcceleration << std::endl;
-    LDPPath_.initialLongVelocity = 37.40;
-    std::cout << "LDPPath_.initialLongVelocity(float32): " << LDPPath_.initialLongVelocity << std::endl;
-    LDPPath_.initialLongAcceleration = 38.50;
-    std::cout << "LDPPath_.initialLongAcceleration(float32): " << LDPPath_.initialLongAcceleration << std::endl;
-    LDPPath_.latAccRequiredForAvoidance = 39.60;
-    std::cout << "LDPPath_.latAccRequiredForAvoidance(float32): " << LDPPath_.latAccRequiredForAvoidance << std::endl;
-    LDPPath_.latAccRequiredForAlignment = 40.70;
-    std::cout << "LDPPath_.latAccRequiredForAlignment(float32): " << LDPPath_.latAccRequiredForAlignment << std::endl;
-    LDPPath_.pathInfo = 1;
-    std::cout << "LDPPath_.pathInfo(uint16): " << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(LDPPath_.pathInfo) << std::dec  << std::endl;
-    LDPPath_.nrOfSegments = 2;
-    std::cout << "LDPPath_.nrOfSegments(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(LDPPath_.nrOfSegments) << std::dec  << std::endl;
-    LDPPath_.timeVector[0] = 41.80;
-    std::cout << "LDPPath_.timeVector[0](float32): " << LDPPath_.timeVector[0] << std::endl;
-    LDPPath_.timeVector[1] = 42.90;
-    std::cout << "LDPPath_.timeVector[1](float32): " << LDPPath_.timeVector[1] << std::endl;
-    LDPPath_.timeVector[2] = 44.00;
-    std::cout << "LDPPath_.timeVector[2](float32): " << LDPPath_.timeVector[2] << std::endl;
-    LDPPath_.timeVector[3] = 45.10;
-    std::cout << "LDPPath_.timeVector[3](float32): " << LDPPath_.timeVector[3] << std::endl;
-    LDPPath_.timeVector[4] = 46.20;
-    std::cout << "LDPPath_.timeVector[4](float32): " << LDPPath_.timeVector[4] << std::endl;
-    LDPPath_.timeVector[5] = 47.30;
-    std::cout << "LDPPath_.timeVector[5](float32): " << LDPPath_.timeVector[5] << std::endl;
-    LDPPath_.timeVector[6] = 48.40;
-    std::cout << "LDPPath_.timeVector[6](float32): " << LDPPath_.timeVector[6] << std::endl;
-    LDPPath_.timeVector[7] = 49.50;
-    std::cout << "LDPPath_.timeVector[7](float32): " << LDPPath_.timeVector[7] << std::endl;
-    LDPPath_.coefficientVector[0] = 50.60;
-    std::cout << "LDPPath_.coefficientVector[0](float32): " << LDPPath_.coefficientVector[0] << std::endl;
-    LDPPath_.coefficientVector[1] = 51.70;
-    std::cout << "LDPPath_.coefficientVector[1](float32): " << LDPPath_.coefficientVector[1] << std::endl;
-    LDPPath_.coefficientVector[2] = 52.80;
-    std::cout << "LDPPath_.coefficientVector[2](float32): " << LDPPath_.coefficientVector[2] << std::endl;
-    LDPPath_.coefficientVector[3] = 53.90;
-    std::cout << "LDPPath_.coefficientVector[3](float32): " << LDPPath_.coefficientVector[3] << std::endl;
-    LDPPath_.coefficientVector[4] = 55.00;
-    std::cout << "LDPPath_.coefficientVector[4](float32): " << LDPPath_.coefficientVector[4] << std::endl;
-    LDPPath_.coefficientVector[5] = 56.10;
-    std::cout << "LDPPath_.coefficientVector[5](float32): " << LDPPath_.coefficientVector[5] << std::endl;
-    LDPPath_.coefficientVector[6] = 57.20;
-    std::cout << "LDPPath_.coefficientVector[6](float32): " << LDPPath_.coefficientVector[6] << std::endl;
-    LDPPath_.coefficientVector[7] = 58.30;
-    std::cout << "LDPPath_.coefficientVector[7](float32): " << LDPPath_.coefficientVector[7] << std::endl;
-    LDPPath_.coefficientVector[8] = 59.40;
-    std::cout << "LDPPath_.coefficientVector[8](float32): " << LDPPath_.coefficientVector[8] << std::endl;
-    LDPPath_.coefficientVector[9] = 60.50;
-    std::cout << "LDPPath_.coefficientVector[9](float32): " << LDPPath_.coefficientVector[9] << std::endl;
-    LDPPath_.coefficientVector[10] = 61.60;
-    std::cout << "LDPPath_.coefficientVector[10](float32): " << LDPPath_.coefficientVector[10] << std::endl;
-    LDPPath_.coefficientVector[11] = 62.70;
-    std::cout << "LDPPath_.coefficientVector[11](float32): " << LDPPath_.coefficientVector[11] << std::endl;
-    LDPPath_.coefficientVector[12] = 63.80;
-    std::cout << "LDPPath_.coefficientVector[12](float32): " << LDPPath_.coefficientVector[12] << std::endl;
-    LDPPath_.coefficientVector[13] = 64.90;
-    std::cout << "LDPPath_.coefficientVector[13](float32): " << LDPPath_.coefficientVector[13] << std::endl;
-    LDPPath_.coefficientVector[14] = 66.00;
-    std::cout << "LDPPath_.coefficientVector[14](float32): " << LDPPath_.coefficientVector[14] << std::endl;
-    LDPPath_.coefficientVector[15] = 67.10;
-    std::cout << "LDPPath_.coefficientVector[15](float32): " << LDPPath_.coefficientVector[15] << std::endl;
-    LDPPath_.coefficientVector[16] = 68.20;
-    std::cout << "LDPPath_.coefficientVector[16](float32): " << LDPPath_.coefficientVector[16] << std::endl;
-    LDPPath_.coefficientVector[17] = 69.30;
-    std::cout << "LDPPath_.coefficientVector[17](float32): " << LDPPath_.coefficientVector[17] << std::endl;
-    LDPPath_.coefficientVector[18] = 70.40;
-    std::cout << "LDPPath_.coefficientVector[18](float32): " << LDPPath_.coefficientVector[18] << std::endl;
-    LDPPath_.coefficientVector[19] = 71.50;
-    std::cout << "LDPPath_.coefficientVector[19](float32): " << LDPPath_.coefficientVector[19] << std::endl;
-    LDPPath_.coefficientVector[20] = 72.60;
-    std::cout << "LDPPath_.coefficientVector[20](float32): " << LDPPath_.coefficientVector[20] << std::endl;
-    LDPPath_.coefficientVector[21] = 73.70;
-    std::cout << "LDPPath_.coefficientVector[21](float32): " << LDPPath_.coefficientVector[21] << std::endl;
-    LDPPath_.coefficientVector[22] = 74.80;
-    std::cout << "LDPPath_.coefficientVector[22](float32): " << LDPPath_.coefficientVector[22] << std::endl;
-    LDPPath_.coefficientVector[23] = 75.90;
-    std::cout << "LDPPath_.coefficientVector[23](float32): " << LDPPath_.coefficientVector[23] << std::endl;
-    LDPPath_.coefficientVector[24] = 77.00;
-    std::cout << "LDPPath_.coefficientVector[24](float32): " << LDPPath_.coefficientVector[24] << std::endl;
-    LDPPath_.coefficientVector[25] = 78.10;
-    std::cout << "LDPPath_.coefficientVector[25](float32): " << LDPPath_.coefficientVector[25] << std::endl;
-    LDPPath_.coefficientVector[26] = 79.20;
-    std::cout << "LDPPath_.coefficientVector[26](float32): " << LDPPath_.coefficientVector[26] << std::endl;
-    LDPPath_.coefficientVector[27] = 80.30;
-    std::cout << "LDPPath_.coefficientVector[27](float32): " << LDPPath_.coefficientVector[27] << std::endl;
-    LDPPath_.coefficientVector[28] = 81.40;
-    std::cout << "LDPPath_.coefficientVector[28](float32): " << LDPPath_.coefficientVector[28] << std::endl;
-    LDPPath_.coefficientVector[29] = 82.50;
-    std::cout << "LDPPath_.coefficientVector[29](float32): " << LDPPath_.coefficientVector[29] << std::endl;
-    LDPPath_.coefficientVector[30] = 83.60;
-    std::cout << "LDPPath_.coefficientVector[30](float32): " << LDPPath_.coefficientVector[30] << std::endl;
-    LDPPath_.coefficientVector[31] = 84.70;
-    std::cout << "LDPPath_.coefficientVector[31](float32): " << LDPPath_.coefficientVector[31] << std::endl;
-    LDPPath_.coefficientVector[32] = 85.80;
-    std::cout << "LDPPath_.coefficientVector[32](float32): " << LDPPath_.coefficientVector[32] << std::endl;
-    LDPPath_.coefficientVector[33] = 86.90;
-    std::cout << "LDPPath_.coefficientVector[33](float32): " << LDPPath_.coefficientVector[33] << std::endl;
-    LDPPath_.coefficientVector[34] = 88.00;
-    std::cout << "LDPPath_.coefficientVector[34](float32): " << LDPPath_.coefficientVector[34] << std::endl;
-    LDPPath_.coefficientVector[35] = 89.10;
-    std::cout << "LDPPath_.coefficientVector[35](float32): " << LDPPath_.coefficientVector[35] << std::endl;
-    LDPPath_.coefficientVector[36] = 90.20;
-    std::cout << "LDPPath_.coefficientVector[36](float32): " << LDPPath_.coefficientVector[36] << std::endl;
-    LDPPath_.coefficientVector[37] = 91.30;
-    std::cout << "LDPPath_.coefficientVector[37](float32): " << LDPPath_.coefficientVector[37] << std::endl;
-    LDPPath_.coefficientVector[38] = 92.40;
-    std::cout << "LDPPath_.coefficientVector[38](float32): " << LDPPath_.coefficientVector[38] << std::endl;
-    LDPPath_.coefficientVector[39] = 93.50;
-    std::cout << "LDPPath_.coefficientVector[39](float32): " << LDPPath_.coefficientVector[39] << std::endl;
-    LDPPath_.coefficientVector[40] = 94.60;
-    std::cout << "LDPPath_.coefficientVector[40](float32): " << LDPPath_.coefficientVector[40] << std::endl;
-    LDPPath_.coefficientVector[41] = 95.70;
-    std::cout << "LDPPath_.coefficientVector[41](float32): " << LDPPath_.coefficientVector[41] << std::endl;
-};
-#endif
-
-
-
 #ifdef CAH_ACTIVESAFETY_H
 /* Set and Print struct CAH_ActiveSafety initial value */
 void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
@@ -5829,8 +5550,140 @@ void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_){
     std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_TTCThres(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_TTCThres << std::endl;
     CAH_ActiveSafety_.fcw_dev.FCW_TTC = 4.40;
     std::cout << "CAH_ActiveSafety_.fcw_dev.FCW_TTC(float32): " << CAH_ActiveSafety_.fcw_dev.FCW_TTC << std::endl;
+    CAH_ActiveSafety_.aebmon_state = 12;
+    std::cout << "CAH_ActiveSafety_.aebmon_state(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.aebmon_state) << std::dec  << std::endl;
+    CAH_ActiveSafety_.LgSf_AEBDecelReq = 5.50;
+    std::cout << "CAH_ActiveSafety_.LgSf_AEBDecelReq(float32): " << CAH_ActiveSafety_.LgSf_AEBDecelReq << std::endl;
+    CAH_ActiveSafety_.LgSf_AEBType = 13;
+    std::cout << "CAH_ActiveSafety_.LgSf_AEBType(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.LgSf_AEBType) << std::dec  << std::endl;
+    CAH_ActiveSafety_.LgSf_AEBDecelReqFlag = 14;
+    std::cout << "CAH_ActiveSafety_.LgSf_AEBDecelReqFlag(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.LgSf_AEBDecelReqFlag) << std::dec  << std::endl;
+    CAH_ActiveSafety_.LgSf_AEBBrkReqFlag = 15;
+    std::cout << "CAH_ActiveSafety_.LgSf_AEBBrkReqFlag(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(CAH_ActiveSafety_.LgSf_AEBBrkReqFlag) << std::dec  << std::endl;
 };
 #endif
+
+
+
+#ifdef VEHPARAM_TX_H
+/* Set and Print struct VehParam_Tx initial value */
+void setIntialValue_VehParam_Tx(VehParam_Tx& VehParam_Tx_){
+    std::cout << "Set struct VehParam_Tx variable and Publish:" << std::endl;
+    VehParam_Tx_.AxleDstReToVehFrnt = 1.10;
+    std::cout << "VehParam_Tx_.AxleDstReToVehFrnt(float32): " << VehParam_Tx_.AxleDstReToVehFrnt << std::endl;
+    VehParam_Tx_.SingleTrackAxleDistFrnt = 2.20;
+    std::cout << "VehParam_Tx_.SingleTrackAxleDistFrnt(float32): " << VehParam_Tx_.SingleTrackAxleDistFrnt << std::endl;
+    VehParam_Tx_.SteerWhlPosn = 1;
+    std::cout << "VehParam_Tx_.SteerWhlPosn(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.SteerWhlPosn) << std::dec  << std::endl;
+    VehParam_Tx_.Len = 3.30;
+    std::cout << "VehParam_Tx_.Len(float32): " << VehParam_Tx_.Len << std::endl;
+    VehParam_Tx_.Weight = 4.40;
+    std::cout << "VehParam_Tx_.Weight(float32): " << VehParam_Tx_.Weight << std::endl;
+    VehParam_Tx_.WhlBas = 5.50;
+    std::cout << "VehParam_Tx_.WhlBas(float32): " << VehParam_Tx_.WhlBas << std::endl;
+    VehParam_Tx_.Width = 6.60;
+    std::cout << "VehParam_Tx_.Width(float32): " << VehParam_Tx_.Width << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] = 7.70;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[0] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] = 8.80;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[1] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] = 9.90;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[2] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] = 11.00;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[3] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] = 12.10;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[4] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] = 13.20;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[5] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] = 14.30;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[6] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] = 15.40;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrntByVehSpd[7] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnFrnt = 16.50;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnFrnt(float32): " << VehParam_Tx_.SingleTrackCornrgStfnFrnt << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] = 17.60;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[0] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] = 18.70;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[1] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] = 19.80;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[2] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] = 20.90;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[3] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] = 22.00;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[4] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] = 23.10;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[5] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] = 24.20;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[6] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] = 25.30;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnReByVehSpd[7] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnRe = 26.40;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnRe(float32): " << VehParam_Tx_.SingleTrackCornrgStfnRe << std::endl;
+    VehParam_Tx_.SteerWhlAgRat = 27.50;
+    std::cout << "VehParam_Tx_.SteerWhlAgRat(float32): " << VehParam_Tx_.SteerWhlAgRat << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] = 28.60;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[0] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] = 29.70;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[1] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] = 30.80;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[2] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] = 31.90;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[3] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] = 33.00;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[4] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] = 34.10;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[5] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] = 35.20;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[6] << std::endl;
+    VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] = 36.30;
+    std::cout << "VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7](float32): " << VehParam_Tx_.SingleTrackCornrgStfnTable_Spd[7] << std::endl;
+    VehParam_Tx_.BltFrntExist = 2;
+    std::cout << "VehParam_Tx_.BltFrntExist(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.BltFrntExist) << std::dec  << std::endl;
+    VehParam_Tx_.OncomingBrk = 3;
+    std::cout << "VehParam_Tx_.OncomingBrk(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.OncomingBrk) << std::dec  << std::endl;
+    VehParam_Tx_.SelfStrGrdt = 37.40;
+    std::cout << "VehParam_Tx_.SelfStrGrdt(float32): " << VehParam_Tx_.SelfStrGrdt << std::endl;
+    VehParam_Tx_.TrafficAssist = 4;
+    std::cout << "VehParam_Tx_.TrafficAssist(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.TrafficAssist) << std::dec  << std::endl;
+    VehParam_Tx_.LongCtrlBrkLim = 5;
+    std::cout << "VehParam_Tx_.LongCtrlBrkLim(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrlBrkLim) << std::dec  << std::endl;
+    VehParam_Tx_.LongCtrEco = 6;
+    std::cout << "VehParam_Tx_.LongCtrEco(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrEco) << std::dec  << std::endl;
+    VehParam_Tx_.LongCtrSpdLoLim = 38.50;
+    std::cout << "VehParam_Tx_.LongCtrSpdLoLim(float32): " << VehParam_Tx_.LongCtrSpdLoLim << std::endl;
+    VehParam_Tx_.LongCtrStopNGo = 7;
+    std::cout << "VehParam_Tx_.LongCtrStopNGo(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.LongCtrStopNGo) << std::dec  << std::endl;
+    VehParam_Tx_.SingleTrackMomentOfInertia = 39.60;
+    std::cout << "VehParam_Tx_.SingleTrackMomentOfInertia(float32): " << VehParam_Tx_.SingleTrackMomentOfInertia << std::endl;
+    VehParam_Tx_.VehTyp = 8;
+    std::cout << "VehParam_Tx_.VehTyp(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(VehParam_Tx_.VehTyp) << std::dec  << std::endl;
+    VehParam_Tx_.WhlRadius = 40.70;
+    std::cout << "VehParam_Tx_.WhlRadius(float32): " << VehParam_Tx_.WhlRadius << std::endl;
+};
+#endif
+
+
+
+#ifdef IDT_FUNCTGTVISNID_H
+/* Set and Print struct IDT_FuncTgtVisnID initial value */
+void setIntialValue_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_){
+    std::cout << "Set struct IDT_FuncTgtVisnID variable and Publish:" << std::endl;
+    IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID = 1;
+    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.ACCTgtVisnID) << std::dec  << std::endl;
+    IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID = 2;
+    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.CutInTgtVisnID) << std::dec  << std::endl;
+    IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID = 3;
+    std::cout << "IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.LongTgtVisnID.FDWTgtVisnID) << std::dec  << std::endl;
+    IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID = 4;
+    std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.AEBTgtVisnID) << std::dec  << std::endl;
+    IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID = 5;
+    std::cout << "IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID(uint8): " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(IDT_FuncTgtVisnID_.CATgtVisnID.FCWTgtVisnID) << std::dec  << std::endl;
+};
+#endif
+
+
+
+
 
 #ifdef VEHBUSIN_H
 std::map<std::string, VariableVariant > VehBusIn_Map = {
@@ -6112,7 +5965,7 @@ std::map<std::string, VariableVariant > VehParam_Tx_Map = {
 {"VehParam_Tx_.LongCtrStopNGo(uint8)" , &VehParam_Tx_.LongCtrStopNGo},
 {"VehParam_Tx_.SingleTrackMomentOfInertia(float32)" , &VehParam_Tx_.SingleTrackMomentOfInertia},
 {"VehParam_Tx_.VehTyp(uint8)" , &VehParam_Tx_.VehTyp},
-{"VehParam_Tx_.WhlRadius(float32)" , &VehParam_Tx_.WhlRadius}
+{"VehParam_Tx_.WhlRadius(float32)" , &VehParam_Tx_.WhlRadius},
 };
 #endif
 
@@ -6978,5 +6831,15 @@ void print_IDT_FuncTgtVisnID(IDT_FuncTgtVisnID& IDT_FuncTgtVisnID_,IDT_FuncTgtVi
         }
 }
 #endif
+
+
+
+
+
+
+
+
+
+
 
 
