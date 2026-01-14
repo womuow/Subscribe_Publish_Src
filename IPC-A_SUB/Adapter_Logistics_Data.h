@@ -79,7 +79,7 @@ public:
 	// dds::sub::DataReader<Objects::MSG_Objects> topic_read_init(std::string topicName);
 	// std::string topicName = "/carla/obj";
 	
-	int domain_id = 80;
+	int domain_id = 0;
 	bool type = false;
 	std::string topic = "ipc_services/msg/subscriber";
 	

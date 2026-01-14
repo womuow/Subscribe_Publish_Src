@@ -59,22 +59,12 @@ int config_async_sub(std::string json_file) {
     
 
 
-    // std::thread inputThread2(asyncInputThreadTTY);
-    
-
     while (true) {
         
         
         if(stop.load())
         {
             std::memcpy(&ipc_msg_Logistics_data_, data_in.data(), data_in.length());
-
-            if(ipc_msg_Logistics_data_.header.id=0x3007 && ipc_msg_Logistics_data_.header.target==0xA1 )
-            {
-
-            std::memcpy(&Logistics_data_, ipc_msg_Logistics_data_.data, sizeof( ipc_msg_Logistics_data_.data));
-
-            print_Logistics_data(Logistics_data_, Logistics_data_old);
             
             if (flag)
             {
@@ -82,9 +72,20 @@ int config_async_sub(std::string json_file) {
                 print_memory(data_in.data(),data_in.size());  
                 std::cout << "Logistics_data_ size="<<sizeof(Logistics_data)<< std::endl;
                 flag=false;
+
+                std::cout << "ipc_msg_Logistics_data_.header id=0x"
+				<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_Logistics_data_.header.id)<<std::endl
+				<<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_Logistics_data_.header.target)<<std::endl
+				<<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_Logistics_data_.header.timestamp)<<std::endl;
             }
 
-            Logistics_data_old = Logistics_data_;
+            if(ipc_msg_Logistics_data_.header.id=0x3007 && ipc_msg_Logistics_data_.header.target==0xA1 )
+            {
+                std::memcpy(&Logistics_data_, ipc_msg_Logistics_data_.data, sizeof(Logistics_data_));
+
+                print_Logistics_data(Logistics_data_, Logistics_data_old);
+                
+                Logistics_data_old = Logistics_data_;
             }
 
 
