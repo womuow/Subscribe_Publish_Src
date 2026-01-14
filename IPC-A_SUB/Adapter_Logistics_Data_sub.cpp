@@ -5,6 +5,7 @@
 
 Logistics_data Logistics_data_;
 Logistics_data Logistics_data_old;
+IPC_MSG_DATA_SIZE_MAX ipc_msg_Logistics_data_;
 
 
 int config_async_sub(std::string json_file) {
@@ -16,8 +17,8 @@ int config_async_sub(std::string json_file) {
     std::cout << "config_async_sub start with "  <<json_file<<"!!!"<< std::endl;
 
 
-    // MOS::communication::Init(json_file);
-    // MOS::utils::Register::get().register_version("Logistics_Data_sub", "1.1.0");
+    MOS::communication::Init(json_file);
+    MOS::utils::Register::get().register_version("Logistics_Data_sub", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     // // proto_info.protocol_type = MOS::communication::kProtocolShm;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
@@ -66,70 +67,75 @@ int config_async_sub(std::string json_file) {
         
         if(stop.load())
         {
-        std::memcpy(&Logistics_data_, data_in.data(), data_in.length());
+            std::memcpy(&ipc_msg_Logistics_data_, data_in.data(), data_in.length());
 
-
-        print_Logistics_data(Logistics_data_, Logistics_data_old);
-        
-        if (flag)
-        {
-            std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
-            print_memory(data_in.data(),data_in.size());  
-            std::cout << "Logistics_data_ size="<<sizeof(Logistics_data)<< std::endl;
-            flag=false;
-        }
-
-        Logistics_data_old = Logistics_data_;
-
-
-        }
-        if (!inputQueue.empty())
-        {
-            if (inputQueue.front() == "Logistics_data_.HW_Version")
+            if(ipc_msg_Logistics_data_.header.id=0x3007 && ipc_msg_Logistics_data_.header.target==0xA1 )
             {
-                std::cout<<"Logistics_data_.HW_Version: "<< std::hex << std::setw(2);
-                for(int i =0;i<sizeof(Logistics_data_.HW_Version);i++)
-                {
-                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i])<<" ";
-                }
-                std::cout<<std::dec<<std::endl;
-            }
-            else if (inputQueue.front() == "Logistics_data_.SW_Version")
-            {
-                std::cout<<"Logistics_data_.SW_Version: "<< std::hex << std::setw(2);
-                for(int i =0;i<sizeof(Logistics_data_.SW_Version);i++)
-                {
-                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i])<<" ";
-                }
-                std::cout<<std::dec<<std::endl;
-            }
-            else if (inputQueue.front() == "Logistics_data_.ECU_SerialNumber")
-            {
-                std::cout<<"Logistics_data_.ECU_SerialNumber: "<< std::hex << std::setw(2);
-                for(int i =0;i<sizeof(Logistics_data_.ECU_SerialNumber);i++)
-                {
-                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i])<<" ";
-                }
-                std::cout<<std::dec<<std::endl;
-            }
-            else if (inputQueue.front() == "Logistics_data_.VIN_Code")
-            {
-                std::cout<<"Logistics_data_.VIN_Code: "<< std::hex << std::setw(2);
-                for(int i =0;i<sizeof(Logistics_data_.VIN_Code);i++)
-                {
-                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i])<<" ";
-                }
-                std::cout<<std::dec<<std::endl;
-            }
 
-            else
-            {
-                getVariableValue(variableMap,inputQueue.front());
-            }
+            std::memcpy(&Logistics_data_, ipc_msg_Logistics_data_.data, sizeof( ipc_msg_Logistics_data_.data));
+
+            print_Logistics_data(Logistics_data_, Logistics_data_old);
             
+            if (flag)
+            {
+                std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
+                print_memory(data_in.data(),data_in.size());  
+                std::cout << "Logistics_data_ size="<<sizeof(Logistics_data)<< std::endl;
+                flag=false;
+            }
+
+            Logistics_data_old = Logistics_data_;
+            }
 
 
-            inputQueue.pop();
+            if (!inputQueue.empty())
+            {
+                if (inputQueue.front() == "Logistics_data_.HW_Version")
+                {
+                    std::cout<<"Logistics_data_.HW_Version: "<< std::hex << std::setw(2);
+                    for(int i =0;i<sizeof(Logistics_data_.HW_Version);i++)
+                    {
+                        std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i])<<" ";
+                    }
+                    std::cout<<std::dec<<std::endl;
+                }
+                else if (inputQueue.front() == "Logistics_data_.SW_Version")
+                {
+                    std::cout<<"Logistics_data_.SW_Version: "<< std::hex << std::setw(2);
+                    for(int i =0;i<sizeof(Logistics_data_.SW_Version);i++)
+                    {
+                        std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i])<<" ";
+                    }
+                    std::cout<<std::dec<<std::endl;
+                }
+                else if (inputQueue.front() == "Logistics_data_.ECU_SerialNumber")
+                {
+                    std::cout<<"Logistics_data_.ECU_SerialNumber: "<< std::hex << std::setw(2);
+                    for(int i =0;i<sizeof(Logistics_data_.ECU_SerialNumber);i++)
+                    {
+                        std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i])<<" ";
+                    }
+                    std::cout<<std::dec<<std::endl;
+                }
+                else if (inputQueue.front() == "Logistics_data_.VIN_Code")
+                {
+                    std::cout<<"Logistics_data_.VIN_Code: "<< std::hex << std::setw(2);
+                    for(int i =0;i<sizeof(Logistics_data_.VIN_Code);i++)
+                    {
+                        std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i])<<" ";
+                    }
+                    std::cout<<std::dec<<std::endl;
+                }
+
+                else
+                {
+                    getVariableValue(variableMap,inputQueue.front());
+                }
+                
+
+
+                inputQueue.pop();
+            }
         }
         
     }

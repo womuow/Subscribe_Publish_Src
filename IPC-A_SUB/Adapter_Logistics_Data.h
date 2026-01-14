@@ -59,7 +59,7 @@
 #include <variant>
 #include <iomanip>
 #include <map>
-
+#include "ipc_msg.h"
 #include "IPC-A_ALLMapPrint.h"
 #include "edr_data_types_common.h"
 #ifndef ADAPTER_Logistics_Data_H
