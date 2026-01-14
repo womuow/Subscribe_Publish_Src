@@ -87,37 +87,37 @@ int config_async_sub(std::string json_file) {
         {
             if (inputQueue.front() == "Logistics_data_.HW_Version")
             {
-                std::cout<<"Logistics_data_.HW_Version: 0x"<< std::hex << std::setw(2);
+                std::cout<<"Logistics_data_.HW_Version: "<< std::hex << std::setw(2);
                 for(int i =0;i<sizeof(Logistics_data_.HW_Version);i++)
                 {
-                    std::cout<<Logistics_data_.HW_Version[i];
+                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i])<<" ";
                 }
                 std::cout<<std::dec<<std::endl;
             }
             else if (inputQueue.front() == "Logistics_data_.SW_Version")
             {
-                std::cout<<"Logistics_data_.SW_Version: 0x"<< std::hex << std::setw(2);
+                std::cout<<"Logistics_data_.SW_Version: "<< std::hex << std::setw(2);
                 for(int i =0;i<sizeof(Logistics_data_.SW_Version);i++)
                 {
-                    std::cout<<Logistics_data_.SW_Version[i];
+                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i])<<" ";
                 }
                 std::cout<<std::dec<<std::endl;
             }
             else if (inputQueue.front() == "Logistics_data_.ECU_SerialNumber")
             {
-                std::cout<<"Logistics_data_.ECU_SerialNumber: 0x"<< std::hex << std::setw(2);
+                std::cout<<"Logistics_data_.ECU_SerialNumber: "<< std::hex << std::setw(2);
                 for(int i =0;i<sizeof(Logistics_data_.ECU_SerialNumber);i++)
                 {
-                    std::cout<<Logistics_data_.ECU_SerialNumber[i];
+                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i])<<" ";
                 }
                 std::cout<<std::dec<<std::endl;
             }
             else if (inputQueue.front() == "Logistics_data_.VIN_Code")
             {
-                std::cout<<"Logistics_data_.VIN_Code: 0x"<< std::hex << std::setw(2);
+                std::cout<<"Logistics_data_.VIN_Code: "<< std::hex << std::setw(2);
                 for(int i =0;i<sizeof(Logistics_data_.VIN_Code);i++)
                 {
-                    std::cout<<Logistics_data_.VIN_Code[i];
+                    std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i])<<" ";
                 }
                 std::cout<<std::dec<<std::endl;
             }
@@ -139,9 +139,9 @@ int config_async_sub(std::string json_file) {
 void Adapter_Logistics_Data::run()
 {
 
+    std::thread inputThread(asyncInputThreadTTY);
 
     config_async_sub(json_file);
-    std::thread inputThread(asyncInputThreadTTY);
 
 }
 Adapter_Logistics_Data::Adapter_Logistics_Data()
