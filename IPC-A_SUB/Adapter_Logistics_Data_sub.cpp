@@ -64,12 +64,14 @@ int config_async_sub(std::string json_file) {
         
         if(stop.load())
         {
+            
+            stop.store(false);  
             std::memcpy(&ipc_msg_Logistics_data_, data_in.data(), data_in.length());
             
             if (flag)
             {
-                std::cout << "data_in.data() size="<<data_in.size()<< std::endl;
                 print_memory(data_in.data(),data_in.size());  
+                std::cout << "data_in.data() size="<< static_cast<int>(data_in.size())<< std::endl;
                 std::cout << "Logistics_data_ size="<<sizeof(Logistics_data)<< std::endl;
                 flag=false;
 

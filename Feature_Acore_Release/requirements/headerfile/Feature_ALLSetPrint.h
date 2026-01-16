@@ -19,6 +19,12 @@
 
 
 
+#ifdef ROADINFO_T_H
+/* Set and Print struct RoadInfo_T initial value */
+void setIntialValue_RoadInfo_T(RoadInfo_T& RoadInfo_T_);
+#endif
+
+
 
 #ifdef CAH_ACTIVESAFETY_H
 void setIntialValue_CAH_ActiveSafety(CAH_ActiveSafety& CAH_ActiveSafety_);
