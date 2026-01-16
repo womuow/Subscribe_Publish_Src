@@ -22,56 +22,6 @@ void print_memory(const void* ptr, size_t size) {
     std::cout << std::dec << std::endl;
 }
 
-void printVariableVariant(const std::string& name, VariableVariant var) {
-    std::visit([&name](auto&& ptr) {
-        using T = std::decay_t<decltype(*ptr)>;
-        
-        // 根据类型决定打印格式
-        if constexpr (std::is_same_v<T, uint8_t> ) {
-            // 8位类型：宽度2
-            std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') 
-                      << static_cast<int>(*ptr) << std::dec << std::endl;
-        } 
-        // if constexpr (std::is_same_v<T, unsigned char> ) {
-        //     // 8位类型：宽度2
-        //     std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') 
-        //               << static_cast<int>(*ptr) << std::dec << std::endl;
-        // } 
-        else if constexpr (std::is_same_v<T, uint16_t> ) {
-            // 16位类型：宽度4
-            std::cout << name << ": 0x" << std::hex << std::setw(4) << std::setfill('0') 
-                      << *ptr << std::dec  << std::endl;
-        }
-        else if constexpr (std::is_same_v<T, uint32_t> ) {
-            // 32位类型：宽度8
-            std::cout << name << ": 0x" << std::hex << std::setw(8) << std::setfill('0') 
-                      << *ptr << std::dec  << std::endl;
-        }
-        else if constexpr (std::is_same_v<T, uint64_t> ) {
-            // 32位类型：宽度8
-            std::cout << name << ": 0x" << std::hex << std::setw(16) << std::setfill('0') 
-                      << *ptr << std::dec  << std::endl;
-        }
-        
-
-        else if constexpr ( std::is_same_v<T, short>) {
-            // 16位类型：宽度4
-            std::cout << name << ": " << std::dec << std::setfill('0') 
-                      << static_cast<int>(*ptr) << std::dec  << std::endl;
-        }
-        else if constexpr ( std::is_same_v<T, int>) {
-            // 32位类型：宽度8
-            std::cout << name << ": " << std::dec<< std::setfill('0') 
-                      << static_cast<int>(*ptr) << std::dec  << std::endl;
-        }
-
-        else if constexpr (std::is_same_v<T, float>) {
-            // 浮点类型：十进制
-            std::cout << name << ": " << std::fixed << std::setprecision(2) << *ptr  << std::endl;
-        }
-    }, var);
-}
-
 
 void asyncInputThreadTTY() {
 
@@ -175,7 +125,7 @@ void asyncInputThreadTTY() {
             {
                 inputQueue.push(line);
                 
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
                tcflush(serial_fd, TCIOFLUSH);
             // close(serial_fd);
             // break;
@@ -191,6 +141,58 @@ void asyncInputThreadTTY() {
         
     }
 }
+
+
+// #ifndef IPC_A_H
+
+void printVariableVariant(const std::string& name, VariableVariant var) {
+    std::visit([&name](auto&& ptr) {
+        using T = std::decay_t<decltype(*ptr)>;
+        
+        // 根据类型决定打印格式
+        if constexpr (std::is_same_v<T, bool> ) {
+            // 8位类型：宽度2
+            std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') 
+                      << static_cast<int>(*ptr) << std::dec << std::endl;
+        } 
+        else if constexpr (std::is_same_v<T, uint8_t> ) {
+            // 8位类型：宽度2
+            std::cout << name << ": 0x" << std::hex << std::setw(2) << std::setfill('0') 
+                      << static_cast<int>(*ptr) << std::dec << std::endl;
+        } 
+        else if constexpr (std::is_same_v<T, uint16_t> ) {
+            // 16位类型：宽度4
+            std::cout << name << ": 0x" << std::hex << std::setw(4) << std::setfill('0') 
+                      << *ptr << std::dec  << std::endl;
+        }
+        else if constexpr (std::is_same_v<T, uint32_t> ) {
+            // 32位类型：宽度8
+            std::cout << name << ": 0x" << std::hex << std::setw(8) << std::setfill('0') 
+                      << *ptr << std::dec  << std::endl;
+        }
+        else if constexpr (std::is_same_v<T, uint64_t> ) {
+            // 32位类型：宽度8
+            std::cout << name << ": 0x" << std::hex << std::setw(16) << std::setfill('0') 
+                      << *ptr << std::dec  << std::endl;
+        }
+        else if constexpr ( std::is_same_v<T, short>) {
+            // 16位类型：宽度4
+            std::cout << name << ": " << std::dec << std::setfill('0') 
+                      << static_cast<int>(*ptr) << std::dec  << std::endl;
+        }
+        else if constexpr ( std::is_same_v<T, int>) {
+            // 32位类型：宽度8
+            std::cout << name << ": " << std::dec<< std::setfill('0') 
+                      << static_cast<int>(*ptr) << std::dec  << std::endl;
+        }
+
+        else if constexpr (std::is_same_v<T, float>) {
+            // 浮点类型：十进制
+            std::cout << name << ": " << std::fixed << std::setprecision(2) << *ptr  << std::endl;
+        }
+    }, var);
+}
+
 
 void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string input)
 {
@@ -221,7 +223,7 @@ void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string 
     }
 }
 
-
+// #endif
 
 
 #ifdef IPC_MSG_DATA_SIZE_MAX_H
@@ -2309,6 +2311,22 @@ void print_IPC_MSG_DATA_SIZE_MAX(IPC_MSG_DATA_SIZE_MAX& IPC_MSG_DATA_SIZE_MAX_,I
 }
 #endif
 
+
+
+#ifdef RESETA1_H
+std::map<std::string, VariableVariant > ResetA1_Map = {
+//[ResetA1]
+{"ResetA1_.R_reset_request" , &ResetA1_.R_reset_request}
+};
+
+/* Print struct Rcore_reset_request changed value */
+void print_ResetA1(Rcore_reset_request& ResetA1_, Rcore_reset_request& ResetA1_old){
+// std::cout << "Rcore_reset_request all variable:" << std::endl;
+    if(ResetA1_.R_reset_request != ResetA1_old.R_reset_request){
+        std::cout << "ResetA1_.R_reset_request(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ResetA1_.R_reset_request) << std::dec  << std::endl;
+        }
+}
+#endif
 
 
 #ifdef LOGISTICS_DATA_H
