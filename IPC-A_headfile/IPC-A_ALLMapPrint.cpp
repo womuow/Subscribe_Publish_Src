@@ -2595,37 +2595,37 @@ void print_Logistics_data(Logistics_data& Logistics_data_,Logistics_data& Logist
 
     if (Logistics_data_.HW_Version[0]!=Logistics_data_old.HW_Version[0] || Logistics_data_.HW_Version[9]!=Logistics_data_old.HW_Version[9])
     {
-        std::cout<<"Logistics_data_.HW_Version: "<< std::hex << std::setw(2);
+        std::cout<<"Logistics_data_.HW_Version: 0x"<< std::hex << std::setw(2);
         for(int i =0;i<sizeof(Logistics_data_.HW_Version);i++)
         {
-            std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i])<<" ";
+            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i]);
         }
         std::cout<<std::dec<<std::endl;
     }
     else if (Logistics_data_.SW_Version[0]!=Logistics_data_old.SW_Version[0] || Logistics_data_.SW_Version[9]!=Logistics_data_old.SW_Version[9])
     {
-        std::cout<<"Logistics_data_.SW_Version: "<< std::hex << std::setw(2);
+        std::cout<<"Logistics_data_.SW_Version: 0x"<< std::hex << std::setw(2);
         for(int i =0;i<sizeof(Logistics_data_.SW_Version);i++)
         {
-            std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i])<<" ";
+            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i]);
         }
         std::cout<<std::dec<<std::endl;
     }
     else if (Logistics_data_.ECU_SerialNumber[0]!=Logistics_data_old.ECU_SerialNumber[0] || Logistics_data_.ECU_SerialNumber[29]!=Logistics_data_old.ECU_SerialNumber[29])
     {
-        std::cout<<"Logistics_data_.ECU_SerialNumber: "<< std::hex << std::setw(2);
+        std::cout<<"Logistics_data_.ECU_SerialNumber: 0x"<< std::hex << std::setw(2);
         for(int i =0;i<sizeof(Logistics_data_.ECU_SerialNumber);i++)
         {
-            std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i])<<" ";
+            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i]);
         }
         std::cout<<std::dec<<std::endl;
     }
     else if (Logistics_data_.VIN_Code[0]!=Logistics_data_old.VIN_Code[0] || Logistics_data_.VIN_Code[16]!=Logistics_data_old.VIN_Code[16])
     {
-        std::cout<<"Logistics_data_.VIN_Code: "<< std::hex << std::setw(2);
+        std::cout<<"Logistics_data_.VIN_Code: 0x"<< std::hex << std::setw(2);
         for(int i =0;i<sizeof(Logistics_data_.VIN_Code);i++)
         {
-            std::cout<<"0x"<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i])<<" ";
+            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i]);
         }
         std::cout<<std::dec<<std::endl;
     }
