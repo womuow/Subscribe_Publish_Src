@@ -17,7 +17,7 @@
 #include <queue>
 
 #define Reset_A1 0x300C
-#define EDR_Info 0x3012
+#define edr_info 0x3012
 #define Logistics_Data 0x3007
 #define CS_Trigger_A1 0x3002
 #define SysState 0x3006
@@ -62,6 +62,11 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 #include "Adapter_Logistics_Data.h"
 #endif
 
+#ifdef EDR_INFO_H
+
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*>;
+#include "Adapter_EDR_Info.h"
+#endif
 
 
 

@@ -59,37 +59,39 @@ int config_async_sub(std::string json_file) {
 
     while (true) {
 
-        if (HeaderId.load()==0x0)
+
+        if (!inputQueue.empty())
         {
-            if (!inputQueue.empty())
+            std::string tempStr = inputQueue.front();
+            std::cout<<"tempStr "<<tempStr<<std::endl;
+            size_t startpos =tempStr.find("HeaderId: 0x");
+            std::cout << "value=0x" << static_cast<int>(startpos)<< std::endl;
+            if (startpos != std::string::npos)
             {
-                std::string tempStr = inputQueue.front();
-                size_t startpos =tempStr.find("HeaderId: 0x");
-                if (startpos != std::string::npos)
-                {
-                    const char* cstr=tempStr.c_str() + startpos;
-                    char * endptr = nullptr;
+                const char* cstr=tempStr.c_str() + startpos;
+                char * endptr = nullptr;
 
-                    errno = 0; // reset errno before the call
-                    uint16_t value = static_cast<uint16_t>(std::strtoul(cstr + strlen("HeaderId: 0x"), &endptr, 16));
+                errno = 0; // reset errno before the call
+                uint16_t value = static_cast<uint16_t>(std::strtoul(cstr + strlen("HeaderId: 0x"), &endptr, 16));
 
-                     // check for conversion errors
-                    if (errno == ERANGE) {
-                        std::cerr << "Out of range" << std::endl;
-                        return 0;
-                    }
-                    
-                    if (endptr == cstr) {
-                        std::cerr << "No conversion performed" << std::endl;
-                        return 0;
-                    }
-
-                    HeaderId.store(value);
-                    inputQueue.pop();
-                    flag = true;
+                // check for conversion errors
+                if (errno == ERANGE) {
+                    std::cerr << "Out of range" << std::endl;
+                    return 0;
                 }
+                
+                if (endptr == cstr) {
+                    std::cerr << "No conversion performed" << std::endl;
+                    return 0;
+                }
+                std::cout << "value=0x" <<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(value)<< std::endl;
+                HeaderId.store(value);
+                flag = true;
             }
+
+            inputQueue.pop();
         }
+
         
         
         if(stop.load())
@@ -99,7 +101,7 @@ int config_async_sub(std::string json_file) {
             std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
             
 
-            if(ipc_msg_.header.id==HeaderId.load() || HeaderId.load()==0x0)
+            if(ipc_msg_.header.id==HeaderId.load() || HeaderId.load()==0xFFFF)
             {
                 if (flag)
                 {
@@ -121,47 +123,6 @@ int config_async_sub(std::string json_file) {
 
             if (!inputQueue.empty())
             {
-                // if (inputQueue.front() == "ResetA1_.HW_Version")
-                // {
-                //     std::cout<<"ResetA1_.HW_Version: 0x"<< std::hex << std::setw(2);
-                //     for(int i =0;i<sizeof(ResetA1_.HW_Version);i++)
-                //     {
-                //         std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(ResetA1_.HW_Version[i]);
-                //     }
-                //     std::cout<<std::dec<<std::endl;
-                // }
-                // else if (inputQueue.front() == "ResetA1_.SW_Version")
-                // {
-                //     std::cout<<"ResetA1_.SW_Version: 0x"<< std::hex << std::setw(2);
-                //     for(int i =0;i<sizeof(ResetA1_.SW_Version);i++)
-                //     {
-                //         std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(ResetA1_.SW_Version[i]);
-                //     }
-                //     std::cout<<std::dec<<std::endl;
-                // }
-                // else if (inputQueue.front() == "ResetA1_.ECU_SerialNumber")
-                // {
-                //     std::cout<<"ResetA1_.ECU_SerialNumber: 0x"<< std::hex << std::setw(2);
-                //     for(int i =0;i<sizeof(ResetA1_.ECU_SerialNumber);i++)
-                //     {
-                //         std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(ResetA1_.ECU_SerialNumber[i]);
-                //     }
-                //     std::cout<<std::dec<<std::endl;
-                // }
-                // else if (inputQueue.front() == "ResetA1_.VIN_Code")
-                // {
-                //     std::cout<<"ResetA1_.VIN_Code: 0x"<< std::hex << std::setw(2);
-                //     for(int i =0;i<sizeof(ResetA1_.VIN_Code);i++)
-                //     {
-                //         std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(ResetA1_.VIN_Code[i]);
-                //     }
-                //     std::cout<<std::dec<<std::endl;
-                // }
-
-                // else
-                // {
-                //     getVariableValue(variableMap,inputQueue.front());
-                // }
                 inputQueue.pop();
             }
         }

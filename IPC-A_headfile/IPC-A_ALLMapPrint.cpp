@@ -26,7 +26,7 @@ void print_memory(const void* ptr, size_t size) {
 void asyncInputThreadTTY() {
 
 
-    // while (true) {
+
 
     int serial_fd = open("/dev/ttyS1",  O_NOCTTY | O_RDWR );
     if (serial_fd == -1) {
@@ -75,7 +75,7 @@ void asyncInputThreadTTY() {
         // 读取数据
         ssize_t bytes_read = read(serial_fd, buffer, sizeof(buffer) - 1);
 
-
+        // std::cout<<"bytes_read="<<bytes_read<<std::endl;
         if(bytes_read>0)
         {
         // 将读取的数据追加到行缓冲区
@@ -90,15 +90,16 @@ void asyncInputThreadTTY() {
             // 从行缓冲区中移除已处理的这一行
             lineBuffer.erase(0, newline_pos + 1);
             
+        // std::cout<<"line="<<line<<std::endl<<"line="<<line<<std::endl;
             // 去除可能的回车符\r
             if (!line.empty() && line.back() == '\n') 
             {
                 if ( line.compare("quit\n")==0 || line.compare("Quit\n")==0||line.compare("QUIT\n")==0)
                 {
                     if(tcsetattr(serial_fd,TCSANOW,&options_old)==0)
-                             std::cout << "串口设置已恢复" << std::endl;
+                             std::cout << "Serial port settings have been restored" << std::endl;
                     else
-                        std::cerr << "恢复串口设置失败: " << strerror(errno) << std::endl;
+                        std::cerr << "Failed to restore serial port settings, error: " << strerror(errno) << std::endl;
                     close(serial_fd);
 
                     return ;
@@ -230,6 +231,13 @@ void getVariableValue(std::map<std::string, VariableVariant> VarMap,std::string 
 
 std::map<std::string, VariableVariant > IPC_MSG_DATA_SIZE_MAX_Map = {
 //[IPC_MSG_DATA_SIZE_MAX]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
 {"IPC_MSG_DATA_SIZE_MAX_.header.id(uint16_t)" , &IPC_MSG_DATA_SIZE_MAX_.header.id},
 {"IPC_MSG_DATA_SIZE_MAX_.header.version(uint16_t)" , &IPC_MSG_DATA_SIZE_MAX_.header.version},
 {"IPC_MSG_DATA_SIZE_MAX_.header.data_size(uint16_t)" , &IPC_MSG_DATA_SIZE_MAX_.header.data_size},
@@ -2316,6 +2324,13 @@ void print_IPC_MSG_DATA_SIZE_MAX(IPC_MSG_DATA_SIZE_MAX& IPC_MSG_DATA_SIZE_MAX_,I
 #ifdef RESETA1_H
 std::map<std::string, VariableVariant > ResetA1_Map = {
 //[ResetA1]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
 {"ResetA1_.R_reset_request" , &ResetA1_.R_reset_request}
 };
 
@@ -2332,6 +2347,13 @@ void print_ResetA1(Rcore_reset_request& ResetA1_, Rcore_reset_request& ResetA1_o
 #ifdef LOGISTICS_DATA_H
 std::map<std::string, VariableVariant > Logistics_data_Map = {
 //[Logistics_data]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
 {"Logistics_data_.HW_Version[0](uint8_t)" , &Logistics_data_.HW_Version[0]},
 {"Logistics_data_.HW_Version[1](uint8_t)" , &Logistics_data_.HW_Version[1]},
 {"Logistics_data_.HW_Version[2](uint8_t)" , &Logistics_data_.HW_Version[2]},
@@ -2652,8 +2674,60 @@ void print_Logistics_data(Logistics_data& Logistics_data_,Logistics_data& Logist
 #endif
 
 
+#ifdef EDR_INFO_H
+
+std::map<std::string, VariableVariant > EDR_Info_Map = {
+//[ResetA1]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
+{"EDR_Info_.HPCADAS_AEBDecCtrl" , &EDR_Info_.HPCADAS_AEBDecCtrl},
+{"EDR_Info_.HPCADAS_LKA_SteeringWheelAngle" , &EDR_Info_.HPCADAS_LKA_SteeringWheelAngle},
+{"EDR_Info_.ADDC_ACCTargetTrq" , &EDR_Info_.ADDC_ACCTargetTrq},
+{"EDR_Info_.ADDC_ACCTargetTrqBrk" , &EDR_Info_.ADDC_ACCTargetTrqBrk},
+{"EDR_Info_.HPCADAS_ACCMode" , &EDR_Info_.HPCADAS_ACCMode},
+{"EDR_Info_.FSC_LCC_Mode" , &EDR_Info_.FSC_LCC_Mode},
+{"EDR_Info_.FSC_LCC_EscapeLevel" , &EDR_Info_.FSC_LCC_EscapeLevel},
+{"EDR_Info_.FSC_emergencyLightReq" , &EDR_Info_.FSC_emergencyLightReq},
+};
 
 
+/* Print struct EDR_Info changed value */
+void print_EDR_Info(EDR_Info& EDR_Info_,EDR_Info& EDR_Info_old)
+{
+    if(EDR_Info_.HPCADAS_AEBDecCtrl != EDR_Info_old.HPCADAS_AEBDecCtrl){
+        std::cout << "EDR_Info_.HPCADAS_AEBDecCtrl(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_AEBDecCtrl) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.HPCADAS_LKA_SteeringWheelAngle != EDR_Info_old.HPCADAS_LKA_SteeringWheelAngle){
+        std::cout << "EDR_Info_.HPCADAS_LKA_SteeringWheelAngle(uint16_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_LKA_SteeringWheelAngle) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.ADDC_ACCTargetTrq != EDR_Info_old.ADDC_ACCTargetTrq){
+        std::cout << "EDR_Info_.ADDC_ACCTargetTrq(uint16_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.ADDC_ACCTargetTrq) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.ADDC_ACCTargetTrqBrk != EDR_Info_old.ADDC_ACCTargetTrqBrk){
+        std::cout << "EDR_Info_.ADDC_ACCTargetTrqBrk(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.ADDC_ACCTargetTrqBrk) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.HPCADAS_ACCMode != EDR_Info_old.HPCADAS_ACCMode){
+        std::cout << "EDR_Info_.HPCADAS_ACCMode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_ACCMode) << std::dec  << std::endl;
+        }        
+    if(EDR_Info_.FSC_LCC_Mode != EDR_Info_old.FSC_LCC_Mode){
+        std::cout << "EDR_Info_.FSC_LCC_Mode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_Mode) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.FSC_LCC_EscapeLevel != EDR_Info_old.FSC_LCC_EscapeLevel){
+        std::cout << "EDR_Info_.FSC_LCC_EscapeLevel(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_EscapeLevel) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.FSC_emergencyLightReq != EDR_Info_old.FSC_emergencyLightReq){
+        // std::cout << "EDR_Info_old.FSC_emergencyLightReq(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_old.FSC_emergencyLightReq) << std::dec  << std::endl;
+        std::cout << "EDR_Info_.FSC_emergencyLightReq(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_emergencyLightReq) << std::dec  << std::endl;
+        }
+}
+
+
+#endif
 
 
 
