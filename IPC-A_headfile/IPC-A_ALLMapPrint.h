@@ -58,7 +58,7 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 
 #ifdef LOGISTICS_DATA_H
 
-using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*>;
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
 #include "Adapter_Logistics_Data.h"
 #endif
 
@@ -69,7 +69,8 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 #endif
 
 
-
+#include "ipc_msg.h"
+extern IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 void print_memory(const void* ptr, size_t size);
 void asyncInputThreadTTY() ;
 // #ifndef IPC_A_H

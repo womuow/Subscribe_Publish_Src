@@ -5,7 +5,6 @@
 
 Rcore_reset_request ResetA1_;
 Rcore_reset_request ResetA1_old;
-IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 
 
 int config_async_sub(std::string json_file) {

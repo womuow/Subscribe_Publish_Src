@@ -115,7 +115,6 @@ extern std::string data_in;
 extern std::atomic_bool stop;
 extern EDR_Info EDR_Info_;
 extern EDR_Info EDR_Info_old;
-extern IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 
 extern std::map<std::string, VariableVariant > EDR_Info_Map;
 

@@ -5,7 +5,7 @@ std::queue<std::string> inputQueue;
 int flag=true;
 std::string data_in={0x0};
 std::atomic_bool stop{ false };
-
+IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 
 
 

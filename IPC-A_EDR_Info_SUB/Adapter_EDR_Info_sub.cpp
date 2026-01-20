@@ -5,7 +5,6 @@
 
 EDR_Info EDR_Info_;
 EDR_Info EDR_Info_old;
-IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 
 
 int config_async_sub(std::string json_file) {

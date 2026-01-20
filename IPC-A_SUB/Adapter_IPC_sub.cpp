@@ -3,7 +3,6 @@
 
 
 
-IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 std::atomic_uint32_t HeaderId{0x0};
 
 int config_async_sub(std::string json_file) {
