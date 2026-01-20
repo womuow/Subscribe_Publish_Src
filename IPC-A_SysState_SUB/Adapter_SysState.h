@@ -61,19 +61,18 @@
 #include <map>
 #include "ipc_msg.h"
 #include "IPC-A_ALLMapPrint.h"
-
-#ifndef ADAPTER_IPC_H
-#define ADAPTER_IPC_H
+#include "edr_data_types_common.h"
+#ifndef ADAPTER_SysState_H
+#define ADAPTER_SysState_H
 
 using namespace std::chrono_literals;
 
 
-
-class Adapter_ResetA1
+class Adapter_SysState
 {
 public:
-	Adapter_ResetA1();
-	~Adapter_ResetA1();
+	Adapter_SysState();
+	~Adapter_SysState();
 	void run();
 	std::string json_file = "";
 // private:
@@ -101,14 +100,14 @@ extern std::queue<std::string> inputQueue;
 extern int flag;
 extern std::string data_in;
 extern std::atomic_bool stop;
-extern Rcore_reset_request ResetA1_;
-extern Rcore_reset_request ResetA1_old;
+extern SysState SysState_;
+extern SysState SysState_old;
 
-extern std::map<std::string, VariableVariant > IPC_Map;
+extern std::map<std::string, VariableVariant > SysState_Map;
 
 extern std::atomic_uint32_t HeaderId;
 
-/* Print struct ResetA1 changed value */
-void print_ResetA1(Rcore_reset_request& ResetA1_,Rcore_reset_request& ResetA1_old);
+/* Print struct SysState changed value */
+void print_SysState(SysState& SysState_,SysState& SysState_old);
 
 #endif

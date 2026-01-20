@@ -61,19 +61,20 @@
 #include <map>
 #include "ipc_msg.h"
 #include "IPC-A_ALLMapPrint.h"
-
-#ifndef ADAPTER_IPC_H
-#define ADAPTER_IPC_H
+#include "edr_data_types_common.h"
+#ifndef ADAPTER_Parameter_H
+#define ADAPTER_Parameter_H
 
 using namespace std::chrono_literals;
 
 
 
-class Adapter_ResetA1
+
+class Adapter_Parameter
 {
 public:
-	Adapter_ResetA1();
-	~Adapter_ResetA1();
+	Adapter_Parameter();
+	~Adapter_Parameter();
 	void run();
 	std::string json_file = "";
 // private:
@@ -101,14 +102,22 @@ extern std::queue<std::string> inputQueue;
 extern int flag;
 extern std::string data_in;
 extern std::atomic_bool stop;
-extern Rcore_reset_request ResetA1_;
-extern Rcore_reset_request ResetA1_old;
 
-extern std::map<std::string, VariableVariant > IPC_Map;
+extern Perception_Vehicle_parameters Perception_Vehicle_parameters_;
+extern Perception_Vehicle_parameters Perception_Vehicle_parameters_old;
+extern Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_;
+extern Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_old;
+
+
+extern std::map<std::string, VariableVariant > Parameter_Map;
 
 extern std::atomic_uint32_t HeaderId;
 
-/* Print struct ResetA1 changed value */
-void print_ResetA1(Rcore_reset_request& ResetA1_,Rcore_reset_request& ResetA1_old);
+
+/* Print struct Perception_Vehicle_parameters changed value */
+void print_Perception_Vehicle_parameters(Perception_Vehicle_parameters& Perception_Vehicle_parameters_,Perception_Vehicle_parameters& Perception_Vehicle_parameters_old);
+/* Print struct Intrinsic_Calibration_parameters changed value */
+void print_Intrinsic_Calibration_parameters(Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_,Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_old);
+
 
 #endif

@@ -20,7 +20,7 @@
 #define edr_info 0x3012
 #define Logistics_Data 0x3007
 #define CS_Trigger_A1 0x3002
-#define SysState 0x3006
+#define sysstate 0x3006
 #define Parameter 0x3005
 #define SW_fault 0x3003
 #define InternalDID 0x3011
@@ -34,6 +34,7 @@
 #define DoIP_req 0x3009
 #define Cyc_monitor 0x300A
 #define Reset_C1 0x300B
+#include "Adapt_data_SelfDefine.h"
 
 
 #ifdef IPC_MSG_DATA_SIZE_MAX_H
@@ -50,7 +51,7 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 
 
 
-#ifdef RESETA1_H
+#ifdef RCORE_RESET_REQUEST_H
 using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
 #include "Adapter_ResetA1.h"
 #endif
@@ -66,6 +67,18 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 
 using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*>;
 #include "Adapter_EDR_Info.h"
+#endif
+
+#ifdef SYSSTATE_H
+
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
+#include "Adapter_SysState.h"
+#endif
+
+#if defined(PERCEPTION_VEHICLE_PARAMETERS_H) || defined(INTRINSIC_CALIBRATION_PARAMETERS_H)
+
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
+#include "Adapter_Parameter.h"
 #endif
 
 

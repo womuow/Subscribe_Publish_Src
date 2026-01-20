@@ -15,12 +15,12 @@ enum class EdrTriggerBit : uint8_t {
     Bit7_Collision_NonLocked = 7,
 };
 
-struct Logistics_data {
-    uint8_t HW_Version[10];
-    uint8_t SW_Version[10];
-    uint8_t ECU_SerialNumber[30];
-    uint8_t VIN_Code[17];
-};
+// struct Logistics_data {
+//     uint8_t HW_Version[10];
+//     uint8_t SW_Version[10];
+//     uint8_t ECU_SerialNumber[30];
+//     uint8_t VIN_Code[17];
+// };
 
 struct TimeStamp_Info {
     uint16_t year{0};
@@ -109,7 +109,7 @@ typedef struct {
 
 // edr data from sheet F.1
 struct EdrData_VehAdasBasicInfo {
-    Logistics_data  logistics_snapshot{};
+    // Logistics_data  logistics_snapshot{};
     uint8_t         event_code{0};
     TimeStamp_Info  timestamp{};
     uint32_t        ICU_TotalOdometerkm{0};

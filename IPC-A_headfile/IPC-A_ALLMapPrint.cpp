@@ -48,7 +48,9 @@ void asyncInputThreadTTY() {
     cfsetispeed(&options, B921600);
     cfsetospeed(&options, B921600);
     
-    
+    // 重要：禁用本地回显，不读取我们自己的输出
+    // options.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);    
+
     // 设置行结束符为换行符'\n'
     options.c_cc[VEOL] = '\n';    // 行结束符
     //options.c_cc[VEOL2] = '\0';   // 第二个行结束符（可选）
@@ -64,6 +66,9 @@ void asyncInputThreadTTY() {
     }
     
     std::cout << "Serial  have opened..." << std::endl;
+    
+    // 清空输入缓冲区，确保只读取新数据
+    tcflush(serial_fd, TCIFLUSH);
     
     // 3. 从串口读取数据
     char buffer[1024];
@@ -126,8 +131,8 @@ void asyncInputThreadTTY() {
             {
                 inputQueue.push(line);
                 
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-               tcflush(serial_fd, TCIOFLUSH);
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                tcflush(serial_fd, TCIOFLUSH);
             // close(serial_fd);
             // break;
             continue;
@@ -2320,10 +2325,9 @@ void print_IPC_MSG_DATA_SIZE_MAX(IPC_MSG_DATA_SIZE_MAX& IPC_MSG_DATA_SIZE_MAX_,I
 #endif
 
 
-
-#ifdef RESETA1_H
-std::map<std::string, VariableVariant > ResetA1_Map = {
-//[ResetA1]
+#if defined(INTRINSIC_CALIBRATION_PARAMETERS_H) || defined(PERCEPTION_VEHICLE_PARAMETERS_H)
+std::map<std::string, VariableVariant > Parameter_Map = {
+//[Intrinsic_Calibration_parameters]
 {"ipc_msg_.header.id",&ipc_msg_.header.id},
 {"ipc_msg_.header.version",&ipc_msg_.header.version},
 {"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
@@ -2331,17 +2335,72 @@ std::map<std::string, VariableVariant > ResetA1_Map = {
 {"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
 {"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
 
-{"ResetA1_.R_reset_request" , &ResetA1_.R_reset_request}
-};
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK1(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK1},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK2(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK2},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP1(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP1},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP2(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP2},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK3(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK3},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK4(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK4},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK5(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK5},
+{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK6(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK6},
 
-/* Print struct Rcore_reset_request changed value */
-void print_ResetA1(Rcore_reset_request& ResetA1_, Rcore_reset_request& ResetA1_old){
-// std::cout << "Rcore_reset_request all variable:" << std::endl;
-    if(ResetA1_.R_reset_request != ResetA1_old.R_reset_request){
-        std::cout << "ResetA1_.R_reset_request(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(ResetA1_.R_reset_request) << std::dec  << std::endl;
-        }
-}
+//[Perception_Vehicle_parameters]
+{"Perception_Vehicle_parameters_.timestamps(uint64_t)" , &Perception_Vehicle_parameters_.timestamps},
+{"Perception_Vehicle_parameters_.veh_config_type(uint8_t)" , &Perception_Vehicle_parameters_.veh_config_type},
+{"Perception_Vehicle_parameters_.Platform_Type(uint8_t)" , &Perception_Vehicle_parameters_.Platform_Type},
+{"Perception_Vehicle_parameters_.k_BSW_DistFrontToRearAxle(uint16_t)" , &Perception_Vehicle_parameters_.k_BSW_DistFrontToRearAxle},
+{"Perception_Vehicle_parameters_.k_WheelBase(uint16_t)" , &Perception_Vehicle_parameters_.k_WheelBase},
+{"Perception_Vehicle_parameters_.k_BSW_HostVehLength(uint16_t)" , &Perception_Vehicle_parameters_.k_BSW_HostVehLength},
+{"Perception_Vehicle_parameters_.k_front_cornering_compliance(float)" , &Perception_Vehicle_parameters_.k_front_cornering_compliance},
+{"Perception_Vehicle_parameters_.k_YawInertiaAdjustFac(float)" , &Perception_Vehicle_parameters_.k_YawInertiaAdjustFac},
+{"Perception_Vehicle_parameters_.k_RearAxleLoadRatio(float)" , &Perception_Vehicle_parameters_.k_RearAxleLoadRatio},
+{"Perception_Vehicle_parameters_.k_rear_compliance(float)" , &Perception_Vehicle_parameters_.k_rear_compliance},
+{"Perception_Vehicle_parameters_.k_VehWidth_Min(uint16_t)" , &Perception_Vehicle_parameters_.k_VehWidth_Min},
+{"Perception_Vehicle_parameters_.k_VehWidth_Max(uint16_t)" , &Perception_Vehicle_parameters_.k_VehWidth_Max},
+{"Perception_Vehicle_parameters_.k_WheelRadius(uint16_t)" , &Perception_Vehicle_parameters_.k_WheelRadius},
+{"Perception_Vehicle_parameters_.k_WheelWidthAve(uint16_t)" , &Perception_Vehicle_parameters_.k_WheelWidthAve},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_x(int16_t)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_x},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_y(int16_t)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_y},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_z(uint16_t)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_z},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta_Online(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta_Online},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta_Online(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta_Online},
+{"Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta_Online(float)" , &Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta_Online},
+};
 #endif
+
+
+
+#ifdef EDR_INFO_H
+std::map<std::string, VariableVariant > EDR_Info_Map = {
+//[EDR_Info]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
+{"EDR_Info_.HPCADAS_AEBDecCtrl(uint8_t)" , &EDR_Info_.HPCADAS_AEBDecCtrl},
+{"EDR_Info_.HPCADAS_LKA_SteeringWheelAngle(uint16_t)" , &EDR_Info_.HPCADAS_LKA_SteeringWheelAngle},
+{"EDR_Info_.ADDC_ACCTargetTrq(uint16_t)" , &EDR_Info_.ADDC_ACCTargetTrq},
+{"EDR_Info_.ADDC_ACCTargetTrqBrk(uint16_t)" , &EDR_Info_.ADDC_ACCTargetTrqBrk},
+{"EDR_Info_.HPCADAS_ACCMode(uint8_t)" , &EDR_Info_.HPCADAS_ACCMode},
+{"EDR_Info_.FSC_LCC_Mode(uint8_t)" , &EDR_Info_.FSC_LCC_Mode},
+{"EDR_Info_.FSC_LCC_EscapeLevel(uint8_t)" , &EDR_Info_.FSC_LCC_EscapeLevel},
+{"EDR_Info_.FSC_emergencyLightReq(uint8_t)" , &EDR_Info_.FSC_emergencyLightReq},
+};
+#endif
+
 
 
 #ifdef LOGISTICS_DATA_H
@@ -2424,6 +2483,198 @@ std::map<std::string, VariableVariant > Logistics_data_Map = {
 };
 #endif
 
+
+
+#ifdef RCORE_RESET_REQUEST_H
+std::map<std::string, VariableVariant > Rcore_reset_request_Map = {
+//[Rcore_reset_request]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
+{"Rcore_reset_request_.R_reset_request(bool)" , &Rcore_reset_request_.R_reset_request},
+};
+#endif
+
+
+
+#ifdef SYSSTATE_H
+std::map<std::string, VariableVariant > SysState_Map = {
+//[SysState]
+{"ipc_msg_.header.id",&ipc_msg_.header.id},
+{"ipc_msg_.header.version",&ipc_msg_.header.version},
+{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
+{"ipc_msg_.header.target",&ipc_msg_.header.target},
+{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
+{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
+
+{"SysState_.Feature_errcode(uint8_t)" , &SysState_.Feature_errcode},
+};
+#endif
+
+#ifdef INTRINSIC_CALIBRATION_PARAMETERS_H
+/* Print struct Intrinsic_Calibration_parameters changed value */
+void print_Intrinsic_Calibration_parameters(Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_,Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_old){
+// std::cout << "Intrinsic_Calibration_parameters all variable:" << std::endl;
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_EFL_X){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_EFL_Y){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_COD_X){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_COD_Y){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK1 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK1){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK1(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK1 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK2 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK2){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK2(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK2 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP1 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsP1){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP1(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP1 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP2 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsP2){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP2(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsP2 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK3 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK3){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK3(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK3 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK4 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK4){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK4(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK4 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK5 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK5){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK5(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK5 << std::endl;
+        }
+    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK6 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelfloat32CoefficientsK6){
+        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK6(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelfloat32CoefficientsK6 << std::endl;
+        }
+}
+#endif
+
+
+#ifdef PERCEPTION_VEHICLE_PARAMETERS_H
+/* Print struct Perception_Vehicle_parameters changed value */
+void print_Perception_Vehicle_parameters(Perception_Vehicle_parameters& Perception_Vehicle_parameters_,Perception_Vehicle_parameters& Perception_Vehicle_parameters_old){
+// std::cout << "Perception_Vehicle_parameters all variable:" << std::endl;
+    if(Perception_Vehicle_parameters_.timestamps != Perception_Vehicle_parameters_old.timestamps){
+        std::cout << "Perception_Vehicle_parameters_.timestamps(uint64_t): 0x" << std::hex << std::setw(16) << std::setfill('0') << Perception_Vehicle_parameters_.timestamps << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.veh_config_type != Perception_Vehicle_parameters_old.veh_config_type){
+        std::cout << "Perception_Vehicle_parameters_.veh_config_type(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(Perception_Vehicle_parameters_.veh_config_type) << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.Platform_Type != Perception_Vehicle_parameters_old.Platform_Type){
+        std::cout << "Perception_Vehicle_parameters_.Platform_Type(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(Perception_Vehicle_parameters_.Platform_Type) << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_BSW_DistFrontToRearAxle != Perception_Vehicle_parameters_old.k_BSW_DistFrontToRearAxle){
+        std::cout << "Perception_Vehicle_parameters_.k_BSW_DistFrontToRearAxle(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_BSW_DistFrontToRearAxle << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_WheelBase != Perception_Vehicle_parameters_old.k_WheelBase){
+        std::cout << "Perception_Vehicle_parameters_.k_WheelBase(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_WheelBase << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_BSW_HostVehLength != Perception_Vehicle_parameters_old.k_BSW_HostVehLength){
+        std::cout << "Perception_Vehicle_parameters_.k_BSW_HostVehLength(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_BSW_HostVehLength << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_front_cornering_compliance != Perception_Vehicle_parameters_old.k_front_cornering_compliance){
+        std::cout << "Perception_Vehicle_parameters_.k_front_cornering_compliance(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_front_cornering_compliance << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_YawInertiaAdjustFac != Perception_Vehicle_parameters_old.k_YawInertiaAdjustFac){
+        std::cout << "Perception_Vehicle_parameters_.k_YawInertiaAdjustFac(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_YawInertiaAdjustFac << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_RearAxleLoadRatio != Perception_Vehicle_parameters_old.k_RearAxleLoadRatio){
+        std::cout << "Perception_Vehicle_parameters_.k_RearAxleLoadRatio(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_RearAxleLoadRatio << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_rear_compliance != Perception_Vehicle_parameters_old.k_rear_compliance){
+        std::cout << "Perception_Vehicle_parameters_.k_rear_compliance(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_rear_compliance << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_VehWidth_Min != Perception_Vehicle_parameters_old.k_VehWidth_Min){
+        std::cout << "Perception_Vehicle_parameters_.k_VehWidth_Min(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_VehWidth_Min << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_VehWidth_Max != Perception_Vehicle_parameters_old.k_VehWidth_Max){
+        std::cout << "Perception_Vehicle_parameters_.k_VehWidth_Max(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_VehWidth_Max << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_WheelRadius != Perception_Vehicle_parameters_old.k_WheelRadius){
+        std::cout << "Perception_Vehicle_parameters_.k_WheelRadius(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_WheelRadius << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_WheelWidthAve != Perception_Vehicle_parameters_old.k_WheelWidthAve){
+        std::cout << "Perception_Vehicle_parameters_.k_WheelWidthAve(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_WheelWidthAve << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_x != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_x){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_x(int16_t): " << static_cast<int>(Perception_Vehicle_parameters_.k_FrontCAM_Wide_x) << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_y != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_y){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_y(int16_t): " << static_cast<int>(Perception_Vehicle_parameters_.k_FrontCAM_Wide_y) << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_z != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_z){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_z(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << Perception_Vehicle_parameters_.k_FrontCAM_Wide_z << std::dec  << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Yaw){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Pitch){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Roll){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Pitch_Delta){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Yaw_Delta){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Roll_Delta){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta_Online != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Pitch_Delta_Online){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta_Online(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Pitch_Delta_Online << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta_Online != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Yaw_Delta_Online){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta_Online(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Yaw_Delta_Online << std::endl;
+        }
+    if(Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta_Online != Perception_Vehicle_parameters_old.k_FrontCAM_Wide_Roll_Delta_Online){
+        std::cout << "Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta_Online(float): " << std::fixed << std::setprecision(2) << Perception_Vehicle_parameters_.k_FrontCAM_Wide_Roll_Delta_Online << std::endl;
+        }
+}
+#endif
+
+
+#ifdef EDR_INFO_H
+/* Print struct EDR_Info changed value */
+void print_EDR_Info(EDR_Info& EDR_Info_,EDR_Info& EDR_Info_old){
+// std::cout << "EDR_Info all variable:" << std::endl;
+    if(EDR_Info_.HPCADAS_AEBDecCtrl != EDR_Info_old.HPCADAS_AEBDecCtrl){
+        std::cout << "EDR_Info_.HPCADAS_AEBDecCtrl(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_AEBDecCtrl) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.HPCADAS_LKA_SteeringWheelAngle != EDR_Info_old.HPCADAS_LKA_SteeringWheelAngle){
+        std::cout << "EDR_Info_.HPCADAS_LKA_SteeringWheelAngle(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << EDR_Info_.HPCADAS_LKA_SteeringWheelAngle << std::dec  << std::endl;
+        }
+    if(EDR_Info_.ADDC_ACCTargetTrq != EDR_Info_old.ADDC_ACCTargetTrq){
+        std::cout << "EDR_Info_.ADDC_ACCTargetTrq(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << EDR_Info_.ADDC_ACCTargetTrq << std::dec  << std::endl;
+        }
+    if(EDR_Info_.ADDC_ACCTargetTrqBrk != EDR_Info_old.ADDC_ACCTargetTrqBrk){
+        std::cout << "EDR_Info_.ADDC_ACCTargetTrqBrk(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << EDR_Info_.ADDC_ACCTargetTrqBrk << std::dec  << std::endl;
+        }
+    if(EDR_Info_.HPCADAS_ACCMode != EDR_Info_old.HPCADAS_ACCMode){
+        std::cout << "EDR_Info_.HPCADAS_ACCMode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_ACCMode) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.FSC_LCC_Mode != EDR_Info_old.FSC_LCC_Mode){
+        std::cout << "EDR_Info_.FSC_LCC_Mode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_Mode) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.FSC_LCC_EscapeLevel != EDR_Info_old.FSC_LCC_EscapeLevel){
+        std::cout << "EDR_Info_.FSC_LCC_EscapeLevel(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_EscapeLevel) << std::dec  << std::endl;
+        }
+    if(EDR_Info_.FSC_emergencyLightReq != EDR_Info_old.FSC_emergencyLightReq){
+        std::cout << "EDR_Info_.FSC_emergencyLightReq(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_emergencyLightReq) << std::dec  << std::endl;
+        }
+}
+#endif
 
 
 #ifdef LOGISTICS_DATA_H
@@ -2631,103 +2882,35 @@ void print_Logistics_data(Logistics_data& Logistics_data_,Logistics_data& Logist
     if(Logistics_data_.VIN_Code[16] != Logistics_data_old.VIN_Code[16]){
         std::cout << "Logistics_data_.VIN_Code[16](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(Logistics_data_.VIN_Code[16]) << std::dec  << std::endl;
         }
-
-
-    if (Logistics_data_.HW_Version[0]!=Logistics_data_old.HW_Version[0] || Logistics_data_.HW_Version[9]!=Logistics_data_old.HW_Version[9])
-    {
-        std::cout<<"Logistics_data_.HW_Version: 0x"<< std::hex << std::setw(2);
-        for(int i =0;i<sizeof(Logistics_data_.HW_Version);i++)
-        {
-            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.HW_Version[i]);
-        }
-        std::cout<<std::dec<<std::endl;
-    }
-    else if (Logistics_data_.SW_Version[0]!=Logistics_data_old.SW_Version[0] || Logistics_data_.SW_Version[9]!=Logistics_data_old.SW_Version[9])
-    {
-        std::cout<<"Logistics_data_.SW_Version: 0x"<< std::hex << std::setw(2);
-        for(int i =0;i<sizeof(Logistics_data_.SW_Version);i++)
-        {
-            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.SW_Version[i]);
-        }
-        std::cout<<std::dec<<std::endl;
-    }
-    else if (Logistics_data_.ECU_SerialNumber[0]!=Logistics_data_old.ECU_SerialNumber[0] || Logistics_data_.ECU_SerialNumber[29]!=Logistics_data_old.ECU_SerialNumber[29])
-    {
-        std::cout<<"Logistics_data_.ECU_SerialNumber: 0x"<< std::hex << std::setw(2);
-        for(int i =0;i<sizeof(Logistics_data_.ECU_SerialNumber);i++)
-        {
-            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.ECU_SerialNumber[i]);
-        }
-        std::cout<<std::dec<<std::endl;
-    }
-    else if (Logistics_data_.VIN_Code[0]!=Logistics_data_old.VIN_Code[0] || Logistics_data_.VIN_Code[16]!=Logistics_data_old.VIN_Code[16])
-    {
-        std::cout<<"Logistics_data_.VIN_Code: 0x"<< std::hex << std::setw(2);
-        for(int i =0;i<sizeof(Logistics_data_.VIN_Code);i++)
-        {
-            std::cout<<std::hex << std::setw(2)<<std::setfill('0')<< static_cast<int>(Logistics_data_.VIN_Code[i]);
-        }
-        std::cout<<std::dec<<std::endl;
-    }
-
 }
 #endif
 
 
-#ifdef EDR_INFO_H
-
-std::map<std::string, VariableVariant > EDR_Info_Map = {
-//[ResetA1]
-{"ipc_msg_.header.id",&ipc_msg_.header.id},
-{"ipc_msg_.header.version",&ipc_msg_.header.version},
-{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
-{"ipc_msg_.header.target",&ipc_msg_.header.target},
-{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
-{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
-
-{"EDR_Info_.HPCADAS_AEBDecCtrl" , &EDR_Info_.HPCADAS_AEBDecCtrl},
-{"EDR_Info_.HPCADAS_LKA_SteeringWheelAngle" , &EDR_Info_.HPCADAS_LKA_SteeringWheelAngle},
-{"EDR_Info_.ADDC_ACCTargetTrq" , &EDR_Info_.ADDC_ACCTargetTrq},
-{"EDR_Info_.ADDC_ACCTargetTrqBrk" , &EDR_Info_.ADDC_ACCTargetTrqBrk},
-{"EDR_Info_.HPCADAS_ACCMode" , &EDR_Info_.HPCADAS_ACCMode},
-{"EDR_Info_.FSC_LCC_Mode" , &EDR_Info_.FSC_LCC_Mode},
-{"EDR_Info_.FSC_LCC_EscapeLevel" , &EDR_Info_.FSC_LCC_EscapeLevel},
-{"EDR_Info_.FSC_emergencyLightReq" , &EDR_Info_.FSC_emergencyLightReq},
-};
-
-
-/* Print struct EDR_Info changed value */
-void print_EDR_Info(EDR_Info& EDR_Info_,EDR_Info& EDR_Info_old)
-{
-    if(EDR_Info_.HPCADAS_AEBDecCtrl != EDR_Info_old.HPCADAS_AEBDecCtrl){
-        std::cout << "EDR_Info_.HPCADAS_AEBDecCtrl(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_AEBDecCtrl) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.HPCADAS_LKA_SteeringWheelAngle != EDR_Info_old.HPCADAS_LKA_SteeringWheelAngle){
-        std::cout << "EDR_Info_.HPCADAS_LKA_SteeringWheelAngle(uint16_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_LKA_SteeringWheelAngle) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.ADDC_ACCTargetTrq != EDR_Info_old.ADDC_ACCTargetTrq){
-        std::cout << "EDR_Info_.ADDC_ACCTargetTrq(uint16_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.ADDC_ACCTargetTrq) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.ADDC_ACCTargetTrqBrk != EDR_Info_old.ADDC_ACCTargetTrqBrk){
-        std::cout << "EDR_Info_.ADDC_ACCTargetTrqBrk(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.ADDC_ACCTargetTrqBrk) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.HPCADAS_ACCMode != EDR_Info_old.HPCADAS_ACCMode){
-        std::cout << "EDR_Info_.HPCADAS_ACCMode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.HPCADAS_ACCMode) << std::dec  << std::endl;
-        }        
-    if(EDR_Info_.FSC_LCC_Mode != EDR_Info_old.FSC_LCC_Mode){
-        std::cout << "EDR_Info_.FSC_LCC_Mode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_Mode) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.FSC_LCC_EscapeLevel != EDR_Info_old.FSC_LCC_EscapeLevel){
-        std::cout << "EDR_Info_.FSC_LCC_EscapeLevel(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_LCC_EscapeLevel) << std::dec  << std::endl;
-        }
-    if(EDR_Info_.FSC_emergencyLightReq != EDR_Info_old.FSC_emergencyLightReq){
-        // std::cout << "EDR_Info_old.FSC_emergencyLightReq(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_old.FSC_emergencyLightReq) << std::dec  << std::endl;
-        std::cout << "EDR_Info_.FSC_emergencyLightReq(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(EDR_Info_.FSC_emergencyLightReq) << std::dec  << std::endl;
+#ifdef RCORE_RESET_REQUEST_H
+/* Print struct Rcore_reset_request changed value */
+void print_Rcore_reset_request(Rcore_reset_request& Rcore_reset_request_,Rcore_reset_request& Rcore_reset_request_old){
+// std::cout << "Rcore_reset_request all variable:" << std::endl;
+    if(Rcore_reset_request_.R_reset_request != Rcore_reset_request_old.R_reset_request){
+        std::cout << "Rcore_reset_request_.R_reset_request(bool): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(Rcore_reset_request_.R_reset_request) << std::dec  << std::endl;
         }
 }
-
-
 #endif
+
+
+#ifdef SYSSTATE_H
+/* Print struct SysState changed value */
+void print_SysState(SysState& SysState_,SysState& SysState_old){
+// std::cout << "SysState all variable:" << std::endl;
+    if(SysState_.Feature_errcode != SysState_old.Feature_errcode){
+        std::cout << "SysState_.Feature_errcode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(SysState_.Feature_errcode) << std::dec  << std::endl;
+        }
+}
+#endif
+
+
+
+
+
 
 
 

@@ -67,11 +67,6 @@
 
 using namespace std::chrono_literals;
 
-struct Rcore_reset_request
-{
-	bool R_reset_request;
-};
-
 
 
 class Adapter_ResetA1
@@ -106,14 +101,14 @@ extern std::queue<std::string> inputQueue;
 extern int flag;
 extern std::string data_in;
 extern std::atomic_bool stop;
-extern Rcore_reset_request ResetA1_;
-extern Rcore_reset_request ResetA1_old;
+extern Rcore_reset_request Rcore_reset_request_;
+extern Rcore_reset_request Rcore_reset_request_old;
 
-extern std::map<std::string, VariableVariant > ResetA1_Map;
+extern std::map<std::string, VariableVariant > Rcore_reset_request_Map;
 
 extern std::atomic_uint32_t HeaderId;
 
 /* Print struct ResetA1 changed value */
-void print_ResetA1(Rcore_reset_request& ResetA1_,Rcore_reset_request& ResetA1_old);
+void print_Rcore_reset_request(Rcore_reset_request& Rcore_reset_request_,Rcore_reset_request& Rcore_reset_request_old);
 
 #endif

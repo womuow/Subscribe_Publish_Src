@@ -3,8 +3,8 @@
 
 
 
-Rcore_reset_request ResetA1_;
-Rcore_reset_request ResetA1_old;
+Rcore_reset_request Rcore_reset_request_;
+Rcore_reset_request Rcore_reset_request_old;
 
 
 int config_async_sub(std::string json_file) {
@@ -28,7 +28,7 @@ int config_async_sub(std::string json_file) {
 
 
 
-    std::map<std::string, VariableVariant > variableMap = ResetA1_Map;
+    std::map<std::string, VariableVariant > variableMap = Rcore_reset_request_Map;
             
                 
 
@@ -80,9 +80,9 @@ int config_async_sub(std::string json_file) {
                     <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
                 }
 
-                std::memcpy(&ResetA1_, ipc_msg_.data, sizeof(ResetA1_));
-                print_ResetA1(ResetA1_, ResetA1_old);                
-                ResetA1_old = ResetA1_;
+                std::memcpy(&Rcore_reset_request_, ipc_msg_.data, sizeof(Rcore_reset_request_));
+                print_Rcore_reset_request(Rcore_reset_request_, Rcore_reset_request_old);                
+                Rcore_reset_request_old = Rcore_reset_request_;
             }
 
 

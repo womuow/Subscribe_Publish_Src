@@ -1,32 +1,34 @@
-﻿#include"Adapter_IPC.h"
+﻿#include"Adapter_SysState.h"
 // typedef bool uint8_t;
 
 
 
-std::atomic_uint32_t HeaderId{0x0};
+SysState SysState_;
+SysState SysState_old;
+
 
 int config_async_sub(std::string json_file) {
     
 
-    Adapter_ResetA1 Adapter_ResetA1_;
-    Adapter_ResetA1_.json_file = json_file;
+    Adapter_SysState Adapter_SysState_;
+    Adapter_SysState_.json_file = json_file;
 
     std::cout << "config_async_sub start with "  <<json_file<<"!!!"<< std::endl;
 
 
     MOS::communication::Init(json_file);
-    MOS::utils::Register::get().register_version("ResetA1_sub", "1.1.0");
+    MOS::utils::Register::get().register_version("SysState_sub", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     // // proto_info.protocol_type = MOS::communication::kProtocolShm;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
     // proto_info.shm_info.block_count = 256;
     // proto_info.shm_info.block_size = 1024*6;
     proto_info.shm_info.fast_mode = false;
-    // std::string data_in = Adapter_ResetA1_.data_in;
+    // std::string data_in = Adapter_SysState_.data_in;
 
 
 
-    // std::map<std::string, VariableVariant > variableMap = ResetA1_Map;
+    std::map<std::string, VariableVariant > variableMap = SysState_Map;
             
                 
 
@@ -34,8 +36,8 @@ int config_async_sub(std::string json_file) {
 
 
     auto sub = MOS::communication::Subscriber::New(
-        Adapter_ResetA1_.domain_id,
-        Adapter_ResetA1_.topic, 
+        Adapter_SysState_.domain_id,
+        Adapter_SysState_.topic, 
         proto_info, 
         [](MOS::message::spMsg tmp) {
 
@@ -58,73 +60,37 @@ int config_async_sub(std::string json_file) {
 
     while (true) {
 
-
-        if (!inputQueue.empty() && HeaderId.load()==0x0)
-        {
-            std::string tempStr = inputQueue.front();
-            std::cout<<"tempStr "<<tempStr<<std::endl;
-            size_t startpos =tempStr.find("HeaderId: 0x");
-            std::cout << "value=0x" << static_cast<int>(startpos)<< std::endl;
-            if (startpos != std::string::npos)
-            {
-                const char* cstr=tempStr.c_str() + startpos;
-                char * endptr = nullptr;
-
-                errno = 0; // reset errno before the call
-                uint16_t value = static_cast<uint16_t>(std::strtoul(cstr + strlen("HeaderId: 0x"), &endptr, 16));
-
-                // check for conversion errors
-                if (errno == ERANGE) {
-                    std::cerr << "Out of range" << std::endl;
-                    return 0;
-                }
-                
-                if (endptr == cstr) {
-                    std::cerr << "No conversion performed" << std::endl;
-                    return 0;
-                }
-                std::cout << "value=0x" <<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(value)<< std::endl;
-                HeaderId.store(value);
-                flag = true;
-            }
-
-            inputQueue.pop();
-        }
-
-        
-        
         if(stop.load())
-        {
-            
+        {            
             stop.store(false);  
-            std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
             
 
-            if(ipc_msg_.header.id==HeaderId.load() || HeaderId.load()==0xFFFF)
+            const char* byte_array = data_in.data();
+            if ((byte_array[0] == (sysstate&0xFF))  && (byte_array[1] == ((sysstate&0xFF00)>>8 )))
             {
                 if (flag)
                 {
                     print_memory(data_in.data(),data_in.size());  
                     std::cout << "data_in.data() size="<< static_cast<int>(data_in.size())<< std::endl;
-                    // flag=false;
+                    flag=false;
 
-                    std::cout << "header id=0x"
+                    std::cout << "ipc_msg_.header id=0x"
                     <<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.id)<<std::endl
                     <<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.target)<<std::endl
                     <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
                 }
 
-                // if(HeaderId.load() == Reset_A1)
-                // {
-                //     std::memcpy(&ResetA1_, ipc_msg_.data, sizeof(ResetA1_));
-                //     print_ResetA1(ResetA1_, ResetA1_old);                
-                //     ResetA1_old = ResetA1_;
-                // }
+                std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
+                std::memcpy(&SysState_, ipc_msg_.data, sizeof(SysState_));
+                print_SysState(SysState_, SysState_old);                
+                SysState_old = SysState_;
             }
 
 
             if (!inputQueue.empty())
-            {
+            {                                
+                getVariableValue(variableMap,inputQueue.front());
+                
                 inputQueue.pop();
             }
         }
@@ -133,7 +99,7 @@ int config_async_sub(std::string json_file) {
     return 0;
 }
 
-void Adapter_ResetA1::run()
+void Adapter_SysState::run()
 {
 
     std::thread inputThread(asyncInputThreadTTY);
@@ -141,10 +107,10 @@ void Adapter_ResetA1::run()
     config_async_sub(json_file);
 
 }
-Adapter_ResetA1::Adapter_ResetA1()
+Adapter_SysState::Adapter_SysState()
 {
 }
-Adapter_ResetA1::~Adapter_ResetA1()
+Adapter_SysState::~Adapter_SysState()
 {
 }
 int main()
@@ -159,11 +125,11 @@ int main()
 #endif
 #ifdef __linux__
     std::string fullPath = std::filesystem::read_symlink("/proc/self/exe");
-    std::cout << "Running on Linux(ResetA1_Sub)"<< fullPath << std::endl;
+    std::cout << "Running on Linux(SysState_Sub)"<< fullPath << std::endl;
 #endif
     size_t pos = fullPath.find_last_of("\\/");
     std::string configPath = fullPath.substr(0, pos) + "/discovery_config.json";
-    Adapter_ResetA1 objtest;
+    Adapter_SysState objtest;
     objtest.json_file = configPath;
     objtest.run();
     // config_async_sub(configPath);

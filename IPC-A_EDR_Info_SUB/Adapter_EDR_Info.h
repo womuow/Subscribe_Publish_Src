@@ -67,17 +67,7 @@
 
 using namespace std::chrono_literals;
 
-struct EDR_Info
-{
-	uint8_t	HPCADAS_AEBDecCtrl;
-	uint16_t	HPCADAS_LKA_SteeringWheelAngle;
-	uint16_t	ADDC_ACCTargetTrq;
-	uint16_t	ADDC_ACCTargetTrqBrk;
-	uint8_t	HPCADAS_ACCMode;
-	uint8_t	FSC_LCC_Mode;
-	uint8_t	FSC_LCC_EscapeLevel;
-	uint8_t	FSC_emergencyLightReq;
-};
+
 
 
 
