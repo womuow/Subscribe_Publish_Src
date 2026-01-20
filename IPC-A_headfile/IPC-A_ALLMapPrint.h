@@ -82,6 +82,16 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 #endif
 
 
+#if defined(MAGNAPARAMCSRES_H) || defined(MAGNACAMEXTPARAM_H) || defined(MAGNACAMINTPARAM_H) || defined(MAGNATACCALIBINPUT_H)
+
+#include "MET_SOC_MAGNA_PARAM_CS.h"
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*,MagnaCalibResultCode*,MagnaStatusCode*>;
+#include "Adapter_CS_Trigger_A1.h"
+
+#endif
+
+
+
 #include "ipc_msg.h"
 extern IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 void print_memory(const void* ptr, size_t size);
