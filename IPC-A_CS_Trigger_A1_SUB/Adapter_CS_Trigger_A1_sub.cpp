@@ -110,9 +110,6 @@ int config_async_sub(std::string json_file) {
                     print_MagnaTACCalibInput(MagnaTACCalibInput_,MagnaTACCalibInput_old);
                     MagnaTACCalibInput_old = MagnaTACCalibInput_;
                 }
-                
-                
-                
                 else
                 {
                     print_memory(data_in.data(),data_in.size());  
@@ -125,8 +122,6 @@ int config_async_sub(std::string json_file) {
                     std::cout << "MagnaCamIntParam size=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< sizeof(MagnaCamIntParam)<<std::endl ;
                     std::cout << "MagnaTACCalibInput size=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< sizeof(MagnaTACCalibInput)<<std::endl ;
                 }
-
-                
             }
 
 

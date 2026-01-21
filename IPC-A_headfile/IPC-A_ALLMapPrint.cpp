@@ -382,14 +382,14 @@ std::map<std::string, VariableVariant > EDR_Info_Map = {
 {"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
 {"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
 
-{"EDR_Info_.HPCADAS_AEBDecCtrl(uint8_t)" , &EDR_Info_.HPCADAS_AEBDecCtrl},
-{"EDR_Info_.HPCADAS_LKA_SteeringWheelAngle(uint16_t)" , &EDR_Info_.HPCADAS_LKA_SteeringWheelAngle},
-{"EDR_Info_.ADDC_ACCTargetTrq(uint16_t)" , &EDR_Info_.ADDC_ACCTargetTrq},
-{"EDR_Info_.ADDC_ACCTargetTrqBrk(uint16_t)" , &EDR_Info_.ADDC_ACCTargetTrqBrk},
-{"EDR_Info_.HPCADAS_ACCMode(uint8_t)" , &EDR_Info_.HPCADAS_ACCMode},
-{"EDR_Info_.FSC_LCC_Mode(uint8_t)" , &EDR_Info_.FSC_LCC_Mode},
-{"EDR_Info_.FSC_LCC_EscapeLevel(uint8_t)" , &EDR_Info_.FSC_LCC_EscapeLevel},
-{"EDR_Info_.FSC_emergencyLightReq(uint8_t)" , &EDR_Info_.FSC_emergencyLightReq},
+{"EDR_Info_.HPCADAS_AEBDecCtrl" , &EDR_Info_.HPCADAS_AEBDecCtrl},
+{"EDR_Info_.HPCADAS_LKA_SteeringWheelAngle" , &EDR_Info_.HPCADAS_LKA_SteeringWheelAngle},
+{"EDR_Info_.ADDC_ACCTargetTrq" , &EDR_Info_.ADDC_ACCTargetTrq},
+{"EDR_Info_.ADDC_ACCTargetTrqBrk" , &EDR_Info_.ADDC_ACCTargetTrqBrk},
+{"EDR_Info_.HPCADAS_ACCMode" , &EDR_Info_.HPCADAS_ACCMode},
+{"EDR_Info_.FSC_LCC_Mode" , &EDR_Info_.FSC_LCC_Mode},
+{"EDR_Info_.FSC_LCC_EscapeLevel" , &EDR_Info_.FSC_LCC_EscapeLevel},
+{"EDR_Info_.FSC_emergencyLightReq" , &EDR_Info_.FSC_emergencyLightReq},
 };
 #endif
 
