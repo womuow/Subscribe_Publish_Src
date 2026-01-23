@@ -60,7 +60,7 @@ int config_async_sub(std::string json_file) {
         // {
             // stop.store(false);  
             const char* byte_array = data_in.data();
-            if ((byte_array[0] == (edr_info&0xFF))  && (byte_array[1] == ((edr_info&0xFF00)>>8 )))
+            if ((byte_array[0] == (def_edr_info&0xFF))  && (byte_array[1] == ((def_edr_info&0xFF00)>>8 )))
             {
                 if (flag)
                 {

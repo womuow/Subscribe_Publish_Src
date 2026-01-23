@@ -81,7 +81,7 @@ int config_async_sub(std::string json_file) {
 				<<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_Logistics_data_.header.timestamp)<<std::endl;
             }
 
-            if(ipc_msg_Logistics_data_.header.id == Logistics_Data)
+            if(ipc_msg_Logistics_data_.header.id == def_Logistics_Data)
             {
                 std::memcpy(&Logistics_data_, ipc_msg_Logistics_data_.data, sizeof(Logistics_data_));
 

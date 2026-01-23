@@ -71,7 +71,7 @@ int config_async_sub(std::string json_file) {
             
 
             const char* byte_array = data_in.data();
-            if ((byte_array[0] == (CS_Trigger_A1&0xFF))  && (byte_array[1] == ((CS_Trigger_A1&0xFF00)>>8 )))
+            if ((byte_array[0] == (def_CS_Trigger_A1&0xFF))  && (byte_array[1] == ((def_CS_Trigger_A1&0xFF00)>>8 )))
             {
                 if (flag)
                 {

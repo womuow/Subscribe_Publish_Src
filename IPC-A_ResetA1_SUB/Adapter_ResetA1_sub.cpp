@@ -66,7 +66,7 @@ int config_async_sub(std::string json_file) {
             std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
             
 
-            if(ipc_msg_.header.id == Reset_A1 )
+            if(ipc_msg_.header.id == def_Reset_A1 )
             {
                 if (flag)
                 {

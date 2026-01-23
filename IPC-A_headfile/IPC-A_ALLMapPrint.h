@@ -16,24 +16,24 @@
 #include <atomic>
 #include <queue>
 
-#define Reset_A1 0x300C
-#define edr_info 0x3012
-#define Logistics_Data 0x3007
-#define CS_Trigger_A1 0x3002
-#define sysstate 0x3006
-#define Parameter 0x3005
-#define SW_fault 0x3003
-#define InternalDID 0x3011
-#define SOCStatusMon 0x3010
-#define CS_Trigger_C1 0x3001
-#define TimeSync 0x300E
-#define PFM 0x300D
-#define CameraBlockage 0x300F
-#define HW_fault 0x3004
-#define DoIP_response 0x3008
-#define DoIP_req 0x3009
-#define Cyc_monitor 0x300A
-#define Reset_C1 0x300B
+#define def_Reset_A1 0x300C
+#define def_edr_info 0x3012
+#define def_Logistics_Data 0x3007
+#define def_CS_Trigger_A1 0x3002
+#define def_sysstate 0x3006
+#define def_Parameter 0x3005
+#define def_SW_fault 0x3003
+#define def_InternalDID 0x3011
+#define def_SOCStatusMon 0x3010
+#define def_CS_Trigger_C1 0x3001
+#define def_TimeSync 0x300E
+#define def_PFM 0x300D
+#define def_CameraBlockage 0x300F
+#define def_HW_fault 0x3004
+#define def_DoIP_response 0x3008
+#define def_DoIP_req 0x3009
+#define def_Cyc_monitor 0x300A
+#define def_Reset_C1 0x300B
 #include "Adapt_data_SelfDefine.h"
 
 
@@ -77,7 +77,7 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 
 #if defined(PERCEPTION_VEHICLE_PARAMETERS_H) || defined(INTRINSIC_CALIBRATION_PARAMETERS_H)
 
-using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
+using VariableVariant = std::variant< sint16*, uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
 #include "Adapter_Parameter.h"
 #endif
 
