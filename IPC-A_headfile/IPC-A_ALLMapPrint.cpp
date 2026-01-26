@@ -4,7 +4,9 @@
 std::queue<std::string> inputQueue;
 int flag=true;
 std::string data_in={0x0};
+std::string data_in2={0x0};
 std::atomic_bool stop{ false };
+std::atomic_bool stop2{ false };
 IPC_MSG_DATA_SIZE_MAX ipc_msg_;
 
 
@@ -904,6 +906,136 @@ void print_SysState(SysState& SysState_,SysState& SysState_old){
 }
 #endif
 
+
+
+
+
+#ifdef UDS_IPC_RESPONSE_H
+std::map<std::string, VariableVariant > UDS_ipc_response_Map = {
+//[UDS_ipc_response]
+{"UDS_ipc_response_.addressing_format(uint8_t)" , &UDS_ipc_response_.addressing_format},
+{"UDS_ipc_response_.Doip_message_length(uint16_t)" , &UDS_ipc_response_.Doip_message_length},
+{"UDS_ipc_response_.Doip_message[0](uint8_t)" , &UDS_ipc_response_.Doip_message[0]},
+{"UDS_ipc_response_.Doip_message[1](uint8_t)" , &UDS_ipc_response_.Doip_message[1]},
+{"UDS_ipc_response_.Doip_message[2](uint8_t)" , &UDS_ipc_response_.Doip_message[2]},
+{"UDS_ipc_response_.Doip_message[3](uint8_t)" , &UDS_ipc_response_.Doip_message[3]},
+{"UDS_ipc_response_.Doip_message[4](uint8_t)" , &UDS_ipc_response_.Doip_message[4]},
+{"UDS_ipc_response_.Doip_message[5](uint8_t)" , &UDS_ipc_response_.Doip_message[5]},
+{"UDS_ipc_response_.Doip_message[6](uint8_t)" , &UDS_ipc_response_.Doip_message[6]},
+{"UDS_ipc_response_.Doip_message[7](uint8_t)" , &UDS_ipc_response_.Doip_message[7]},
+{"UDS_ipc_response_.Doip_message[8](uint8_t)" , &UDS_ipc_response_.Doip_message[8]},
+{"UDS_ipc_response_.Doip_message[9](uint8_t)" , &UDS_ipc_response_.Doip_message[9]},
+};
+#endif
+
+
+
+#ifdef UDS_IPC_REQ_H
+std::map<std::string, VariableVariant > UDS_ipc_req_Map = {
+//[UDS_ipc_req]
+{"UDS_ipc_req_.addressing_format(uint8_t)" , &UDS_ipc_req_.addressing_format},
+{"UDS_ipc_req_.Doip_message_length(uint16_t)" , &UDS_ipc_req_.Doip_message_length},
+{"UDS_ipc_req_.Doip_message[0](uint8_t)" , &UDS_ipc_req_.Doip_message[0]},
+{"UDS_ipc_req_.Doip_message[1](uint8_t)" , &UDS_ipc_req_.Doip_message[1]},
+{"UDS_ipc_req_.Doip_message[2](uint8_t)" , &UDS_ipc_req_.Doip_message[2]},
+{"UDS_ipc_req_.Doip_message[3](uint8_t)" , &UDS_ipc_req_.Doip_message[3]},
+{"UDS_ipc_req_.Doip_message[4](uint8_t)" , &UDS_ipc_req_.Doip_message[4]},
+{"UDS_ipc_req_.Doip_message[5](uint8_t)" , &UDS_ipc_req_.Doip_message[5]},
+{"UDS_ipc_req_.Doip_message[6](uint8_t)" , &UDS_ipc_req_.Doip_message[6]},
+{"UDS_ipc_req_.Doip_message[7](uint8_t)" , &UDS_ipc_req_.Doip_message[7]},
+{"UDS_ipc_req_.Doip_message[8](uint8_t)" , &UDS_ipc_req_.Doip_message[8]},
+{"UDS_ipc_req_.Doip_message[9](uint8_t)" , &UDS_ipc_req_.Doip_message[9]},
+{"UDS_ipc_req_.Doip_message[10](uint8_t)" , &UDS_ipc_req_.Doip_message[10]},
+};
+#endif
+
+
+#ifdef UDS_IPC_RESPONSE_H
+/* Print struct UDS_ipc_response changed value */
+void print_UDS_ipc_response(UDS_ipc_response& UDS_ipc_response_,UDS_ipc_response& UDS_ipc_response_old){
+// std::cout << "UDS_ipc_response all variable:" << std::endl;
+    if(UDS_ipc_response_.addressing_format != UDS_ipc_response_old.addressing_format){
+        std::cout << "UDS_ipc_response_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.addressing_format) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message_length != UDS_ipc_response_old.Doip_message_length){
+        std::cout << "UDS_ipc_response_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_response_.Doip_message_length << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[0] != UDS_ipc_response_old.Doip_message[0]){
+        std::cout << "UDS_ipc_response_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[0]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[1] != UDS_ipc_response_old.Doip_message[1]){
+        std::cout << "UDS_ipc_response_.Doip_message[1](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[1]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[2] != UDS_ipc_response_old.Doip_message[2]){
+        std::cout << "UDS_ipc_response_.Doip_message[2](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[2]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[3] != UDS_ipc_response_old.Doip_message[3]){
+        std::cout << "UDS_ipc_response_.Doip_message[3](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[3]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[4] != UDS_ipc_response_old.Doip_message[4]){
+        std::cout << "UDS_ipc_response_.Doip_message[4](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[4]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[5] != UDS_ipc_response_old.Doip_message[5]){
+        std::cout << "UDS_ipc_response_.Doip_message[5](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[5]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[6] != UDS_ipc_response_old.Doip_message[6]){
+        std::cout << "UDS_ipc_response_.Doip_message[6](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[6]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[7] != UDS_ipc_response_old.Doip_message[7]){
+        std::cout << "UDS_ipc_response_.Doip_message[7](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[7]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[8] != UDS_ipc_response_old.Doip_message[8]){
+        std::cout << "UDS_ipc_response_.Doip_message[8](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[8]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_response_.Doip_message[9] != UDS_ipc_response_old.Doip_message[9]){
+        std::cout << "UDS_ipc_response_.Doip_message[9](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[9]) << std::dec  << std::endl;
+        }
+}
+#endif
+
+
+#ifdef UDS_IPC_REQ_H
+/* Print struct UDS_ipc_req changed value */
+void print_UDS_ipc_req(UDS_ipc_req& UDS_ipc_req_,UDS_ipc_req& UDS_ipc_req_old){
+// std::cout << "UDS_ipc_req all variable:" << std::endl;
+    if(UDS_ipc_req_.addressing_format != UDS_ipc_req_old.addressing_format){
+        std::cout << "UDS_ipc_req_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.addressing_format) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message_length != UDS_ipc_req_old.Doip_message_length){
+        std::cout << "UDS_ipc_req_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_req_.Doip_message_length << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[0] != UDS_ipc_req_old.Doip_message[0]){
+        std::cout << "UDS_ipc_req_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[0]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[1] != UDS_ipc_req_old.Doip_message[1]){
+        std::cout << "UDS_ipc_req_.Doip_message[1](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[1]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[2] != UDS_ipc_req_old.Doip_message[2]){
+        std::cout << "UDS_ipc_req_.Doip_message[2](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[2]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[3] != UDS_ipc_req_old.Doip_message[3]){
+        std::cout << "UDS_ipc_req_.Doip_message[3](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[3]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[4] != UDS_ipc_req_old.Doip_message[4]){
+        std::cout << "UDS_ipc_req_.Doip_message[4](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[4]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[5] != UDS_ipc_req_old.Doip_message[5]){
+        std::cout << "UDS_ipc_req_.Doip_message[5](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[5]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[6] != UDS_ipc_req_old.Doip_message[6]){
+        std::cout << "UDS_ipc_req_.Doip_message[6](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[6]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[7] != UDS_ipc_req_old.Doip_message[7]){
+        std::cout << "UDS_ipc_req_.Doip_message[7](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[7]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[8] != UDS_ipc_req_old.Doip_message[8]){
+        std::cout << "UDS_ipc_req_.Doip_message[8](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[8]) << std::dec  << std::endl;
+        }
+    if(UDS_ipc_req_.Doip_message[9] != UDS_ipc_req_old.Doip_message[9]){
+        std::cout << "UDS_ipc_req_.Doip_message[9](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[9]) << std::dec  << std::endl;
+        }
+}
+#endif
 
 
 

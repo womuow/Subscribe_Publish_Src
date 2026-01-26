@@ -30,10 +30,11 @@
 #define def_PFM 0x300D
 #define def_CameraBlockage 0x300F
 #define def_HW_fault 0x3004
-#define def_DoIP_response 0x3008
 #define def_DoIP_req 0x3009
 #define def_Cyc_monitor 0x300A
 #define def_Reset_C1 0x300B
+#define def_DoIP_response 0x3008
+#define def_DoIP_req 0x3009
 #include "Adapt_data_SelfDefine.h"
 
 
@@ -90,7 +91,12 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 
 #endif
 
+#if defined(UDS_IPC_REQ_H) || defined(UDS_IPC_RESPONSE_H) 
 
+using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
+#include "Adapter_DoIP.h"
+
+#endif
 
 #include "ipc_msg.h"
 extern IPC_MSG_DATA_SIZE_MAX ipc_msg_;

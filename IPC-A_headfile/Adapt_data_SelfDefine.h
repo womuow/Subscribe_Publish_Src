@@ -79,3 +79,16 @@ typedef struct {
 typedef struct {
    uint8_t Feature_errcode;
 } SysState;
+
+
+typedef struct {
+ uint8_t addressing_format;
+ uint16_t Doip_message_length;
+ uint8_t Doip_message[256];
+} UDS_ipc_req;
+
+typedef struct {
+ uint8_t addressing_format;
+ uint16_t Doip_message_length;
+ uint8_t Doip_message[256];
+} UDS_ipc_response;
