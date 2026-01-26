@@ -76,8 +76,8 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 #endif
 
 #if defined(PERCEPTION_VEHICLE_PARAMETERS_H) || defined(INTRINSIC_CALIBRATION_PARAMETERS_H)
-
-using VariableVariant = std::variant< sint16*, uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
+//sint16 与 int16_t 等同，variant不能出现重复的类型
+using VariableVariant = std::variant< uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*>;
 #include "Adapter_Parameter.h"
 #endif
 

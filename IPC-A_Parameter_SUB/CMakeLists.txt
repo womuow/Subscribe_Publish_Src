@@ -26,8 +26,9 @@ if(NOT TARGET communication)
 endif()
 
 
-add_definitions(-DINTRINSIC_CALIBRATION_PARAMETERS_H=1)
-add_definitions(-DPERCEPTION_VEHICLE_PARAMETERS_H=1)
+add_definitions(-D INTRINSIC_CALIBRATION_PARAMETERS_H=1)
+add_definitions(-D PERCEPTION_VEHICLE_PARAMETERS_H=1)
+
 
 
 add_executable(${libParameter}
