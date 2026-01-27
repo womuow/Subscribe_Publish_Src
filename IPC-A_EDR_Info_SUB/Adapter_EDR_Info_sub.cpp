@@ -55,10 +55,11 @@ int config_async_sub(std::string json_file) {
     }
     );
 
-    while (true) {
-        // if(stop.load())
-        // {
-            // stop.store(false);  
+    while (true) {                
+        if(stop.load())
+        {
+            stop.store(false);
+
             const char* byte_array = data_in.data();
             if ((byte_array[0] == (def_edr_info&0xFF))  && (byte_array[1] == ((def_edr_info&0xFF00)>>8 )))
             {
@@ -81,7 +82,8 @@ int config_async_sub(std::string json_file) {
                 
                 EDR_Info_old = EDR_Info_;
             }
-        // }
+        }
+
         if (!inputQueue.empty())
         {
             getVariableValue(variableMap,inputQueue.front());

@@ -76,7 +76,8 @@ void asyncInputThreadTTY() {
     char buffer[1024];
     std::string lineBuffer;  // 用于累积行数据
     
-    while(true){
+    while(true)
+    {
         memset(buffer, 0, sizeof(buffer));
 
         // 读取数据
