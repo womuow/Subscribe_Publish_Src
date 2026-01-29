@@ -1,6 +1,6 @@
 # cmake_minimum_required(VERSION 3.16)
 
-# project(libSysState_SUB LANGUAGES C CXX)
+# project(libFeaState_SUB LANGUAGES C CXX)
 
 
 # set(CMAKE_C_COMPILER /usr/local/ARM-toolchain/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc)
@@ -13,7 +13,7 @@
 set(MOS_LIB ${CMAKE_SOURCE_DIR}/linux-ax750)
 set(CMAKE_PREFIX_PATH ${MOS_LIB})
 set(CMAKE_BUILD_TYPE Release)
-set(libSysState libSysState_SUB)
+set(libFeaState libFeaState_SUB)
 
 # 设置可执行文件的输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/IPC-A)
@@ -26,24 +26,24 @@ if(NOT TARGET communication)
 endif()
 
 
-add_definitions(-DSYSSTATE_H=1)
+add_definitions(-DFeaState_H=1)
 
 
-add_executable(${libSysState}
+add_executable(${libFeaState}
     ${CMAKE_SOURCE_DIR}/Src/IPC-A_headfile/IPC-A_ALLMapPrint.cpp
-	${CMAKE_SOURCE_DIR}/Src/IPC-A_SysState_SUB/Adapter_SysState_sub.cpp )
+	${CMAKE_SOURCE_DIR}/Src/IPC-A_FeaState_SUB/Adapter_FeaState_sub.cpp )
   #${CMAKE_SOURCE_DIR}/Src/Feature_Acore_Release/requirements/headerfile/IPC_Pub_SetAndPrintValue.cpp) #add_library
 
 
-target_link_libraries(${libSysState} PUBLIC mos::met_pack rt pthread mos::communication)
+target_link_libraries(${libFeaState} PUBLIC mos::met_pack rt pthread mos::communication)
 
 
 target_include_directories(
-    ${libSysState} 
+    ${libFeaState} 
     PUBLIC 
     ${CMAKE_SOURCE_DIR}/linux-ax750/include
     ${CMAKE_SOURCE_DIR}/Src/IPC-A_headfile    
-    ${CMAKE_SOURCE_DIR}/Src/IPC-A_SysState_SUB
+    ${CMAKE_SOURCE_DIR}/Src/IPC-A_FeaState_SUB
     /home/c/ExternalLib/json/include
     )
 

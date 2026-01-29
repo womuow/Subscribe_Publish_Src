@@ -1,34 +1,34 @@
-﻿#include"Adapter_SysState.h"
+﻿#include"Adapter_FeaState.h"
 // typedef bool uint8_t;
 
 
 
-SysState SysState_;
-SysState SysState_old;
+FeaState FeaState_;
+FeaState FeaState_old;
 
 
 int config_async_sub(std::string json_file) {
     
 
-    Adapter_SysState Adapter_SysState_;
-    Adapter_SysState_.json_file = json_file;
+    Adapter_FeaState Adapter_FeaState_;
+    Adapter_FeaState_.json_file = json_file;
 
     std::cout << "config_async_sub start with "  <<json_file<<"!!!"<< std::endl;
 
 
     MOS::communication::Init(json_file);
-    MOS::utils::Register::get().register_version("SysState_sub", "1.1.0");
+    MOS::utils::Register::get().register_version("FeaState_sub", "1.1.0");
     MOS::communication::ProtocolInfo proto_info;
     // // proto_info.protocol_type = MOS::communication::kProtocolShm;
     proto_info.protocol_type = MOS::communication::kProtocolShm;
     // proto_info.shm_info.block_count = 256;
     // proto_info.shm_info.block_size = 1024*6;
     proto_info.shm_info.fast_mode = false;
-    // std::string data_in = Adapter_SysState_.data_in;
+    // std::string data_in = Adapter_FeaState_.data_in;
 
 
 
-    std::map<std::string, VariableVariant > variableMap = SysState_Map;
+    std::map<std::string, VariableVariant > variableMap = FeaState_Map;
             
                 
 
@@ -36,8 +36,8 @@ int config_async_sub(std::string json_file) {
 
 
     auto sub = MOS::communication::Subscriber::New(
-        Adapter_SysState_.domain_id,
-        Adapter_SysState_.topic, 
+        Adapter_FeaState_.domain_id,
+        Adapter_FeaState_.topic, 
         proto_info, 
         [](MOS::message::spMsg tmp) {
 
@@ -66,7 +66,7 @@ int config_async_sub(std::string json_file) {
             
 
             const char* byte_array = data_in.data();
-            if ((byte_array[0] == (def_sysstate&0xFF))  && (byte_array[1] == ((def_sysstate&0xFF00)>>8 )))
+            if ((byte_array[0] == (def_FeaState&0xFF))  && (byte_array[1] == ((def_FeaState&0xFF00)>>8 )))
             {
                 if (flag)
                 {
@@ -81,9 +81,9 @@ int config_async_sub(std::string json_file) {
                 }
 
                 std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
-                std::memcpy(&SysState_, ipc_msg_.data, sizeof(SysState_));
-                print_SysState(SysState_, SysState_old);                
-                SysState_old = SysState_;
+                std::memcpy(&FeaState_, ipc_msg_.data, sizeof(FeaState_));
+                print_FeaState(FeaState_, FeaState_old);                
+                FeaState_old = FeaState_;
             }
 
 
@@ -99,7 +99,7 @@ int config_async_sub(std::string json_file) {
     return 0;
 }
 
-void Adapter_SysState::run()
+void Adapter_FeaState::run()
 {
 
     std::thread inputThread(asyncInputThreadTTY);
@@ -107,10 +107,10 @@ void Adapter_SysState::run()
     config_async_sub(json_file);
 
 }
-Adapter_SysState::Adapter_SysState()
+Adapter_FeaState::Adapter_FeaState()
 {
 }
-Adapter_SysState::~Adapter_SysState()
+Adapter_FeaState::~Adapter_FeaState()
 {
 }
 int main()
@@ -125,11 +125,11 @@ int main()
 #endif
 #ifdef __linux__
     std::string fullPath = std::filesystem::read_symlink("/proc/self/exe");
-    std::cout << "Running on Linux(SysState_Sub)"<< fullPath << std::endl;
+    std::cout << "Running on Linux(FeaState_Sub)"<< fullPath << std::endl;
 #endif
     size_t pos = fullPath.find_last_of("\\/");
     std::string configPath = fullPath.substr(0, pos) + "/discovery_config.json";
-    Adapter_SysState objtest;
+    Adapter_FeaState objtest;
     objtest.json_file = configPath;
     objtest.run();
     // config_async_sub(configPath);

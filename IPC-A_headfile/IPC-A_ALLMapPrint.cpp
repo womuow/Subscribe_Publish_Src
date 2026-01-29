@@ -498,8 +498,8 @@ std::map<std::string, VariableVariant > Rcore_reset_request_Map = {
 
 
 
-#ifdef SYSSTATE_H
-std::map<std::string, VariableVariant > SysState_Map = {
+#ifdef FeaState_H
+std::map<std::string, VariableVariant > FeaState_Map = {
 {"ipc_msg_.header.id",&ipc_msg_.header.id},
 {"ipc_msg_.header.version",&ipc_msg_.header.version},
 {"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
@@ -507,8 +507,8 @@ std::map<std::string, VariableVariant > SysState_Map = {
 {"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
 {"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
 
-//[SysState]
-{"SysState_.Feature_errcode(uint8_t)" , &SysState_.Feature_errcode},
+//[FeaState]
+{"FeaState_.Feature_errcode(uint8_t)" , &FeaState_.Feature_errcode},
 };
 #endif
 
@@ -897,12 +897,12 @@ void print_Rcore_reset_request(Rcore_reset_request& Rcore_reset_request_,Rcore_r
 #endif
 
 
-#ifdef SYSSTATE_H
-/* Print struct SysState changed value */
-void print_SysState(SysState& SysState_,SysState& SysState_old){
-// std::cout << "SysState all variable:" << std::endl;
-    if(SysState_.Feature_errcode != SysState_old.Feature_errcode){
-        std::cout << "SysState_.Feature_errcode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(SysState_.Feature_errcode) << std::dec  << std::endl;
+#ifdef FeaState_H
+/* Print struct FeaState changed value */
+void print_FeaState(FeaState& FeaState_,FeaState& FeaState_old){
+// std::cout << "FeaState all variable:" << std::endl;
+    if(FeaState_.Feature_errcode != FeaState_old.Feature_errcode){
+        std::cout << "FeaState_.Feature_errcode(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(FeaState_.Feature_errcode) << std::dec  << std::endl;
         }
 }
 #endif

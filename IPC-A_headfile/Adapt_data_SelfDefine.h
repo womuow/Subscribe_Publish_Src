@@ -3,20 +3,20 @@
 #include "Platform_Types.h"
 
 
-typedef struct {
-   float PAR_cameraProperties_EFL_X;
-   float PAR_cameraProperties_EFL_Y;
-   float PAR_cameraProperties_COD_X;
-   float PAR_cameraProperties_COD_Y;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK1;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK2;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsP1;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsP2;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK3;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK4;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK5;
-   float PAR_cameraProperties_cameraModelFloatCoefficientsK6;
-} Intrinsic_Calibration_parameters;
+// typedef struct {
+//    float PAR_cameraProperties_EFL_X;
+//    float PAR_cameraProperties_EFL_Y;
+//    float PAR_cameraProperties_COD_X;
+//    float PAR_cameraProperties_COD_Y;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK1;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK2;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsP1;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsP2;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK3;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK4;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK5;
+//    float PAR_cameraProperties_cameraModelFloatCoefficientsK6;
+// } Intrinsic_Calibration_parameters;
 
 
 typedef struct {
@@ -78,7 +78,7 @@ typedef struct {
 
 typedef struct {
    uint8_t Feature_errcode;
-} SysState;
+} FeaState;
 
 
 typedef struct {

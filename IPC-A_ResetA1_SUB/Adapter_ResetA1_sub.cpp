@@ -63,10 +63,10 @@ int config_async_sub(std::string json_file) {
         if(stop.load())
         {            
             stop.store(false);  
-            std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
             
 
-            if(ipc_msg_.header.id == def_Reset_A1 )
+            const char* byte_array = data_in.data();
+            if ((byte_array[0] == (def_Reset_A1&0xFF))  && (byte_array[1] == ((def_Reset_A1&0xFF00)>>8 )))
             {
                 if (flag)
                 {
@@ -80,6 +80,7 @@ int config_async_sub(std::string json_file) {
                     <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
                 }
 
+                std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
                 std::memcpy(&Rcore_reset_request_, ipc_msg_.data, sizeof(Rcore_reset_request_));
                 print_Rcore_reset_request(Rcore_reset_request_, Rcore_reset_request_old);                
                 Rcore_reset_request_old = Rcore_reset_request_;

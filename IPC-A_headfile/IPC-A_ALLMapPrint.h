@@ -20,7 +20,7 @@
 #define def_edr_info 0x3012
 #define def_Logistics_Data 0x3007
 #define def_CS_Trigger_A1 0x3002
-#define def_sysstate 0x3006
+#define def_FeaState 0x3006
 #define def_Parameter 0x3005
 #define def_SW_fault 0x3003
 #define def_InternalDID 0x3011
@@ -70,10 +70,10 @@ using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,in
 #include "Adapter_EDR_Info.h"
 #endif
 
-#ifdef SYSSTATE_H
+#ifdef FeaState_H
 
 using VariableVariant = std::variant<uint8_t*, uint16_t* ,uint32_t*,uint64_t*,int8_t*,int16_t*,int32_t*,int64_t*,float*,bool*>;
-#include "Adapter_SysState.h"
+#include "Adapter_FeaState.h"
 #endif
 
 #if defined(PERCEPTION_VEHICLE_PARAMETERS_H) || defined(INTRINSIC_CALIBRATION_PARAMETERS_H)
