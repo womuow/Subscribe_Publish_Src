@@ -105,8 +105,7 @@ extern std::atomic_bool stop;
 
 extern Perception_Vehicle_parameters Perception_Vehicle_parameters_;
 extern Perception_Vehicle_parameters Perception_Vehicle_parameters_old;
-extern Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_;
-extern Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_old;
+extern IPC_MSG_DATA_SIZE_MAX_CRC16 ipc_msg_crc16_;
 
 
 extern std::map<std::string, VariableVariant > Parameter_Map;
@@ -116,8 +115,7 @@ extern std::atomic_uint32_t HeaderId;
 
 /* Print struct Perception_Vehicle_parameters changed value */
 void print_Perception_Vehicle_parameters(Perception_Vehicle_parameters& Perception_Vehicle_parameters_,Perception_Vehicle_parameters& Perception_Vehicle_parameters_old);
-/* Print struct Intrinsic_Calibration_parameters changed value */
-void print_Intrinsic_Calibration_parameters(Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_,Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_old);
+
 
 
 #endif

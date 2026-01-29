@@ -62,4 +62,10 @@ struct IPC_MSG_DATA_SIZE_MAX {
 	uint8_t data[IPC_MSG_MAX_DATA_SIZE];
 };
 
+struct IPC_MSG_DATA_SIZE_MAX_CRC16 {
+	struct IPC_MSG header;
+	uint16_t CRC16;
+	uint8_t data[IPC_MSG_MAX_DATA_SIZE];
+};
+
 #endif // IPC_IPC_MSG_H_

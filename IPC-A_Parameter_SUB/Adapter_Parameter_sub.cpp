@@ -4,9 +4,7 @@
 
 Perception_Vehicle_parameters Perception_Vehicle_parameters_;
 Perception_Vehicle_parameters Perception_Vehicle_parameters_old;
-Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_;
-Intrinsic_Calibration_parameters Intrinsic_Calibration_parameters_old;
-
+IPC_MSG_DATA_SIZE_MAX_CRC16 ipc_msg_crc16_;
 
 int config_async_sub(std::string json_file) {
     
@@ -69,30 +67,24 @@ int config_async_sub(std::string json_file) {
             const char* byte_array = data_in.data();
             if ((byte_array[0] == (def_Parameter&0xFF))  && (byte_array[1] == ((def_Parameter&0xFF00)>>8 )))
             {
+                std::memcpy(&ipc_msg_crc16_, data_in.data(), data_in.length());
                 if (flag)
                 {
                     print_memory(data_in.data(),data_in.size());  
                     std::cout << "data_in.data() size="<< static_cast<int>(data_in.size())<< std::endl;
                     flag=false;
 
-                    std::cout << "ipc_msg_.header id=0x"
-                    <<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.id)<<std::endl
-                    <<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.target)<<std::endl
-                    <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
+                    std::cout << "ipc_msg_crc16_.header id=0x"
+                    <<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.id)<<std::endl
+                    <<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.target)<<std::endl
+                    <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.timestamp)<<std::endl;
                 }
 
-                std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
-                if(data_in.length() == sizeof(ipc_msg_.header) + sizeof(Perception_Vehicle_parameters))
+                if(data_in.length() == sizeof(ipc_msg_crc16_.header) + sizeof(Perception_Vehicle_parameters))
                 {
-                    std::memcpy(&Perception_Vehicle_parameters_, ipc_msg_.data, sizeof(Perception_Vehicle_parameters));
+                    std::memcpy(&Perception_Vehicle_parameters_, ipc_msg_crc16_.data, sizeof(Perception_Vehicle_parameters));
                     print_Perception_Vehicle_parameters(Perception_Vehicle_parameters_, Perception_Vehicle_parameters_old);                
                     Perception_Vehicle_parameters_old = Perception_Vehicle_parameters_;
-                }
-                else if(data_in.length() == sizeof(ipc_msg_.header) + sizeof(Intrinsic_Calibration_parameters))
-                {
-                    std::memcpy(&Intrinsic_Calibration_parameters_, ipc_msg_.data, sizeof(Intrinsic_Calibration_parameters_));
-                    print_Intrinsic_Calibration_parameters(Intrinsic_Calibration_parameters_, Intrinsic_Calibration_parameters_old);                
-                    Intrinsic_Calibration_parameters_old = Intrinsic_Calibration_parameters_;
                 }
                 else
                 {
@@ -100,10 +92,10 @@ int config_async_sub(std::string json_file) {
                     std::cout << "data_in.data() size="<< static_cast<int>(data_in.size())<< std::endl;
                     flag=false;
 
-                    std::cout << "ipc_msg_.header id=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.id)<<std::endl                    
-                    <<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.target)<<std::endl
-                    <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
-                    std::cout << "Intrinsic_Calibration_parameters size=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< sizeof(Intrinsic_Calibration_parameters)<<std::endl ;
+                    std::cout << "ipc_msg_crc16_.header id=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.id)<<std::endl                    
+                    <<"target=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.target)<<std::endl
+                    <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_crc16_.header.timestamp)<<std::endl;
+                    
                     std::cout << "Perception_Vehicle_parameters size=0x"<<std::hex << std::setw(4)<<std::setfill('0')<< sizeof(Perception_Vehicle_parameters)<<std::endl ;
                 }
 
@@ -113,9 +105,23 @@ int config_async_sub(std::string json_file) {
 
             if (!inputQueue.empty())
             {                                
-                getVariableValue(variableMap,inputQueue.front());
-                
-                inputQueue.pop();
+                if (inputQueue.front() == "ipc_msg_crc16_.data")
+                {
+                    std::cout << "ipc_msg_crc16_.data: 0x";
+                    print_memory(ipc_msg_crc16_.data, sizeof(Perception_Vehicle_parameters)); 
+                    for (size_t i = 0; i < ipc_msg_crc16_.header.data_size; ++i) {
+                        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                        << static_cast<int>(ipc_msg_crc16_.data[i]) ;
+                    }
+                    std::cout << std::endl;
+
+                    inputQueue.pop();
+                }
+                else{
+                    getVariableValue(variableMap,inputQueue.front());
+                    
+                    inputQueue.pop();
+                }
             }
         }
         

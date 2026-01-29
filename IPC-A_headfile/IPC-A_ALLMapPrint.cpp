@@ -323,27 +323,13 @@ void print_IPC_MSG_DATA_SIZE_MAX(IPC_MSG_DATA_SIZE_MAX& IPC_MSG_DATA_SIZE_MAX_,I
 #if defined(INTRINSIC_CALIBRATION_PARAMETERS_H) || defined(PERCEPTION_VEHICLE_PARAMETERS_H)
 std::map<std::string, VariableVariant > Parameter_Map = {
 
-{"ipc_msg_.header.id",&ipc_msg_.header.id},
-{"ipc_msg_.header.version",&ipc_msg_.header.version},
-{"ipc_msg_.header.data_size",&ipc_msg_.header.data_size},
-{"ipc_msg_.header.target",&ipc_msg_.header.target},
-{"ipc_msg_.header.timestamp",&ipc_msg_.header.timestamp},
-{"ipc_msg_.header.data[0]",&ipc_msg_.header.data[0]},
-
-//[Intrinsic_Calibration_parameters]
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK1(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK1},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK2(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK2},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP1(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP1},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP2(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP2},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK3(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK3},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK4(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK4},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK5(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK5},
-{"Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK6(float)" , &Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK6},
-
+{"ipc_msg_crc16_.header.id",&ipc_msg_crc16_.header.id},
+{"ipc_msg_crc16_.header.version",&ipc_msg_crc16_.header.version},
+{"ipc_msg_crc16_.header.data_size",&ipc_msg_crc16_.header.data_size},
+{"ipc_msg_crc16_.header.target",&ipc_msg_crc16_.header.target},
+{"ipc_msg_crc16_.header.timestamp",&ipc_msg_crc16_.header.timestamp},
+{"ipc_msg_crc16_.header.data[0]",&ipc_msg_crc16_.header.data[0]},
+{"ipc_msg_crc16_.CRC16",&ipc_msg_crc16_.CRC16},
 
 //[Perception_Vehicle_parameters]
 {"Perception_Vehicle_parameters_.timestamps(uint64_t)" , &Perception_Vehicle_parameters_.timestamps},
@@ -514,49 +500,6 @@ std::map<std::string, VariableVariant > FeaState_Map = {
 
 
 
-
-#ifdef INTRINSIC_CALIBRATION_PARAMETERS_H
-/* Print struct Intrinsic_Calibration_parameters changed value */
-void print_Intrinsic_Calibration_parameters(Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_,Intrinsic_Calibration_parameters& Intrinsic_Calibration_parameters_old){
-// std::cout << "Intrinsic_Calibration_parameters all variable:" << std::endl;
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_EFL_X){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_X << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_EFL_Y){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_EFL_Y << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_COD_X){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_X << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_COD_Y){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_COD_Y << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK1 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK1){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK1(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK1 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK2 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK2){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK2(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK2 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP1 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsP1){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP1(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP1 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP2 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsP2){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP2(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsP2 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK3 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK3){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK3(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK3 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK4 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK4){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK4(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK4 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK5 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK5){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK5(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK5 << std::endl;
-        }
-    if(Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK6 != Intrinsic_Calibration_parameters_old.PAR_cameraProperties_cameraModelFloatCoefficientsK6){
-        std::cout << "Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK6(float): " << std::fixed << std::setprecision(2) << Intrinsic_Calibration_parameters_.PAR_cameraProperties_cameraModelFloatCoefficientsK6 << std::endl;
-        }
-}
-#endif
 
 
 #ifdef PERCEPTION_VEHICLE_PARAMETERS_H
