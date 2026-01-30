@@ -60,13 +60,13 @@ int config_async_Response_sub(std::string json_file) {
         {            
             stop.store(false);  
 
-            const char* byte_array = data_in2.data();
-            if ((byte_array[0] == (def_DoIP_req&0xFF))  && (byte_array[1] == ((def_DoIP_req&0xFF00)>>8 )))
+            const char* byte_array = data_in.data();
+            if ((byte_array[0] == (def_DoIP_response&0xFF))  && (byte_array[1] == ((def_DoIP_response&0xFF00)>>8 )))
             {
                 // if (flag)
                 // {
                 //     print_memory(data_in.data(),data_in.size());  
-                //     std::cout << "data_in2.data() size="<< static_cast<int>(data_in.size())<< std::endl;
+                //     std::cout << "data_in.data() size="<< static_cast<int>(data_in.size())<< std::endl;
                 //     flag=false;
 
                 //     std::cout << "ipc_msg_.header id=0x"
@@ -75,20 +75,24 @@ int config_async_Response_sub(std::string json_file) {
                 //     <<"timestamp=0x"<<std::hex << std::setw(16)<<std::setfill('0')<< static_cast<int>(ipc_msg_.header.timestamp)<<std::endl;
                 // }
 
-                std::memcpy(&ipc_msg_, data_in2.data(), data_in2.length());
+                std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
                 
                
-                std::memcpy(&UDS_ipc_req_, ipc_msg_.data, sizeof(UDS_ipc_req));
+                std::memcpy(&UDS_ipc_response_, ipc_msg_.data, sizeof(UDS_ipc_response));
                 
-                
-                    std::cout << "UDS_ipc_req_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.addressing_format) << std::dec  << std::endl;
+                    std::cout << "UDS_ipc_response_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.addressing_format) << std::dec  << std::endl;
                     
-                    std::cout << "UDS_ipc_req_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_req_.Doip_message_length << std::dec  << std::endl;
+                    std::cout << "UDS_ipc_response_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_response_.Doip_message_length << std::dec  << std::endl;
                     
-                    std::cout << "UDS_ipc_req_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[0]) << std::dec  << std::endl;
-                    
-                    std::cout << "UDS_ipc_req_.Doip_message array: 0x" ;
-                    print_memory(UDS_ipc_req_.Doip_message,10);
+
+                    std::cout << "UDS_ipc_response_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[0]) << std::dec  << std::endl;
+
+                    std::cout << "UDS_ipc_response_.Doip_message: 0x" ;
+                    //print_memory(UDS_ipc_response_.Doip_message,10);
+                    for (size_t i = 0; i < UDS_ipc_response_.Doip_message_length; ++i) {
+                        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                        << static_cast<int>(UDS_ipc_response_.Doip_message[i]) ;
+                    }
                     std::cout << std::endl;
             }
         }
@@ -159,22 +163,22 @@ int config_async_Req_sub(std::string json_file) {
             
 
             const char* byte_array = data_in.data();
-            if ((byte_array[0] == (def_DoIP_response&0xFF))  && (byte_array[1] == ((def_DoIP_response&0xFF00)>>8 )))
+            if ((byte_array[0] == (def_DoIP_req&0xFF))  && (byte_array[1] == ((def_DoIP_req&0xFF00)>>8 )))
             {
                 std::memcpy(&ipc_msg_, data_in.data(), data_in.length());
                 
                
-                std::memcpy(&UDS_ipc_response_, ipc_msg_.data, sizeof(UDS_ipc_response));
+                std::memcpy(&UDS_ipc_req_, ipc_msg_.data, sizeof(UDS_ipc_req));
                 
-                    std::cout << "UDS_ipc_response_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.addressing_format) << std::dec  << std::endl;
+                
+                    std::cout << "UDS_ipc_req_.addressing_format(uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.addressing_format) << std::dec  << std::endl;
                     
-                    std::cout << "UDS_ipc_response_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_response_.Doip_message_length << std::dec  << std::endl;
+                    std::cout << "UDS_ipc_req_.Doip_message_length(uint16_t): 0x" << std::hex << std::setw(4) << std::setfill('0') << UDS_ipc_req_.Doip_message_length << std::dec  << std::endl;
                     
-
-                    std::cout << "UDS_ipc_response_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_response_.Doip_message[0]) << std::dec  << std::endl;
-
-                    std::cout << "UDS_ipc_response_.Doip_message array: 0x" ;
-                    print_memory(UDS_ipc_response_.Doip_message,10);
+                    std::cout << "UDS_ipc_req_.Doip_message[0](uint8_t): 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(UDS_ipc_req_.Doip_message[0]) << std::dec  << std::endl;
+                    
+                    std::cout << "UDS_ipc_req_.Doip_message: 0x" ;
+                    print_memory(UDS_ipc_req_.Doip_message,10);
                     std::cout << std::endl;
             }
 
@@ -196,7 +200,7 @@ void Adapter_DoIP::run()
 
     std::thread inputThread(config_async_Req_sub,json_file);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     config_async_Response_sub(json_file);
 

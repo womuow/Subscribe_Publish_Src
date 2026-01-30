@@ -108,7 +108,7 @@ int config_async_sub(std::string json_file) {
                 if (inputQueue.front() == "ipc_msg_crc16_.data")
                 {
                     std::cout << "ipc_msg_crc16_.data: 0x";
-                    print_memory(ipc_msg_crc16_.data, sizeof(Perception_Vehicle_parameters)); 
+                    //print_memory(ipc_msg_crc16_.data, sizeof(Perception_Vehicle_parameters)); 
                     for (size_t i = 0; i < ipc_msg_crc16_.header.data_size; ++i) {
                         std::cout << std::hex << std::setw(2) << std::setfill('0') 
                         << static_cast<int>(ipc_msg_crc16_.data[i]) ;
